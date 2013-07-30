@@ -19,7 +19,7 @@
                          return function () { return f.apply(null, args.concat(toArray(arguments))); }; }
 
     // AST
-    function mkList (x) { var l = isArray(x) ? x :toArray(arguments); l.type = "list"; return l; }
+    function mkList (x) { var l = isArray(x) ? x : toArray(arguments); l.type = "list"; return l; }
     function mkSymbol (x) { return { name: x, type: "symbol" }; }
     function mkString (x) { return { value: x, type: "string" }; }
     function mkNumber (x) { return { value: x, type: "number" }; }
@@ -39,6 +39,8 @@
                      env.popFrame();
                      each(lexFrames, function () { env.popFrame(); });
                      return result; } }; };
+    function mkConstructor (type) { return { type: "constructor", invoke: curry(mkInstance, type) }; }
+    function mkInstance (type, env, args) { return { type: type.name }; }
 
     // Parser
     var open = cromp.character("(");
@@ -96,9 +98,22 @@
         "def": {
             invoke: function (env, args) {
                 // Q: if symbol is not a symbol, should we eval it? to support (def (symbol "a") 1)
+                // A: have something similar to set & setq in elisp,
+                //    i.e. def quotes first arg, like setq, and "def-unquoted" evals first arg?
+                //    Then def is defined in terms of def-unquoted
                 var symbol = first(args);
                 var val = evaluateForm(env, second(args));
-                env.def(symbol.name, val); },
+                env.def(symbol.name, val);
+                /* Q: should def return anything? */ },
+            type: "macro" },
+        "deft": {
+            invoke: function (env, args) {
+                var type = args.length === 1 ? first(first(args)) : first(args);
+                var constructors = args.length === 1 ? mkList(type) : tail(args).map(first);
+                each(constructors, function (constructor) {
+                    prelude.def.invoke(env, mkList(constructor, mkConstructor(type)));
+                });
+            },
             type: "macro" },
         "eval": {
             invoke: function (env, args) {
@@ -139,7 +154,7 @@
                 return result; },
             type: "macro" }
         // TODO: atom, =, cons, head, tail, cond, defn, ns
-        // TODO: "interop"/"introspection" - type, name, vars, lookup
+        // TODO: "interop"/"introspection" - type, name, vars, lookup/env
     };
 
     // Numeric fns
@@ -152,7 +167,7 @@
                  type: "function" }; });
 
     // Evaluation
-    function Environment (frame) { this.frames = frame ? [frame] : []; }
+    function Environment (frame) { this.frames = mkList(frame); }
     Environment.prototype.lookup = function (n) { return reverseFind(this.frames, function(f) { return f[n]; }); };
     Environment.prototype.pushFrame = function (frame) { this.frames.push(frame || {}); };
     Environment.prototype.popFrame = function () { this.frames.pop(); };
@@ -163,7 +178,7 @@
         for (var n in prelude) { globals[n] = prelude[n]; }
         return new Environment(globals); };
 
-    function evaluateForm (env, form) { return prelude.eval.invoke(env, [form]); }
+    function evaluateForm (env, form) { return prelude.eval.invoke(env, mkList([form])); }
 
     teslo.evaluate = function (src, env) {
         var result = teslo.parse(src);

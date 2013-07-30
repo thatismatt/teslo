@@ -296,6 +296,8 @@
                 assert.equal(env.lookup("x").value, 1);
             });
 
+            // dependent let bindings: (let (x 1 y x) ...)
+            // let bind a fn
         });
 
         suite("fn", function () {
@@ -334,6 +336,29 @@
                 teslo.evaluate("(def f (let (a 1) (fn () a))) (def x (f))", env);
                 assert.equal(env.lookup("x").type, "number");
                 assert.equal(env.lookup("x").value, 1);
+            });
+
+        });
+
+        suite("deft", function () {
+
+            test("create a type", function() {
+                var env = teslo.environment();
+                teslo.evaluate("(deft (T)) (def x (T))", env);
+                assert.equal(env.lookup("x").type, "T");
+            });
+
+            test("create a type with an explicit constructor", function() {
+                var env = teslo.environment();
+                teslo.evaluate("(deft T (C)) (def x (C))", env);
+                assert.equal(env.lookup("x").type, "T");
+            });
+
+            test("create a type with two constructors", function() {
+                var env = teslo.environment();
+                teslo.evaluate("(deft T (C1) (C2)) (def x1 (C1)) (def x2 (C2))", env);
+                assert.equal(env.lookup("x1").type, "T");
+                assert.equal(env.lookup("x2").type, "T");
             });
 
         });
