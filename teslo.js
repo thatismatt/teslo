@@ -6,7 +6,7 @@
     function third (arr) { return arr[2]; }
     function last (arr) { return arr[arr.length - 1]; }
     function toArray (x) { return Array.prototype.slice.call(x, 0); }
-    function isArray (x) { return Object.prototype.toString.call(x) === "[object Array]"; }
+    function isArray (x) { return !x.type && Object.prototype.toString.call(x) === "[object Array]"; }
     function tail (arr) { return Array.prototype.slice.call(arr, 1); }
     function add (a, b) { return a + b; }
     function subtract (a, b) { return a - b; }
@@ -19,7 +19,7 @@
                          return function () { return f.apply(null, args.concat(toArray(arguments))); }; }
 
     // AST
-    function mkList (x) { var l = isArray(x) ? x : toArray(arguments); l.type = "list"; return l; }
+    function mkList (x) { var l = toArray(arguments); l.type = "list"; return l; }
     function mkSymbol (x) { return { name: x, type: "symbol" }; }
     function mkString (x) { return { value: x, type: "string" }; }
     function mkNumber (x) { return { value: x, type: "number" }; }
@@ -59,7 +59,7 @@
             .map(second).map(mkKeyword);
     var list = cromp.recursive(function () {
         return cromp.between(open, close, cromp.optional(forms))
-            .map(mkList); });
+            .map(function(x) { return mkList.apply(null, x); }); });
     var macro = cromp.recursive(function () {
         return cromp.choose(quote,
                             syntaxQuote,
@@ -178,7 +178,7 @@
         for (var n in prelude) { globals[n] = prelude[n]; }
         return new Environment(globals); };
 
-    function evaluateForm (env, form) { return prelude.eval.invoke(env, mkList([form])); }
+    function evaluateForm (env, form) { return prelude.eval.invoke(env, mkList(form)); }
 
     teslo.evaluate = function (src, env) {
         var result = teslo.parse(src);
