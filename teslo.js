@@ -152,6 +152,9 @@
                 var result = evaluateForm(env, body);
                 env.popFrame();
                 return result; },
+            type: "macro" },
+        "comment": {
+            invoke: function (env, args) { },
             type: "macro" }
         // TODO: atom, =, cons, head, tail, cond, defn, ns
         // TODO: "interop"/"introspection" - type, name, vars, lookup/env

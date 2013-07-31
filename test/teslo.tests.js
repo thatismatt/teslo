@@ -363,6 +363,25 @@
 
         });
 
+        suite("comment", function () {
+
+            test("comment function", function() {
+                var env = teslo.environment();
+                teslo.evaluate("(def a 1) (comment (def not-evaled 3)) (def b 2)", env);
+                assert.equal(env.lookup("a").value, 1);
+                assert.equal(env.lookup("b").value, 2);
+                assert.equal(env.lookup("not-evaled"), undefined);
+            });
+
+            test(";; syntax", function() {
+                var env = teslo.environment();
+                teslo.evaluate("(def a 1)\n;; a comment\n(def b 2)", env);
+                assert.equal(env.lookup("a").value, 1);
+                assert.equal(env.lookup("b").value, 2);
+            });
+
+        });
+
     });
 
     // TODO: test prelude environment
