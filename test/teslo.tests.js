@@ -206,29 +206,31 @@
 
     suite("evaluate", function () {
 
+        function evaluate (src) {
+            var env = teslo.environment();
+            teslo.evaluate(src, env);
+            return env;
+        }
+
         suite("def", function () {
 
             test("assign 1 to x", function() {
-                var env = teslo.environment();
-                teslo.evaluate("(def x 1)", env);
+                var env = evaluate("(def x 1)");
                 assert.equal(env.lookup("x").value, 1);
             });
 
             test("assign 2 to y", function() {
-                var env = teslo.environment();
-                teslo.evaluate("(def y 2)", env);
+                var env = evaluate("(def y 2)");
                 assert.equal(env.lookup("y").value, 2);
             });
 
             test('assign "Hello, World" to greeting', function() {
-                var env = teslo.environment();
-                teslo.evaluate('(def greeting "Hello, World")', env);
+                var env = evaluate('(def greeting "Hello, World")');
                 assert.equal(env.lookup("greeting").value, "Hello, World");
             });
 
             test("assign list to my-list", function() {
-                var env = teslo.environment();
-                teslo.evaluate("(def my-list '(1 2 3))", env);
+                var env = evaluate("(def my-list '(1 2 3))");
                 var myList = env.lookup("my-list");
                 assert.equal(myList.type, "list");
                 assert.equal(myList[0].value, 1);
@@ -237,25 +239,22 @@
             });
 
             test("two defs", function() {
-                var env = teslo.environment();
-                teslo.evaluate("(def a 1) (def b 2)", env);
+                var env = evaluate("(def a 1) (def b 2)");
                 assert.equal(env.lookup("a").value, 1);
                 assert.equal(env.lookup("b").value, 2);
             });
 
             test("assign a to b", function() {
-                var env = teslo.environment();
-                teslo.evaluate("(def a 1) (def b a)", env);
+                var env = evaluate("(def a 1) (def b a)");
                 assert.equal(env.lookup("a").value, 1);
                 assert.equal(env.lookup("b").value, 1);
             });
 
             test("maths with values", function() {
-                var env = teslo.environment();
-                teslo.evaluate(["(def add (+ 1 2))",
+                var env = evaluate(["(def add (+ 1 2))",
                                 "(def sub (- 6 1 2))",
                                 "(def mul (* 1 2 3))",
-                                "(def div (/ 12 4 3))"].join(""), env);
+                                "(def div (/ 12 4 3))"].join(""));
                 assert.equal(env.lookup("add").value, 3);
                 assert.equal(env.lookup("sub").value, 3);
                 assert.equal(env.lookup("mul").value, 6);
@@ -263,14 +262,12 @@
             });
 
             test("maths symbols", function() {
-                var env = teslo.environment();
-                teslo.evaluate("(def a 1) (def b 2) (def c (+ a b))", env);
+                var env = evaluate("(def a 1) (def b 2) (def c (+ a b))");
                 assert.equal(env.lookup("c").value, 3);
             });
 
             test("eval", function() {
-                var env = teslo.environment();
-                teslo.evaluate("(def a (eval '(+ 1 2)))", env);
+                var env = evaluate("(def a (eval '(+ 1 2)))");
                 assert.equal(env.lookup("a").value, 3);
             });
 
@@ -279,20 +276,17 @@
         suite("let", function () {
 
             test("let with one binding", function() {
-                var env = teslo.environment();
-                teslo.evaluate("(def x (let (y 1) y))", env);
+                var env = evaluate("(def x (let (y 1) y))");
                 assert.equal(env.lookup("x").value, 1);
             });
 
             test("let with two bindings", function() {
-                var env = teslo.environment();
-                teslo.evaluate("(def x (let (y 1 z 2) (+ y z)))", env);
+                var env = evaluate("(def x (let (y 1 z 2) (+ y z)))");
                 assert.equal(env.lookup("x").value, 3);
             });
 
             test("let bindings hide globals", function() {
-                var env = teslo.environment();
-                teslo.evaluate("(def y 2) (def x (let (y 1) y))", env);
+                var env = evaluate("(def y 2) (def x (let (y 1) y))");
                 assert.equal(env.lookup("x").value, 1);
             });
 
@@ -303,28 +297,24 @@
         suite("fn", function () {
 
             test("assign function to f", function() {
-                var env = teslo.environment();
-                teslo.evaluate("(def f (fn (x) x))", env);
+                var env = evaluate("(def f (fn (x) x))");
                 assert.equal(env.lookup("f").type, "function");
             });
 
             test("create and invoke function", function() {
-                var env = teslo.environment();
-                teslo.evaluate("(def x ((fn () 1) 1))", env);
+                var env = evaluate("(def x ((fn () 1) 1))");
                 assert.equal(env.lookup("x").type, "number");
                 assert.equal(env.lookup("x").value, 1);
             });
 
             test("def function and invoke", function() {
-                var env = teslo.environment();
-                teslo.evaluate("(def f (fn () 1)) (def x (f))", env);
+                var env = evaluate("(def f (fn () 1)) (def x (f))");
                 assert.equal(env.lookup("x").type, "number");
                 assert.equal(env.lookup("x").value, 1);
             });
 
             test("invoke function with different args", function() {
-                var env = teslo.environment();
-                teslo.evaluate("(def f (fn (a) a)) (def x (f 1)) (def y (f 2))", env);
+                var env = evaluate("(def f (fn (a) a)) (def x (f 1)) (def y (f 2))");
                 assert.equal(env.lookup("x").type, "number");
                 assert.equal(env.lookup("x").value, 1);
                 assert.equal(env.lookup("y").type, "number");
@@ -332,8 +322,7 @@
             });
 
             test("closure", function() {
-                var env = teslo.environment();
-                teslo.evaluate("(def f (let (a 1) (fn () a))) (def x (f))", env);
+                var env = evaluate("(def f (let (a 1) (fn () a))) (def x (f))");
                 assert.equal(env.lookup("x").type, "number");
                 assert.equal(env.lookup("x").value, 1);
             });
@@ -343,20 +332,17 @@
         suite("deft", function () {
 
             test("create a type", function() {
-                var env = teslo.environment();
-                teslo.evaluate("(deft (T)) (def x (T))", env);
+                var env = evaluate("(deft (T)) (def x (T))");
                 assert.equal(env.lookup("x").type, "T");
             });
 
             test("create a type with an explicit constructor", function() {
-                var env = teslo.environment();
-                teslo.evaluate("(deft T (C)) (def x (C))", env);
+                var env = evaluate("(deft T (C)) (def x (C))");
                 assert.equal(env.lookup("x").type, "T");
             });
 
             test("create a type with two constructors", function() {
-                var env = teslo.environment();
-                teslo.evaluate("(deft T (C1) (C2)) (def x1 (C1)) (def x2 (C2))", env);
+                var env = evaluate("(deft T (C1) (C2)) (def x1 (C1)) (def x2 (C2))");
                 assert.equal(env.lookup("x1").type, "T");
                 assert.equal(env.lookup("x2").type, "T");
             });
@@ -366,16 +352,14 @@
         suite("comment", function () {
 
             test("comment function", function() {
-                var env = teslo.environment();
-                teslo.evaluate("(def a 1) (comment (def not-evaled 3)) (def b 2)", env);
+                var env = evaluate("(def a 1) (comment (def not-evaled 3)) (def b 2)");
                 assert.equal(env.lookup("a").value, 1);
                 assert.equal(env.lookup("b").value, 2);
                 assert.equal(env.lookup("not-evaled"), undefined);
             });
 
             test(";; syntax", function() {
-                var env = teslo.environment();
-                teslo.evaluate("(def a 1)\n;; a comment\n(def b 2)", env);
+                var env = evaluate("(def a 1)\n;; a comment\n(def b 2)");
                 assert.equal(env.lookup("a").value, 1);
                 assert.equal(env.lookup("b").value, 2);
             });
