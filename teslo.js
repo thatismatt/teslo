@@ -155,7 +155,7 @@
         "comment": {
             invoke: function (env, args) { },
             type: "macro" }
-        // TODO: atom, =, cons, head, tail, cond, defn, ns
+        // TODO: atom, =, cons, head, tail, cond, defn, defmacro, ns
         // TODO: "interop"/"introspection" - type, name, vars, lookup/env
     };
 
