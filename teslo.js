@@ -6,7 +6,6 @@
     function third (arr) { return arr[2]; }
     function last (arr) { return arr[arr.length - 1]; }
     function toArray (x) { return Array.prototype.slice.call(x, 0); }
-    function isArray (x) { return !x.type && Object.prototype.toString.call(x) === "[object Array]"; }
     function tail (arr) { return Array.prototype.slice.call(arr, 1); }
     function add (a, b) { return a + b; }
     function subtract (a, b) { return a - b; }
