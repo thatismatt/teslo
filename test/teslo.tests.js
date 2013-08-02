@@ -208,6 +208,7 @@
 
         function evaluate (src) {
             var env = teslo.environment();
+            teslo.evaluate(teslo.prelude, env);
             teslo.evaluate(src, env);
             return env;
         }
@@ -372,7 +373,11 @@
 
 })(this.mocha || new require("mocha").Mocha,
    this.chai || require("chai"),
-   this.teslo || require("../"),
+   this.teslo || (function () {
+       var teslo = require("../");
+       teslo.prelude = require("fs").readFileSync("lib/prelude.teslo", { encoding: "utf8" });
+       return teslo;
+   })(),
    this.$ ? this.$.get
           : function (f, c) {
               var r = require("fs").readFile;

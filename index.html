@@ -17,7 +17,10 @@
     </script>
     <script type="text/javascript" src="test/teslo.tests.js"></script>
     <script type="text/javascript">
-      mocha.run();
+      $.get("lib/prelude.teslo", function(prelude) {
+        teslo.prelude = prelude;
+        mocha.run();
+       });
     </script>
   </body>
 </html>
