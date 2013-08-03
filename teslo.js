@@ -113,12 +113,9 @@
         "deft": {
             invoke: function (env, args) {
                 // Q: is this too specialized?
-                //    should the type/constructor function creation be split from the def call?
-                //    i.e. (deft (A)) is shorthand for (def A (create-type))
-                //    what would the implications of this be?
-                //       Q: what is an anonymous type?
-                //       Q: what is the type of an anonymous type?
-                //       Q: does def-ing an anonymous type name it?
+                //    should we split the type creation, constructor function creation and def-ing?
+                //    i.e. (deft (A)) would be (def A (create-type))
+                // Q: would def-ing an anonymous type name it? i.e. (name (type ((create-type)))) => ???
                 var isImplicitType = args.length === 1;
                 var type = isImplicitType ? first(first(args)) : first(args);
                 var constructors = isImplicitType ? args : tail(args);
