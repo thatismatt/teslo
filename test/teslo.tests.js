@@ -308,7 +308,7 @@
                 assert.equal(env.lookup("x").value, 1);
             });
 
-            test("def function and invoke", function() {
+            test("define a function and invoke", function() {
                 var env = evaluate("(def f (fn () 1)) (def x (f))");
                 assert.equal(env.lookup("x").type, "number");
                 assert.equal(env.lookup("x").value, 1);
@@ -332,20 +332,34 @@
 
         suite("deft", function () {
 
-            test("create a type", function() {
+            test("define type", function() {
                 var env = evaluate("(deft (T)) (def x (T))");
                 assert.equal(env.lookup("x").type, "T");
             });
 
-            test("create a type with an explicit constructor", function() {
+            test("define type with explicit constructor", function() {
                 var env = evaluate("(deft T (C)) (def x (C))");
                 assert.equal(env.lookup("x").type, "T");
             });
 
-            test("create a type with two constructors", function() {
+            test("define type with two constructors", function() {
                 var env = evaluate("(deft T (C1) (C2)) (def x1 (C1)) (def x2 (C2))");
                 assert.equal(env.lookup("x1").type, "T");
                 assert.equal(env.lookup("x2").type, "T");
+            });
+
+            test("define type with constructor taking one parameter", function() {
+                var env = evaluate("(deft (T a)) (def x (T 1)) (def y (T.a x))");
+                assert.equal(env.lookup("x").type, "T");
+                assert.equal(env.lookup("y").value, 1);
+            });
+
+            test("define type with constructor taking multiple parameters", function() {
+                var env = evaluate("(deft (T a b c)) (def x (T 1 2 3)) (def xa (T.a x)) (def xb (T.b x)) (def xc (T.c x))");
+                assert.equal(env.lookup("x").type, "T");
+                assert.equal(env.lookup("xa").value, 1);
+                assert.equal(env.lookup("xb").value, 2);
+                assert.equal(env.lookup("xc").value, 3);
             });
 
         });

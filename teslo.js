@@ -29,7 +29,7 @@
                  body: second(args),
                  type: "function",
                  invoke: function (env, args) {
-                     // TODO: check this.params.length === args.params.length
+                     // TODO: check this.params.length === args.length
                      each(lexFrames, function (f) { env.pushFrame(f); });
                      var frame = {};
                      env.pushFrame(frame);
@@ -38,13 +38,18 @@
                      env.popFrame();
                      each(lexFrames, function () { env.popFrame(); });
                      return result; } }; };
-    function mkConstructor (type) { return { type: "constructor", invoke: curry(mkInstance, type) }; }
-    function mkInstance (type, env, args) { return { type: type.name }; }
+    function mkConstructor (type, params) {
+        return { type: "constructor",
+                 params: params,
+                 invoke: function (env, args) {
+                     var instance = { type: type.name, members: {} };
+                     each(zip(this.params, args), function(x) { instance.members[first(x).name] = second(x); });
+                     return instance; } }; }
 
     // Parser
     var open = cromp.character("(");
     var close = cromp.character(")");
-    var symbol = cromp.regex(/[a-zA-Z0-9+=\-*\/?]+/).map(first).map(mkSymbol);
+    var symbol = cromp.regex(/[a-zA-Z0-9+=\-*\/?.]+/).map(first).map(mkSymbol);
     var whitespace = cromp.regex(/\s+/);
     var optionalWhitespace = cromp.optional(whitespace);
     var eof = cromp.regex(/$/);
@@ -107,12 +112,24 @@
             type: "macro" },
         "deft": {
             invoke: function (env, args) {
-                var type = args.length === 1 ? first(first(args)) : first(args);
-                var constructors = args.length === 1 ? mkList(type) : tail(args).map(first);
+                // Q: is this too specialized?
+                //    should the type/constructor function creation be split from the def call?
+                //    i.e. (deft (A)) is shorthand for (def A (create-type))
+                //    what would the implications of this be?
+                //       Q: what is an anonymous type?
+                //       Q: what is the type of an anonymous type?
+                //       Q: does def-ing an anonymous type name it?
+                var isImplicitType = args.length === 1;
+                var type = isImplicitType ? first(first(args)) : first(args);
+                var constructors = isImplicitType ? args : tail(args);
                 each(constructors, function (constructor) {
-                    prelude.def.invoke(env, mkList(constructor, mkConstructor(type)));
-                });
-            },
+                    var ctorName = first(constructor);
+                    var ctorParams = tail(constructor);
+                    prelude.def.invoke(env, mkList(ctorName, mkConstructor(type, ctorParams)));
+                    each(ctorParams, function (param) {
+                        prelude.def.invoke(
+                            env, mkList(mkSymbol(ctorName.name + "." + param.name),
+                                        { invoke: function (env, args) { return first(args).members[param.name]; } })); }); }); },
             type: "macro" },
         "eval": {
             invoke: function (env, args) {
