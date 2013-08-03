@@ -367,6 +367,15 @@
 
         });
 
+        suite("host interop", function () {
+
+            test("type", function() {
+                var env = evaluate("(def a (type 1))");
+                assert.equal(env.lookup("a"), "number");
+            });
+
+        });
+
     });
 
     // TODO: test prelude environment

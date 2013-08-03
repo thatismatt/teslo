@@ -154,9 +154,12 @@
             type: "macro" },
         "comment": {
             invoke: function (env, args) { },
-            type: "macro" }
+            type: "macro" },
+        "type": {
+            invoke: function (env, args) { return first(args).type; },
+            type: "function" }
         // TODO: atom, =, cons, head, tail, cond, defn, defmacro, ns
-        // TODO: "interop"/"introspection" - type, name, vars, lookup/env
+        // TODO: "interop"/"introspection" - name, vars, lookup/env
     };
 
     // Numeric fns
