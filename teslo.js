@@ -97,8 +97,8 @@
                  success: a.success,
                  message: a.message }; };
 
-    // prelude
-    var prelude = {
+    // Bootstrap
+    var bootstrap = {
         "def": {
             invoke: function (env, args) {
                 // Q: if symbol is not a symbol, should we eval it? to support (def (symbol "a") 1)
@@ -122,9 +122,9 @@
                 each(constructors, function (constructor) {
                     var ctorName = first(constructor);
                     var ctorParams = tail(constructor);
-                    prelude.def.invoke(env, mkList(ctorName, mkConstructor(type, ctorParams)));
+                    bootstrap.def.invoke(env, mkList(ctorName, mkConstructor(type, ctorParams)));
                     each(ctorParams, function (param) {
-                        prelude.def.invoke(
+                        bootstrap.def.invoke(
                             env, mkList(mkSymbol(ctorName.name + "." + param.name),
                                         { invoke: function (env, args) { return first(args).members[param.name]; } })); }); }); },
             type: "macro" },
@@ -179,7 +179,7 @@
     // Numeric fns
     each([["+", add], ["-", subtract], ["*", multiply], ["/", divide]],
          function (p) { var n = first(p); var f = second(p);
-             prelude[n] = {
+             bootstrap[n] = {
                  invoke: function (env, args) { return mkNumber(
                      args.map(function (x) { return x.value; })
                          .reduce(f)); },
@@ -194,10 +194,10 @@
 
     teslo.environment = function () {
         var globals = {};
-        for (var n in prelude) { globals[n] = prelude[n]; }
+        for (var n in bootstrap) { globals[n] = bootstrap[n]; }
         return new Environment(globals); };
 
-    function evaluateForm (env, form) { return prelude.eval.invoke(env, mkList(form)); }
+    function evaluateForm (env, form) { return bootstrap.eval.invoke(env, mkList(form)); }
 
     teslo.evaluate = function (src, env) {
         var result = teslo.parse(src);
