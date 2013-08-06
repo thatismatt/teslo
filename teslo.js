@@ -16,6 +16,7 @@
     function zip (as, bs) { return as.map(function(a, i) { return [a, bs[i]]; }); }
     function curry (f) { var args = tail(arguments);
                          return function () { return f.apply(null, args.concat(toArray(arguments))); }; }
+    function equals (a, b) { return a.type === b.type && a.value === b.value; }
 
     // AST
     function mkList (x) { var l = toArray(arguments); l.type = "list"; return l; }
@@ -38,11 +39,11 @@
                      env.popFrame();
                      each(lexFrames, function () { env.popFrame(); });
                      return result; } }; };
-    function mkConstructor (type, params) {
+    function mkConstructor (name, type, params) {
         return { type: "constructor",
                  params: params,
                  invoke: function (env, args) {
-                     var instance = { type: type.name, members: {} };
+                     var instance = { type: type.name, members: {}, constructor: name };
                      each(zip(this.params, args), function(x) { instance.members[first(x).name] = second(x); });
                      return instance; } }; }
 
@@ -122,7 +123,7 @@
                 each(constructors, function (constructor) {
                     var ctorName = first(constructor);
                     var ctorParams = tail(constructor);
-                    bootstrap.def.invoke(env, mkList(ctorName, mkConstructor(type, ctorParams)));
+                    bootstrap.def.invoke(env, mkList(ctorName, mkConstructor(ctorName.name, type, ctorParams)));
                     each(ctorParams, function (param) {
                         bootstrap.def.invoke(
                             env, mkList(mkSymbol(ctorName.name + "." + param.name),
@@ -171,7 +172,18 @@
             type: "macro" },
         "type": {
             invoke: function (env, args) { return first(args).type; },
-            type: "function" }
+            type: "function" },
+        "match": {
+            invoke: function (env, args) {
+                var toMatch = evaluateForm(env, first(args));
+                var matchForms = tail(args);
+                for (var i = 0; i < matchForms.length; i += 2) {
+                    if (matchForms[i].type === "symbol" ||
+                        matchForms[i].type === "list" && first(matchForms[i]).name === toMatch.constructor ||
+                        equals(matchForms[i], toMatch))
+                        return matchForms[i + 1]; }
+                return undefined; },
+            type: "macro" }
         // TODO: atom, =, cons, head, tail, cond, defn, defmacro, ns
         // TODO: "interop"/"introspection" - name, vars, lookup/env
     };

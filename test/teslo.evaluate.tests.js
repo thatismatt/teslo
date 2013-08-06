@@ -5,11 +5,21 @@
 
     suite("evaluate", function () {
 
-        function evaluate (src) {
+        function setupEnv () {
             var env = teslo.environment();
             teslo.evaluate(teslo.prelude, env);
+            return env;
+        }
+
+        function evaluate (src) {
+            var env = setupEnv();
             teslo.evaluate(src, env);
             return env;
+        }
+
+        function evaluateForm (src) {
+            var env = setupEnv();
+            return teslo.evaluate(src, env)[0];
         }
 
         suite("def", function () {
@@ -185,6 +195,38 @@
             test("type", function() {
                 var env = evaluate("(def a (type 1))");
                 assert.equal(env.lookup("a"), "number");
+            });
+
+        });
+
+        suite("pattern matching", function () {
+
+            test("match - value", function() {
+                var result = evaluateForm('(match 1 1 "one")');
+                assert.equal(result.value, "one");
+            });
+
+            test("match - symbol is catch all", function() {
+                var env = evaluate('(def m (fn (x) (match x a "catchall")))');
+                assert.equal(teslo.evaluate("(m 1)", env)[0].value, "catchall");
+                assert.equal(teslo.evaluate("(m 2)", env)[0].value, "catchall");
+            });
+
+            test("match - value must be exact match", function() {
+                var env = evaluate('(def m (fn (x) (match x 1 "one" 2 "two")))');
+                assert.equal(teslo.evaluate("(m 1)", env)[0].value, "one");
+                assert.equal(teslo.evaluate("(m 2)", env)[0].value, "two");
+            });
+
+            test("match - type", function() {
+                var env = evaluate('(deft (A)) (def m (fn (x) (match x (A) "A")))');
+                assert.equal(teslo.evaluate("(m (A))", env)[0].value, "A");
+            });
+
+            test("match - constructor", function() {
+                var env = evaluate('(deft T (A) (B)) (def m (fn (x) (match x (A) "A" (B) "B")))');
+                assert.equal(teslo.evaluate("(m (A))", env)[0].value, "A");
+                assert.equal(teslo.evaluate("(m (B))", env)[0].value, "B");
             });
 
         });
