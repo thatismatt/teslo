@@ -3,6 +3,13 @@
     chai.Assertion.includeStack = true;
     var assert = chai.assert;
 
+    // assert helpers
+    function isBuiltInType (type) { return function (env, name) { assert.equal(env.lookup(name).type, type); }; }
+    var isFunction = isBuiltInType("function");
+    var isList = isBuiltInType("list");
+    var isNumber = isBuiltInType("number");
+    function isType (env, name, type) { assert.equal(env.lookup(name), type); }
+
     suite("evaluate", function () {
 
         function setupEnv () {
@@ -42,7 +49,7 @@
             test("assign list to my-list", function() {
                 var env = evaluate("(def my-list '(1 2 3))");
                 var myList = env.lookup("my-list");
-                assert.equal(myList.type, "list");
+                isList(env, "my-list");
                 assert.equal(myList[0].value, 1);
                 assert.equal(myList[1].value, 2);
                 assert.equal(myList[2].value, 3);
@@ -108,32 +115,32 @@
 
             test("assign function to f", function() {
                 var env = evaluate("(def f (fn (x) x))");
-                assert.equal(env.lookup("f").type, "function");
+                isFunction(env, "f");
             });
 
             test("create and invoke function", function() {
                 var env = evaluate("(def x ((fn () 1) 1))");
-                assert.equal(env.lookup("x").type, "number");
+                isNumber(env, "x");
                 assert.equal(env.lookup("x").value, 1);
             });
 
             test("define a function and invoke", function() {
                 var env = evaluate("(def f (fn () 1)) (def x (f))");
-                assert.equal(env.lookup("x").type, "number");
+                isNumber(env, "x");
                 assert.equal(env.lookup("x").value, 1);
             });
 
             test("invoke function with different args", function() {
                 var env = evaluate("(def f (fn (a) a)) (def x (f 1)) (def y (f 2))");
-                assert.equal(env.lookup("x").type, "number");
+                isNumber(env, "x");
                 assert.equal(env.lookup("x").value, 1);
-                assert.equal(env.lookup("y").type, "number");
+                isNumber(env, "y");
                 assert.equal(env.lookup("y").value, 2);
             });
 
             test("closure", function() {
                 var env = evaluate("(def f (let (a 1) (fn () a))) (def x (f))");
-                assert.equal(env.lookup("x").type, "number");
+                isNumber(env, "x");
                 assert.equal(env.lookup("x").value, 1);
             });
 
@@ -194,7 +201,7 @@
 
             test("type", function() {
                 var env = evaluate("(def a (type 1))");
-                assert.equal(env.lookup("a"), "number");
+                isType(env, "a", "number");
             });
 
         });
