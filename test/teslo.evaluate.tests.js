@@ -197,7 +197,7 @@
 
         });
 
-        suite("host interop", function () {
+        suite("reflection", function () {
 
             test("type", function() {
                 var env = evaluate("(def a (type 1))");
