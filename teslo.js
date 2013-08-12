@@ -173,6 +173,9 @@
         "type": {
             invoke: function (env, args) { return first(args).type; },
             type: "function" },
+        "create-type": {
+            invoke: function (env, args) { return { type: "Type" }; },
+            type: "function" },
         "match": {
             invoke: function (env, args) {
                 var toMatch = evaluateForm(env, first(args));

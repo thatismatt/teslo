@@ -146,6 +146,15 @@
 
         });
 
+        suite("type", function () {
+
+            test("create anonymous type", function() {
+                var result = evaluateForm("(create-type)");
+                assert.equal(result.type, "Type");
+            });
+
+        });
+
         suite("deft", function () {
 
             test("define type", function() {
