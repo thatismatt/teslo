@@ -4,10 +4,12 @@
     var assert = chai.assert;
 
     // assert helpers
-    function isBuiltInType (type) { return function (env, name) { assert.equal(env.lookup(name).type, type); }; }
-    var isFunction = isBuiltInType("function");
-    var isList = isBuiltInType("list");
-    var isNumber = isBuiltInType("number");
+    function isOfType (type, env, name) {
+        function lookup (env, name) { assert.equal(env.lookup(name).type, type); };
+        return arguments.length === 1 ? lookup : lookup(env, name); }
+    var isFunction = isOfType("function");
+    var isList = isOfType("list");
+    var isNumber = isOfType("number");
     function isType (env, name, type) { assert.equal(env.lookup(name), type); }
 
     suite("evaluate", function () {
@@ -77,6 +79,8 @@
                 assert.equal(env.lookup("mul").value, 6);
                 assert.equal(env.lookup("div").value, 1);
             });
+
+            // minus with one arg negates
 
             test("maths symbols", function() {
                 var env = evaluate("(def a 1) (def b 2) (def c (+ a b))");
