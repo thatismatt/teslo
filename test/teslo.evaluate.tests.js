@@ -156,6 +156,13 @@
                 var env = evaluate("(def t (create-type))");
                 isType(env, "t");
             });
+
+            test("create named type", function() {
+                var env = evaluate('(def t (create-type "T"))');
+                isType(env, "t");
+                assert.equal(env.lookup("t").name, "T");
+            });
+
         });
 
         suite("deft", function () {

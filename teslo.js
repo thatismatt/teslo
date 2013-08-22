@@ -181,7 +181,9 @@
             invoke: function (env, args) { return first(args).type; },
             type: mkType("Function") },
         "create-type": {
-            invoke: function (env, args) { return mkType("Type"); },
+            invoke: function (env, args) {
+                var name = first(args);
+                return mkType(name && name.value); },
             type: mkType("Function") },
         "match": {
             invoke: function (env, args) {
