@@ -118,10 +118,6 @@
                 env.def(symbol.name, val);
                 /* Q: should def return anything? */ }),
         "deft": mkMacro(function (env, args) {
-                // Q: is this too specialized?
-                //    should we split the type creation, constructor function creation and def-ing?
-                //    i.e. (deft (A)) would be (def A (create-type))
-                // Q: would def-ing an anonymous type name it? i.e. (name (type ((create-type)))) => ???
                 var isImplicitType = args.length === 1;
                 var type = isImplicitType ? first(first(args)) : first(args);
                 var constructors = isImplicitType ? args : tail(args);
