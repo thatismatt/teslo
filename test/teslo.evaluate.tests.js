@@ -194,7 +194,7 @@
 
         suite("comment", function () {
 
-            test("comment function", function() {
+            test("comment macro", function() {
                 var env = evaluate("(def a 1) (comment (def not-evaled 3)) (def b 2)");
                 assert.equal(env.lookup("a").value, 1);
                 assert.equal(env.lookup("b").value, 2);
