@@ -32,21 +32,7 @@
     function mkNumber (x) { return { value: x, type: mkType("Number") }; }
     function mkKeyword (x) { return { name: x, type: mkType("Keyword") }; };
     function mkMacro (f) { return { invoke: f, type: mkType("Macro") }; };
-    function mkFunction (lexEnv, args) {
-        var lexFrames = tail(lexEnv.frames);
-        return { params: first(args),
-                 body: second(args),
-                 type: mkType("Function"),
-                 invoke: function (env, args) {
-                     // TODO: check this.params.length === args.length
-                     each(lexFrames, function (f) { env.pushFrame(f); });
-                     var frame = {};
-                     env.pushFrame(frame);
-                     each(zip(this.params, args), function(x) { frame[first(x).name] = second(x); });
-                     var result = evaluateForm(env, this.body);
-                     env.popFrame();
-                     each(lexFrames, function () { env.popFrame(); });
-                     return result; } }; };
+    function mkFunction (f) { return { invoke: f, type: mkType("Function") }; };
     function mkConstructor (name, type, params) {
         return { type: mkType("Constructor"),
                  params: params,
@@ -129,8 +115,7 @@
                         bootstrap.def.invoke(
                             env, mkList(mkSymbol(ctorName.name + "." + param.name),
                                         { invoke: function (env, args) { return first(args).members[param.name]; } })); }); }); }),
-        "eval": {
-            invoke: function (env, args) {
+        "eval": mkFunction(function (env, args) {
                 var x = first(args);
                 if (isList(x)) {
                     // TODO: (eval ()) ?
@@ -145,11 +130,23 @@
                     return v;
                 } else {
                     return x;
-                }
-            },
-            type: mkType("Function") },
+                } }),
         "quote": mkMacro(function (env, args) { return first(args); }),
-        "fn": mkMacro(mkFunction),
+        "fn": mkMacro(function (lexEnv, args) {
+            var lexFrames = tail(lexEnv.frames);
+            return { params: first(args),
+                     body: second(args),
+                     type: mkType("Function"),
+                     invoke: function (env, args) {
+                         // TODO: check this.params.length === args.length
+                         each(lexFrames, function (f) { env.pushFrame(f); });
+                         var frame = {};
+                         env.pushFrame(frame);
+                         each(zip(this.params, args), function(x) { frame[first(x).name] = second(x); });
+                         var result = evaluateForm(env, this.body);
+                         env.popFrame();
+                         each(lexFrames, function () { env.popFrame(); });
+                         return result; } }; }),
         "let": mkMacro(function (env, args) {
                 // TODO: verify 2 args
                 // TODO: verify even number of binding forms
@@ -163,11 +160,9 @@
                 return result; }),
         "comment": mkMacro(function (env, args) { }),
         "type": mkMacro(function (env, args) { return first(args).type; }),
-        "create-type": {
-            invoke: function (env, args) {
+        "create-type": mkFunction(function (env, args) {
                 var name = first(args);
-                return mkType(name && name.value); },
-            type: mkType("Function") },
+                return mkType(name && name.value); }),
         "match": mkMacro(function (env, args) {
                 var toMatch = evaluateForm(env, first(args));
                 var matchForms = tail(args);
@@ -184,11 +179,9 @@
     // Numeric fns
     each([["+", add], ["-", subtract], ["*", multiply], ["/", divide]],
          function (p) { var n = first(p); var f = second(p);
-             bootstrap[n] = {
-                 invoke: function (env, args) { return mkNumber(
+             bootstrap[n] = mkFunction(function (env, args) { return mkNumber(
                      args.map(function (x) { return x.value; })
-                         .reduce(f)); },
-                 type: mkType("Function") }; });
+                         .reduce(f)); }); });
 
     // Evaluation
     function Environment (frame) { this.frames = mkList(frame); }
