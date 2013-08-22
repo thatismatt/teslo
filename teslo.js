@@ -16,19 +16,26 @@
     function zip (as, bs) { return as.map(function(a, i) { return [a, bs[i]]; }); }
     function curry (f) { var args = tail(arguments);
                          return function () { return f.apply(null, args.concat(toArray(arguments))); }; }
-    function equals (a, b) { return a.type === b.type && a.value === b.value; }
+    function typeEquals (a, b) { return a.type.name === b.type.name; }
+    function equals (a, b) { return typeEquals(a, b) && a.value === b.value; }
+
+    function isOfType (t) { return function(x) { return x.type && x.type.name === t; }; }
+    var isList = isOfType("List");
+    var isSymbol = isOfType("Symbol");
+    var isMacro = isOfType("Macro");
 
     // AST
-    function mkList (x) { var l = toArray(arguments); l.type = "list"; return l; }
-    function mkSymbol (x) { return { name: x, type: "symbol" }; }
-    function mkString (x) { return { value: x, type: "string" }; }
-    function mkNumber (x) { return { value: x, type: "number" }; }
-    function mkKeyword (x) { return { name: x, type: "keyword" }; };
+    function mkType (x) { return { name: x, type: { name: "Type" } }; }
+    function mkList (x) { var l = toArray(arguments); l.type = mkType("List"); return l; }
+    function mkSymbol (x) { return { name: x, type: mkType("Symbol") }; }
+    function mkString (x) { return { value: x, type: mkType("String") }; }
+    function mkNumber (x) { return { value: x, type: mkType("Number") }; }
+    function mkKeyword (x) { return { name: x, type: mkType("Keyword") }; };
     function mkFunction (lexEnv, args) {
         var lexFrames = tail(lexEnv.frames);
         return { params: first(args),
                  body: second(args),
-                 type: "function",
+                 type: mkType("Function"),
                  invoke: function (env, args) {
                      // TODO: check this.params.length === args.length
                      each(lexFrames, function (f) { env.pushFrame(f); });
@@ -40,10 +47,10 @@
                      each(lexFrames, function () { env.popFrame(); });
                      return result; } }; };
     function mkConstructor (name, type, params) {
-        return { type: "constructor",
+        return { type: mkType("Constructor"),
                  params: params,
                  invoke: function (env, args) {
-                     var instance = { type: type.name, members: {}, constructor: name };
+                     var instance = { type: mkType(type.name), members: {}, constructor: name };
                      each(zip(this.params, args), function(x) { instance.members[first(x).name] = second(x); });
                      return instance; } }; }
 
@@ -110,7 +117,7 @@
                 var val = evaluateForm(env, second(args));
                 env.def(symbol.name, val);
                 /* Q: should def return anything? */ },
-            type: "macro" },
+            type: mkType("Macro") },
         "deft": {
             invoke: function (env, args) {
                 // Q: is this too specialized?
@@ -128,18 +135,18 @@
                         bootstrap.def.invoke(
                             env, mkList(mkSymbol(ctorName.name + "." + param.name),
                                         { invoke: function (env, args) { return first(args).members[param.name]; } })); }); }); },
-            type: "macro" },
+            type: mkType("Macro") },
         "eval": {
             invoke: function (env, args) {
                 var x = first(args);
-                if (x.type === "list") {
+                if (isList(x)) {
                     // TODO: (eval ()) ?
                     var f = evaluateForm(env, first(x));
-                    var fargs = f.type === "macro"
+                    var fargs = isMacro(f)
                             ? tail(x) // if the form is a macro, defer the decision about evaluating args
                             : tail(x).map(curry(evaluateForm, env));
                     return f.invoke(env, fargs);
-                } else if (x.type === "symbol") {
+                } else if (isSymbol(x)) {
                     var v = env.lookup(x.name);
                     if (!v) throw new Error("'" + x.name + "' not in scope.");
                     return v;
@@ -147,13 +154,13 @@
                     return x;
                 }
             },
-            type: "function" },
+            type: mkType("Function") },
         "quote": {
             invoke: function (env, args) { return first(args); },
-            type: "macro" },
+            type: mkType("Macro") },
         "fn": {
             invoke: mkFunction,
-            type: "macro" },
+            type: mkType("Macro") },
         "let": {
             invoke: function (env, args) {
                 // TODO: verify 2 args
@@ -166,27 +173,27 @@
                 var result = evaluateForm(env, body);
                 env.popFrame();
                 return result; },
-            type: "macro" },
+            type: mkType("Macro") },
         "comment": {
             invoke: function (env, args) { },
-            type: "macro" },
+            type: mkType("Macro") },
         "type": {
             invoke: function (env, args) { return first(args).type; },
-            type: "function" },
+            type: mkType("Function") },
         "create-type": {
-            invoke: function (env, args) { return { type: "Type" }; },
-            type: "function" },
+            invoke: function (env, args) { return mkType("Type"); },
+            type: mkType("Function") },
         "match": {
             invoke: function (env, args) {
                 var toMatch = evaluateForm(env, first(args));
                 var matchForms = tail(args);
                 for (var i = 0; i < matchForms.length; i += 2) {
-                    if (matchForms[i].type === "symbol" ||
-                        matchForms[i].type === "list" && first(matchForms[i]).name === toMatch.constructor ||
+                    if (isSymbol(matchForms[i]) ||
+                        isList(matchForms[i]) && first(matchForms[i]).name === toMatch.constructor ||
                         equals(matchForms[i], toMatch))
                         return matchForms[i + 1]; }
                 return undefined; },
-            type: "macro" }
+            type: mkType("Macro") }
         // TODO: atom, =, cons, head, tail, cond, defn, defmacro, ns
         // TODO: "interop"/"introspection" - name, vars, lookup/env
     };
@@ -198,7 +205,7 @@
                  invoke: function (env, args) { return mkNumber(
                      args.map(function (x) { return x.value; })
                          .reduce(f)); },
-                 type: "function" }; });
+                 type: mkType("Function") }; });
 
     // Evaluation
     function Environment (frame) { this.frames = mkList(frame); }

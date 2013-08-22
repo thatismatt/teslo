@@ -5,12 +5,12 @@
 
     // assert helpers
     function isOfType (type, env, name) {
-        function lookup (env, name) { assert.equal(env.lookup(name).type, type); };
+        function lookup (env, name) { assert.equal(env.lookup(name).type.name, type); };
         return arguments.length === 1 ? lookup : lookup(env, name); }
-    var isFunction = isOfType("function");
-    var isList = isOfType("list");
-    var isNumber = isOfType("number");
-    function isType (env, name, type) { assert.equal(env.lookup(name), type); }
+    var isFunction = isOfType("Function");
+    var isList = isOfType("List");
+    var isNumber = isOfType("Number");
+    var isType = isOfType("Type");
 
     suite("evaluate", function () {
 
@@ -153,39 +153,38 @@
         suite("type", function () {
 
             test("create anonymous type", function() {
-                var result = evaluateForm("(create-type)");
-                assert.equal(result.type, "Type");
+                var env = evaluate("(def t (create-type))");
+                isType(env, "t");
             });
-
         });
 
         suite("deft", function () {
 
             test("define type", function() {
                 var env = evaluate("(deft (T)) (def x (T))");
-                assert.equal(env.lookup("x").type, "T");
+                isOfType("T", env, "x");
             });
 
             test("define type with explicit constructor", function() {
                 var env = evaluate("(deft T (C)) (def x (C))");
-                assert.equal(env.lookup("x").type, "T");
+                isOfType("T", env, "x");
             });
 
             test("define type with two constructors", function() {
                 var env = evaluate("(deft T (C1) (C2)) (def x1 (C1)) (def x2 (C2))");
-                assert.equal(env.lookup("x1").type, "T");
-                assert.equal(env.lookup("x2").type, "T");
+                isOfType("T", env, "x1");
+                isOfType("T", env, "x2");
             });
 
             test("define type with constructor taking one parameter", function() {
                 var env = evaluate("(deft (T a)) (def x (T 1)) (def y (T.a x))");
-                assert.equal(env.lookup("x").type, "T");
+                isOfType("T", env, "x");
                 assert.equal(env.lookup("y").value, 1);
             });
 
             test("define type with constructor taking multiple parameters", function() {
                 var env = evaluate("(deft (T a b c)) (def x (T 1 2 3)) (def xa (T.a x)) (def xb (T.b x)) (def xc (T.c x))");
-                assert.equal(env.lookup("x").type, "T");
+                isOfType("T", env, "x");
                 assert.equal(env.lookup("xa").value, 1);
                 assert.equal(env.lookup("xb").value, 2);
                 assert.equal(env.lookup("xc").value, 3);
@@ -214,7 +213,7 @@
 
             test("type", function() {
                 var env = evaluate("(def a (type 1))");
-                isType(env, "a", "number");
+                isType(env, "a");
             });
 
         });
