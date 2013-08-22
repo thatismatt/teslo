@@ -31,6 +31,7 @@
     function mkString (x) { return { value: x, type: mkType("String") }; }
     function mkNumber (x) { return { value: x, type: mkType("Number") }; }
     function mkKeyword (x) { return { name: x, type: mkType("Keyword") }; };
+    function mkMacro (f) { return { invoke: f, type: mkType("Macro") }; };
     function mkFunction (lexEnv, args) {
         var lexFrames = tail(lexEnv.frames);
         return { params: first(args),
@@ -107,8 +108,7 @@
 
     // Bootstrap
     var bootstrap = {
-        "def": {
-            invoke: function (env, args) {
+        "def": mkMacro(function (env, args) {
                 // Q: if symbol is not a symbol, should we eval it? to support (def (symbol "a") 1)
                 // A: have something similar to set & setq in elisp,
                 //    i.e. def quotes first arg, like setq, and "def-unquoted" evals first arg?
@@ -116,10 +116,8 @@
                 var symbol = first(args);
                 var val = evaluateForm(env, second(args));
                 env.def(symbol.name, val);
-                /* Q: should def return anything? */ },
-            type: mkType("Macro") },
-        "deft": {
-            invoke: function (env, args) {
+                /* Q: should def return anything? */ }),
+        "deft": mkMacro(function (env, args) {
                 // Q: is this too specialized?
                 //    should we split the type creation, constructor function creation and def-ing?
                 //    i.e. (deft (A)) would be (def A (create-type))
@@ -134,8 +132,7 @@
                     each(ctorParams, function (param) {
                         bootstrap.def.invoke(
                             env, mkList(mkSymbol(ctorName.name + "." + param.name),
-                                        { invoke: function (env, args) { return first(args).members[param.name]; } })); }); }); },
-            type: mkType("Macro") },
+                                        { invoke: function (env, args) { return first(args).members[param.name]; } })); }); }); }),
         "eval": {
             invoke: function (env, args) {
                 var x = first(args);
@@ -155,14 +152,9 @@
                 }
             },
             type: mkType("Function") },
-        "quote": {
-            invoke: function (env, args) { return first(args); },
-            type: mkType("Macro") },
-        "fn": {
-            invoke: mkFunction,
-            type: mkType("Macro") },
-        "let": {
-            invoke: function (env, args) {
+        "quote": mkMacro(function (env, args) { return first(args); }),
+        "fn": mkMacro(mkFunction),
+        "let": mkMacro(function (env, args) {
                 // TODO: verify 2 args
                 // TODO: verify even number of binding forms
                 var bindings = first(args);
@@ -172,21 +164,15 @@
                 env.pushFrame(frame);
                 var result = evaluateForm(env, body);
                 env.popFrame();
-                return result; },
-            type: mkType("Macro") },
-        "comment": {
-            invoke: function (env, args) { },
-            type: mkType("Macro") },
-        "type": {
-            invoke: function (env, args) { return first(args).type; },
-            type: mkType("Function") },
+                return result; }),
+        "comment": mkMacro(function (env, args) { }),
+        "type": mkMacro(function (env, args) { return first(args).type; }),
         "create-type": {
             invoke: function (env, args) {
                 var name = first(args);
                 return mkType(name && name.value); },
             type: mkType("Function") },
-        "match": {
-            invoke: function (env, args) {
+        "match": mkMacro(function (env, args) {
                 var toMatch = evaluateForm(env, first(args));
                 var matchForms = tail(args);
                 for (var i = 0; i < matchForms.length; i += 2) {
@@ -194,8 +180,7 @@
                         isList(matchForms[i]) && first(matchForms[i]).name === toMatch.constructor ||
                         equals(matchForms[i], toMatch))
                         return matchForms[i + 1]; }
-                return undefined; },
-            type: mkType("Macro") }
+                return undefined; })
         // TODO: atom, =, cons, head, tail, cond, defn, defmacro, ns
         // TODO: "interop"/"introspection" - name, vars, lookup/env
     };
