@@ -21,7 +21,11 @@
 
     function isOfType (t) { return function(x) { return x.type && x.type.name === t; }; }
     var isList = isOfType("List");
+    var isString = isOfType("String");
+    var isNumber = isOfType("Number");
     var isSymbol = isOfType("Symbol");
+    var isKeyword = isOfType("Keyword");
+    var isFunction = isOfType("Function");
     var isMacro = isOfType("Macro");
 
     // AST
@@ -44,7 +48,7 @@
     // Parser
     var open = cromp.character("(");
     var close = cromp.character(")");
-    var symbol = cromp.regex(/[a-zA-Z0-9+=\-*\/?.]+/).map(first).map(mkSymbol);
+    var symbol = cromp.regex(/[a-zA-Z0-9+=\-_*\/?.$]+/).map(first).map(mkSymbol);
     var whitespace = cromp.regex(/\s+/);
     var optionalWhitespace = cromp.optional(whitespace);
     var eof = cromp.regex(/$/);
@@ -102,7 +106,7 @@
             var symbol = first(args);
             var val = evaluateForm(env, second(args));
             env.def(symbol.name, val);
-            /* Q: should def return anything? */ }),
+            return symbol; }),
         "deft": mkMacro(function (env, args) {
             var isImplicitType = args.length === 1;
             var type = isImplicitType ? first(first(args)) : first(args);
@@ -114,7 +118,8 @@
                 each(ctorParams, function (param) {
                     bootstrap.def.invoke(
                         env, mkList(mkSymbol(ctorName.name + "." + param.name),
-                                    mkFunction(function (env, args) { return first(args).members[param.name]; }))); }); }); }),
+                                    mkFunction(function (env, args) { return first(args).members[param.name]; }))); }); });
+            return type; }),
         "eval": mkFunction(function (env, args) {
             var x = first(args);
             if (isList(x)) {
@@ -178,7 +183,20 @@
                     var result = evaluateForm(env, matchForms[i + 1]);
                     env.popFrame();
                     return result; } }
-            return undefined; })
+            return undefined; }),
+        "string":mkFunction(function(env, args) {
+            var arg = first(args);
+            return isSymbol(arg)   ? arg.name :
+                   isString(arg)   ? '"' + arg.value + '"' :
+                   isNumber(arg)   ? arg.value :
+                   isKeyword(arg)  ? ":" + arg.name :
+                   isFunction(arg) ? "<Function>" :
+                   isMacro(arg)    ? "<Macro>" :
+                   isList(arg)     ? "(" + arg.map(mkList).map(curry(bootstrap.string.invoke, env)).join(" ") + ")" :
+                   /* otherwise */                  arg; }),
+        "print": mkFunction(function (env, args) {
+            console.log(bootstrap.string.invoke(env, args));
+        })
         // TODO: atom, =, cons, head, tail, cond, defn, defmacro, ns
         // TODO: "interop"/"introspection" - name, vars, lookup/env
     };
