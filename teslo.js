@@ -114,7 +114,7 @@
                 each(ctorParams, function (param) {
                     bootstrap.def.invoke(
                         env, mkList(mkSymbol(ctorName.name + "." + param.name),
-                                    { invoke: function (env, args) { return first(args).members[param.name]; } })); }); }); }),
+                                    mkFunction(function (env, args) { return first(args).members[param.name]; }))); }); }); }),
         "eval": mkFunction(function (env, args) {
             var x = first(args);
             if (isList(x)) {
@@ -167,10 +167,17 @@
             var toMatch = evaluateForm(env, first(args));
             var matchForms = tail(args);
             for (var i = 0; i < matchForms.length; i += 2) {
-                if (isSymbol(matchForms[i]) ||
-                    isList(matchForms[i]) && first(matchForms[i]).name === toMatch.constructor ||
-                    equals(matchForms[i], toMatch))
-                    return matchForms[i + 1]; }
+                var pattern = matchForms[i];
+                if (isSymbol(pattern)) return matchForms[i + 1];
+                if (equals(pattern, toMatch)) return matchForms[i + 1];
+                if (isList(pattern) && first(pattern).name === toMatch.constructor) {
+                    var frame = {};
+                    var params = env.lookup(toMatch.constructor).params; // FIX: remove hardcoding
+                    each(zip(params, tail(pattern)), function(x) { frame[second(x).name] = toMatch.members[first(x).name]; });
+                    env.pushFrame(frame);
+                    var result = evaluateForm(env, matchForms[i + 1]);
+                    env.popFrame();
+                    return result; } }
             return undefined; })
         // TODO: atom, =, cons, head, tail, cond, defn, defmacro, ns
         // TODO: "interop"/"introspection" - name, vars, lookup/env

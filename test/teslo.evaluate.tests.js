@@ -255,6 +255,34 @@
                 assert.equal(teslo.evaluate("(m (B))", env)[0].value, "B");
             });
 
+            test("match - matching clause's body is evaluated", function() {
+                var env = evaluate('(deft T (A)) (def m (fn (x) (match x (A) (+ 1 2))))');
+                assert.equal(teslo.evaluate("(m (A))", env)[0].value, 3);
+            });
+
+            test("match - destructuring, same name as member", function() {
+                var env = evaluate('(deft T (A a)) (def m (fn (x) (match x (A a) a)))');
+                assert.equal(teslo.evaluate("(m (A 1))", env)[0].value, 1);
+            });
+
+            test("match - destructuring, different name to member", function() {
+                var env = evaluate('(deft T (A a)) (def m (fn (x) (match x (A b) b)))');
+                assert.equal(teslo.evaluate("(m (A 1))", env)[0].value, 1);
+            });
+
+            test("match - constructor with parameters", function() {
+                var env = evaluate([
+                    '(deft T (A) (B u) (C v w) (D x y z))',
+                    '(def m (fn (x) (match x (A) 0',
+                    '                        (B a) a',
+                    '                        (C b c) (+ b c)',
+                    '                        (D d e f) (+ d e f))))'].join("\n"));
+                assert.equal(teslo.evaluate("(m (A))", env)[0].value, 0);
+                assert.equal(teslo.evaluate("(m (B 1))", env)[0].value, 1);
+                assert.equal(teslo.evaluate("(m (C 1 2))", env)[0].value, 3);
+                assert.equal(teslo.evaluate("(m (D 1 2 3))", env)[0].value, 6);
+            });
+
         });
 
     });
