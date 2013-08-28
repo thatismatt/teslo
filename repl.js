@@ -1,32 +1,36 @@
 var teslo = require("./teslo");
+var readline = require("readline");
+
+function completer (env) {
+    return function (line) {
+    var vars = Object.keys(env.frames[0]);
+    var hits = vars.filter(function(c) {
+        return c.indexOf(line) === 0 ||
+            (c.indexOf(line.substring(1)) === 0
+             && line[0] === "("); });
+    return [hits, line.replace("(", "")]; }; }
 
 function repl() {
-    var readline = require("readline");
     var env = teslo.environment();
-    var rl = readline.createInterface({
+    var rdln = readline.createInterface({
         input: process.stdin,
         output: process.stdout,
-        completer: function(line) {
-            var vars = Object.keys(env.frames[0]);
-            var hits = vars.filter(function(c) {
-                return c.indexOf(line) === 0 ||
-                    (c.indexOf(line.substring(1)) === 0
-                     && line[0] === '('); });
-            return [hits, line.replace("(", "")]; } });
-    var i = 0;
-    rl.setPrompt("> ");
-    rl.prompt();
-    rl.on("line", function(line) {
-        try {
-            var result = teslo.evaluate(line, env);
-            if (result.length) {
-                env.def("$" + i, result[0]);
-                teslo.evaluate("(print $" + i + ")", env); } }
-        catch (e) {
-            console.log(e); }
-        rl.prompt();
-        i++;
-    }).on("close", function() {
-        process.exit(0); }); }
+        completer: completer(env) });
+    var resultIndex = 0;
+    rdln.setPrompt("> ");
+    rdln.prompt();
+    rdln.on("line", function (line) {
+            try {
+                var result = teslo.evaluate(line, env);
+                if (result.length) {
+                    for (var i = 0; i < result.length; i++) {
+                    env.def("$" + resultIndex, result[i]);
+                    teslo.evaluate("(print $" + resultIndex + ")", env);
+                    resultIndex++; } } }
+            catch (e) {
+                console.log(e); }
+            rdln.prompt(); })
+        .on("close", function () {
+            process.exit(0); }); }
 
 if (require.main === module) repl();
