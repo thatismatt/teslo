@@ -287,6 +287,7 @@
     });
 
     // TODO: test prelude environment
+    // TODO: replace function() with function ()
 
 })(this.mocha || new require("mocha").Mocha,
    this.chai || require("chai"),
