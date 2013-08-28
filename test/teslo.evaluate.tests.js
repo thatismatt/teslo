@@ -10,7 +10,9 @@
     var isFunction = isOfType("Function");
     var isList = isOfType("List");
     var isNumber = isOfType("Number");
-    var isType = isOfType("Type");
+    function isType (env, name, tname) {
+        isOfType("Type", env, name);
+        if (tname) assert.equal(env.lookup(name).name, tname); }
 
     suite("evaluate", function () {
 
@@ -219,7 +221,12 @@
 
             test("type", function() {
                 var env = evaluate("(def a (type 1))");
-                isType(env, "a");
+                isType(env, "a", "Number");
+            });
+
+            test("type of form", function() {
+                var env = evaluate("(def a (type (+ 1 2)))");
+                isType(env, "a", "Number");
             });
 
         });

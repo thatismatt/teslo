@@ -164,7 +164,7 @@
             env.popFrame();
             return result; }),
         "comment": mkMacro(function (env, args) { }),
-        "type": mkMacro(function (env, args) { return first(args).type; }),
+        "type": mkFunction(function (env, args) { return first(args).type; }),
         "create-type": mkFunction(function (env, args) {
             var name = first(args);
             return mkType(name && name.value); }),
