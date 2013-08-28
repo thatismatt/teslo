@@ -26,9 +26,8 @@
             return env;
         }
 
-        function evaluateForm (src) {
-            var env = setupEnv();
-            return teslo.evaluate(src, env)[0];
+        function evaluateForm (src, env) {
+            return teslo.evaluate(src, env || setupEnv())[0];
         }
 
         suite("def", function () {
@@ -234,40 +233,40 @@
 
             test("match - symbol is catch all", function() {
                 var env = evaluate('(def m (fn (x) (match x a "catchall")))');
-                assert.equal(teslo.evaluate("(m 1)", env)[0].value, "catchall");
-                assert.equal(teslo.evaluate("(m 2)", env)[0].value, "catchall");
+                assert.equal(evaluateForm("(m 1)", env).value, "catchall");
+                assert.equal(evaluateForm("(m 2)", env).value, "catchall");
             });
 
             test("match - value must be exact match", function() {
                 var env = evaluate('(def m (fn (x) (match x 1 "one" 2 "two")))');
-                assert.equal(teslo.evaluate("(m 1)", env)[0].value, "one");
-                assert.equal(teslo.evaluate("(m 2)", env)[0].value, "two");
+                assert.equal(evaluateForm("(m 1)", env).value, "one");
+                assert.equal(evaluateForm("(m 2)", env).value, "two");
             });
 
             test("match - type", function() {
                 var env = evaluate('(deft (A)) (def m (fn (x) (match x (A) "A")))');
-                assert.equal(teslo.evaluate("(m (A))", env)[0].value, "A");
+                assert.equal(evaluateForm("(m (A))", env).value, "A");
             });
 
             test("match - constructor", function() {
                 var env = evaluate('(deft T (A) (B)) (def m (fn (x) (match x (A) "A" (B) "B")))');
-                assert.equal(teslo.evaluate("(m (A))", env)[0].value, "A");
-                assert.equal(teslo.evaluate("(m (B))", env)[0].value, "B");
+                assert.equal(evaluateForm("(m (A))", env).value, "A");
+                assert.equal(evaluateForm("(m (B))", env).value, "B");
             });
 
             test("match - matching clause's body is evaluated", function() {
                 var env = evaluate('(deft T (A)) (def m (fn (x) (match x (A) (+ 1 2))))');
-                assert.equal(teslo.evaluate("(m (A))", env)[0].value, 3);
+                assert.equal(evaluateForm("(m (A))", env).value, 3);
             });
 
             test("match - destructuring, same name as member", function() {
                 var env = evaluate('(deft T (A a)) (def m (fn (x) (match x (A a) a)))');
-                assert.equal(teslo.evaluate("(m (A 1))", env)[0].value, 1);
+                assert.equal(evaluateForm("(m (A 1))", env).value, 1);
             });
 
             test("match - destructuring, different name to member", function() {
                 var env = evaluate('(deft T (A a)) (def m (fn (x) (match x (A b) b)))');
-                assert.equal(teslo.evaluate("(m (A 1))", env)[0].value, 1);
+                assert.equal(evaluateForm("(m (A 1))", env).value, 1);
             });
 
             test("match - constructor with parameters", function() {
@@ -277,10 +276,10 @@
                     '                        (B a) a',
                     '                        (C b c) (+ b c)',
                     '                        (D d e f) (+ d e f))))'].join("\n"));
-                assert.equal(teslo.evaluate("(m (A))", env)[0].value, 0);
-                assert.equal(teslo.evaluate("(m (B 1))", env)[0].value, 1);
-                assert.equal(teslo.evaluate("(m (C 1 2))", env)[0].value, 3);
-                assert.equal(teslo.evaluate("(m (D 1 2 3))", env)[0].value, 6);
+                assert.equal(evaluateForm("(m (A))", env).value, 0);
+                assert.equal(evaluateForm("(m (B 1))", env).value, 1);
+                assert.equal(evaluateForm("(m (C 1 2))", env).value, 3);
+                assert.equal(evaluateForm("(m (D 1 2 3))", env).value, 6);
             });
 
         });
