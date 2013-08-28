@@ -224,11 +224,10 @@
 
     teslo.evaluate = function (src, env) {
         var result = teslo.parse(src);
-        if (result.success) {
+        if (result.success)
             return result.forms.map(curry(evaluateForm, env));
-        } else {
-            throw new Error("Parse error: " + (result.message || "unknown error"));
-        } };
+        else
+            throw new Error("Parse error: " + (result.message || "unknown error")); };
 
 })(typeof exports === "undefined" ? this["teslo"] = {} : exports,
    this.cromp || require("cromp"));
