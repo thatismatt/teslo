@@ -112,8 +112,34 @@
                 assert.equal(env.lookup("x").value, 1);
             });
 
+            test("let over lambda", function() {
+                var env = evaluate("(def f (let (y 1) (fn () y)))");
+                isFunction(env, "f");
+                assert.equal(evaluateForm("(f)", env).value, 1);
+            });
+
             // dependent let bindings: (let (x 1 y x) ...)
-            // let bind a fn
+        });
+
+        suite("do", function () {
+
+            test("evaluates all arguments", function() {
+                var env = evaluate("(do (def a 1) (def b 2))");
+                assert.equal(env.lookup("a").value, 1);
+                assert.equal(env.lookup("b").value, 2);
+            });
+
+            test("evaluates arguments in order", function() {
+                var env = evaluate("(do (def a 1) (def b (+ a 1)))");
+                assert.equal(env.lookup("a").value, 1);
+                assert.equal(env.lookup("b").value, 2);
+            });
+
+            test("returns result of last argument", function() {
+                var result = evaluateForm("(do 1 2 3 4)");
+                assert.equal(result.value, 4);
+            });
+
         });
 
         suite("fn", function () {
@@ -244,6 +270,12 @@
                 assert.equal(evaluateForm("(m 2)", env).value, "catchall");
             });
 
+            test("match - symbol is bound to matched value", function() {
+                var env = evaluate('(def m (fn (x) (match x a a)))');
+                assert.equal(evaluateForm("(m 1)", env).value, 1);
+                assert.equal(evaluateForm("(m 2)", env).value, 2);
+            });
+
             test("match - value must be exact match", function() {
                 var env = evaluate('(def m (fn (x) (match x 1 "one" 2 "two")))');
                 assert.equal(evaluateForm("(m 1)", env).value, "one");
@@ -287,6 +319,25 @@
                 assert.equal(evaluateForm("(m (B 1))", env).value, 1);
                 assert.equal(evaluateForm("(m (C 1 2))", env).value, 3);
                 assert.equal(evaluateForm("(m (D 1 2 3))", env).value, 6);
+            });
+        });
+
+        suite("macro", function () {
+
+            test("identity", function () {
+                var env = evaluate("(def m (macro (x) x))");
+                assert.equal(evaluateForm("(m 1)", env).value, 1);
+                assert.equal(evaluateForm("(m 2)", env).value, 2);
+            });
+
+            test("macro arguments aren't evaluated", function () {
+                var env = evaluate("(def m (macro (x) 0))");
+                evaluateForm("(m (i-dont-exist))", env);
+            });
+
+            test("the value a macro returns is evaluated", function () {
+                var env = evaluate("(def m (macro () '(+ 1 2)))");
+                assert.equal(evaluateForm("(m)", env).value, 3);
             });
 
         });
