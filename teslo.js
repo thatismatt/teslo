@@ -97,109 +97,105 @@
                  message: a.message }; };
 
     // Bootstrap
-    var bootstrap = {
-        "def": mkMacro(function (env, args) {
-            // Q: if symbol is not a symbol, should we eval it? to support (def (symbol "a") 1)
-            // A: have something similar to set & setq in elisp,
-            //    i.e. def quotes first arg, like setq, and "def-unquoted" evals first arg?
-            //    Then def is defined in terms of def-unquoted
-            var symbol = first(args);
-            var val = evaluateForm(env, second(args));
-            env.def(symbol.name, val);
-            return symbol; }),
-        "deft": mkMacro(function (env, args) {
-            var isImplicitType = args.length === 1;
-            var type = isImplicitType ? first(first(args)) : first(args);
-            var constructors = isImplicitType ? args : tail(args);
-            each(constructors, function (constructor) {
-                var ctorName = first(constructor);
-                var ctorParams = tail(constructor);
-                bootstrap.def.invoke(env, mkList(ctorName, mkConstructor(ctorName.name, type, ctorParams)));
-                each(ctorParams, function (param) {
-                    bootstrap.def.invoke(
-                        env, mkList(mkSymbol(ctorName.name + "." + param.name),
-                                    mkFunction(function (env, args) { return first(args).members[param.name]; }))); }); });
-            return type; }),
-        "eval": mkFunction(function (env, args) {
-            var x = first(args);
-            if (isList(x)) {
-                // TODO: (eval ()) ?
-                var f = evaluateForm(env, first(x));
-                var fargs = isMacro(f)
-                        ? tail(x) // if the form is a macro, defer the decision about evaluating args
-                        : tail(x).map(curry(evaluateForm, env));
-                return f.invoke(env, fargs);
-            } else if (isSymbol(x)) {
-                var v = env.lookup(x.name);
-                if (!v) throw new Error("'" + x.name + "' not in scope.");
-                return v;
-            } else {
-                return x;
-            } }),
-        "quote": mkMacro(function (env, args) { return first(args); }),
-        "fn": mkMacro(function (lexEnv, args) {
-            var lexFrames = tail(lexEnv.frames);
-            return { params: first(args),
-                     body: second(args),
-                     type: mkType("Function"),
-                     invoke: function (env, args) {
-                         // TODO: check this.params.length === args.length
-                         each(lexFrames, function (f) { env.pushFrame(f); });
-                         var frame = {};
-                         env.pushFrame(frame);
-                         each(zip(this.params, args), function(x) { frame[first(x).name] = second(x); });
-                         var result = evaluateForm(env, this.body);
-                         env.popFrame();
-                         each(lexFrames, function () { env.popFrame(); });
-                         return result; } }; }),
-        "let": mkMacro(function (env, args) {
-            // TODO: verify 2 args
-            // TODO: verify even number of binding forms
-            var bindings = first(args);
-            var body = second(args);
+    var bootstrap = {};
+    bootstrap["def"] = mkMacro(function (env, args) {
+        // Q: if symbol is not a symbol, should we eval it? to support (def (symbol "a") 1)
+        // A: have something similar to set & setq in elisp,
+        //    i.e. def quotes first arg, like setq, and "def-unquoted" evals first arg?
+        //    Then def is defined in terms of def-unquoted
+        var symbol = first(args);
+        var val = evaluateForm(env, second(args));
+        env.def(symbol.name, val);
+        return symbol; });
+    bootstrap["deft"] = mkMacro(function (env, args) {
+        var isImplicitType = args.length === 1;
+        var type = isImplicitType ? first(first(args)) : first(args);
+        var constructors = isImplicitType ? args : tail(args);
+        each(constructors, function (constructor) {
+            var ctorName = first(constructor);
+            var ctorParams = tail(constructor);
+            bootstrap.def.invoke(env, mkList(ctorName, mkConstructor(ctorName.name, type, ctorParams)));
+            each(ctorParams, function (param) {
+                bootstrap.def.invoke(
+                    env, mkList(mkSymbol(ctorName.name + "." + param.name),
+                                mkFunction(function (env, args) { return first(args).members[param.name]; }))); }); });
+        return type; });
+    bootstrap["eval"] = mkFunction(function (env, args) {
+        var x = first(args);
+        if (isList(x)) {
+            // TODO: (eval ()) ?
+            var f = evaluateForm(env, first(x));
+            var fargs = isMacro(f)
+                    ? tail(x) // if the form is a macro, defer the decision about evaluating args
+                    : tail(x).map(curry(evaluateForm, env));
+            return f.invoke(env, fargs); }
+        else if (isSymbol(x)) {
+            var v = env.lookup(x.name);
+            if (!v) throw new Error("'" + x.name + "' not in scope.");
+            return v; }
+        else {
+            return x; } });
+    bootstrap["quote"] = mkMacro(function (env, args) { return first(args); });
+    bootstrap["fn"] = mkMacro(function (lexEnv, args) {
+        var lexFrames = tail(lexEnv.frames);
+        var params = first(args);
+        var body = second(args);
+        return mkFunction(function (env, args) {
+            // TODO: check this.params.length === args.length
+            each(lexFrames, function (f) { env.pushFrame(f); });
             var frame = {};
-            for (var i = 0; i < bindings.length; i += 2) { frame[bindings[i].name] = bindings[i + 1]; }
             env.pushFrame(frame);
+            each(zip(params, args), function(x) { frame[first(x).name] = second(x); });
             var result = evaluateForm(env, body);
             env.popFrame();
-            return result; }),
-        "comment": mkMacro(function (env, args) { }),
-        "type": mkFunction(function (env, args) { return first(args).type; }),
-        "create-type": mkFunction(function (env, args) {
-            var name = first(args);
-            return mkType(name && name.value); }),
-        "match": mkMacro(function (env, args) {
-            var toMatch = evaluateForm(env, first(args));
-            var matchForms = tail(args);
-            for (var i = 0; i < matchForms.length; i += 2) {
-                var pattern = matchForms[i];
-                if (isSymbol(pattern)) return matchForms[i + 1];
-                if (equals(pattern, toMatch)) return matchForms[i + 1];
-                if (isList(pattern) && first(pattern).name === toMatch.constructor) {
-                    var frame = {};
-                    var params = env.lookup(toMatch.constructor).params; // FIX: remove hardcoding
-                    each(zip(params, tail(pattern)), function(x) { frame[second(x).name] = toMatch.members[first(x).name]; });
-                    env.pushFrame(frame);
-                    var result = evaluateForm(env, matchForms[i + 1]);
-                    env.popFrame();
-                    return result; } }
-            return undefined; }),
-        "string":mkFunction(function(env, args) {
-            var arg = first(args);
-            return isSymbol(arg)   ? arg.name :
-                   isString(arg)   ? '"' + arg.value + '"' :
-                   isNumber(arg)   ? arg.value :
-                   isKeyword(arg)  ? ":" + arg.name :
-                   isFunction(arg) ? "<Function>" :
-                   isMacro(arg)    ? "<Macro>" :
-                   isList(arg)     ? "(" + arg.map(mkList).map(curry(bootstrap.string.invoke, env)).join(" ") + ")" :
-                   /* otherwise */                  arg; }),
-        "print": mkFunction(function (env, args) {
-            console.log(bootstrap.string.invoke(env, args));
-        })
-        // TODO: atom, =, cons, head, tail, cond, defn, defmacro, ns
-        // TODO: "interop"/"introspection" - name, vars, lookup/env
-    };
+            each(lexFrames, function () { env.popFrame(); });
+            return result; }); });
+    bootstrap["let"] = mkMacro(function (env, args) {
+        // TODO: verify 2 args
+        // TODO: verify even number of binding forms
+        var bindings = first(args);
+        var body = second(args);
+        var frame = {};
+        for (var i = 0; i < bindings.length; i += 2) { frame[bindings[i].name] = bindings[i + 1]; }
+        env.pushFrame(frame);
+        var result = evaluateForm(env, body);
+        env.popFrame();
+        return result; });
+    bootstrap["comment"] = mkMacro(function (env, args) { });
+    bootstrap["type"] = mkFunction(function (env, args) { return first(args).type; });
+    bootstrap["create-type"] = mkFunction(function (env, args) {
+        var name = first(args);
+        return mkType(name && name.value); });
+    bootstrap["match"] = mkMacro(function (env, args) {
+        var toMatch = evaluateForm(env, first(args));
+        var matchForms = tail(args);
+        for (var i = 0; i < matchForms.length; i += 2) {
+            var pattern = matchForms[i];
+            if (isSymbol(pattern)) return matchForms[i + 1];
+            if (equals(pattern, toMatch)) return matchForms[i + 1];
+            if (isList(pattern) && first(pattern).name === toMatch.constructor) {
+                var frame = {};
+                var params = env.lookup(toMatch.constructor).params; // FIX: remove hardcoding
+                each(zip(params, tail(pattern)), function(x) { frame[second(x).name] = toMatch.members[first(x).name]; });
+                env.pushFrame(frame);
+                var result = evaluateForm(env, matchForms[i + 1]);
+                env.popFrame();
+                return result; } }
+        return undefined; });
+    bootstrap["string"] =mkFunction(function(env, args) {
+        var arg = first(args);
+        return isSymbol(arg) ? arg.name :
+            isString(arg)    ? '"' + arg.value + '"' :
+            isNumber(arg)    ? arg.value :
+            isKeyword(arg)   ? ":" + arg.name :
+            isFunction(arg)  ? "<Function>" :
+            isMacro(arg)     ? "<Macro>" :
+            isList(arg)      ? "(" + arg.map(mkList).map(curry(bootstrap.string.invoke, env)).join(" ") + ")" :
+            /* otherwise */  arg; });
+    bootstrap["print"] = mkFunction(function (env, args) {
+        console.log(bootstrap.string.invoke(env, args)); });
+    // TODO: atom, =, cons, head, tail, cond, defn, defmacro, ns
+    // TODO: "interop"/"introspection" - name, vars, lookup/env
 
     // Numeric fns
     each([["+", add], ["-", subtract], ["*", multiply], ["/", divide]],
