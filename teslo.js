@@ -37,13 +37,6 @@
     function mkKeyword (x) { return { name: x, type: mkType("Keyword") }; };
     function mkMacro (f) { return { invoke: f, type: mkType("Macro") }; };
     function mkFunction (f) { return { invoke: f, type: mkType("Function") }; };
-    function mkConstructor (name, type, params) {
-        return { type: mkType("Constructor"),
-                 params: params,
-                 invoke: function (env, args) {
-                     var instance = { type: mkType(type.name), members: {}, constructor: name };
-                     each(zip(this.params, args), function(x) { instance.members[first(x).name] = second(x); });
-                     return instance; } }; }
 
     // Parser
     var open = cromp.character("(");
@@ -114,7 +107,12 @@
         each(constructors, function (constructor) {
             var ctorName = first(constructor);
             var ctorParams = tail(constructor);
-            bootstrap.def.invoke(env, mkList(ctorName, mkConstructor(ctorName.name, type, ctorParams)));
+            var ctor = mkFunction(function (env, args) {
+                var instance = { type: mkType(type.name), members: {}, constructor: ctorName.name };
+                each(zip(ctorParams, args), function(x) { instance.members[first(x).name] = second(x); });
+                return instance; });
+            ctor.params = ctorParams;
+            bootstrap.def.invoke(env, mkList(ctorName, ctor));
             each(ctorParams, function (param) {
                 bootstrap.def.invoke(
                     env, mkList(mkSymbol(ctorName.name + "." + param.name),
@@ -175,7 +173,7 @@
             if (equals(pattern, toMatch)) return matchForms[i + 1];
             if (isList(pattern) && first(pattern).name === toMatch.constructor) {
                 var frame = {};
-                var params = env.lookup(toMatch.constructor).params; // FIX: remove hardcoding
+                var params = env.lookup(toMatch.constructor).params;
                 each(zip(params, tail(pattern)), function(x) { frame[second(x).name] = toMatch.members[first(x).name]; });
                 env.pushFrame(frame);
                 var result = evaluateForm(env, matchForms[i + 1]);
