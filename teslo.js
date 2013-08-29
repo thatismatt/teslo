@@ -122,7 +122,8 @@
                 ctorParams.map(function (param) {
                     return [mkSymbol(ctorName.name + "." + param.name),
                             mkFunction(function (env, args) { return first(args).members[param.name]; })]; })); });
-        return arrayToList([mkSymbol("do")].concat(concat(defs).map(function (x) { return mkList(mkSymbol("def"), first(x), second(x)); }))); });
+        var defForms = concat(defs).map(function (x) { return mkList(mkSymbol("def"), first(x), second(x)); });
+        return arrayToList([mkSymbol("do")].concat(defForms)); });
 
     bootstrap["eval"] = mkFunction(function (env, args) {
         var x = first(args);
