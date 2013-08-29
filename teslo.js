@@ -16,8 +16,8 @@
     function concat (x) { return Array.prototype.concat.apply([], x); };
     function cons (a, b) { return concat([[a], b]); }
     function reverseFind (arr, f) { var i = arr.length, r; while (!r && i--) { r = f(arr[i]); } return r; }
-    function zip (as, bs) { return map(as, function(a, i) { return [a, bs[i]]; }); }
-    function zipmap (as, bs) { var r = {}; map(zip(as, bs), function(x) { r[x[0]] = x[1]; }); return r; }
+    function zip (as, bs) { return map(as, function (a, i) { return [a, bs[i]]; }); }
+    function zipmap (as, bs) { var r = {}; map(zip(as, bs), function (x) { r[x[0]] = x[1]; }); return r; }
     function compose (f, g) { return function () { return f(g.apply(null, arguments)); }; }
     function curry (f) { var args = tail(arguments);
                          return function () { return f.apply(null, args.concat(toArray(arguments))); }; }
@@ -25,7 +25,7 @@
     function typeEquals (a, b) { return a.type.name === b.type.name; }
     function equals (a, b) { return typeEquals(a, b) && a.value && b.value && a.value === b.value; }
 
-    function isOfType (t) { return function(x) { return x.type && x.type.name === t; }; }
+    function isOfType (t) { return function (x) { return x.type && x.type.name === t; }; }
     var isList = isOfType("List");
     var isString = isOfType("String");
     var isNumber = isOfType("Number");
@@ -156,7 +156,7 @@
                 each(lexFrames, function (f) { env.pushFrame(f); });
                 var frame = {};
                 env.pushFrame(frame);
-                each(zip(params, args), function(x) { frame[first(x).name] = second(x); });
+                each(zip(params, args), function (x) { frame[first(x).name] = second(x); });
                 var result = evaluateForm(env, body);
                 env.popFrame();
                 each(lexFrames, function () { env.popFrame(); });
@@ -187,7 +187,7 @@
             if (equals(pattern, toMatch)) return body;
             if (isSymbol(pattern)) return appliedFunctionForm([pattern], body, [toMatch]);
             if (isList(pattern) && first(pattern).name === toMatch.type.name) {
-                var fargs = map(toMatch.type.params, function(x) { return toMatch.members[x.name]; });
+                var fargs = map(toMatch.type.params, function (x) { return toMatch.members[x.name]; });
                 return appliedFunctionForm(tail(pattern), body, fargs); } }
         return undefined; });
 
@@ -202,7 +202,7 @@
         var results = args.map(curry(evaluateForm, env));
         return last(results); });
 
-    bootstrap["string"] = mkFunction(function(env, args) {
+    bootstrap["string"] = mkFunction(function (env, args) {
         var arg = first(args);
         return isSymbol(arg) ? arg.name :
             isString(arg)    ? '"' + arg.value + '"' :
@@ -228,7 +228,7 @@
 
     // Evaluation
     function Environment (frame) { this.frames = mkList(frame); }
-    Environment.prototype.lookup = function (n) { return reverseFind(this.frames, function(f) { return f[n]; }); };
+    Environment.prototype.lookup = function (n) { return reverseFind(this.frames, function (f) { return f[n]; }); };
     Environment.prototype.pushFrame = function (frame) { this.frames.push(frame || {}); };
     Environment.prototype.popFrame = function () { this.frames.pop(); };
     Environment.prototype.def = function (n, v) { first(this.frames)[n] = v; };

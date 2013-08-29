@@ -5,7 +5,7 @@ var readline = require("readline");
 function completer (env) {
     return function (line) {
     var vars = Object.keys(env.frames[0]);
-    var hits = vars.filter(function(c) {
+    var hits = vars.filter(function (c) {
         return c.indexOf(line) === 0 ||
             (c.indexOf(line.substring(1)) === 0
              && line[0] === "("); });
