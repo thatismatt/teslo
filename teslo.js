@@ -221,7 +221,7 @@
     // TODO: atom, =, cons, head, tail, cond, defn, defmacro, ns
     // TODO: "interop"/"introspection" - name, vars, lookup/env
 
-    // Numeric fns
+    // Numeric functions
     each([["+", add], ["-", subtract], ["*", multiply], ["/", divide]],
          function (p) { var n = first(p); var f = second(p);
              bootstrap[n] = mkFunction(function (env, args) { return mkNumber(
