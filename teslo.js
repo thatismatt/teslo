@@ -14,10 +14,13 @@
     function each (arr, f) { for (var i = 0; i < arr.length; i++) { f(arr[i]); } }
     function map (arr, f) { var r = []; each(arr, function (x) { r.push(f(x)); }); return r; }
     function concat (x) { return Array.prototype.concat.apply([], x); };
+    function cons (a, b) { return concat([[a], b]); }
     function reverseFind (arr, f) { var i = arr.length, r; while (!r && i--) { r = f(arr[i]); } return r; }
     function zip (as, bs) { return as.map(function(a, i) { return [a, bs[i]]; }); }
+    function compose (f, g) { return function () { return f(g.apply(null, arguments)); }; }
     function curry (f) { var args = tail(arguments);
                          return function () { return f.apply(null, args.concat(toArray(arguments))); }; }
+    var flatmap = compose(concat, map);
     function typeEquals (a, b) { return a.type.name === b.type.name; }
     function equals (a, b) { return typeEquals(a, b) && a.value && b.value && a.value === b.value; }
 
@@ -110,7 +113,7 @@
         var isImplicitType = args.length === 1;
         var type = isImplicitType ? first(first(args)) : first(args);
         var constructors = isImplicitType ? args : tail(args);
-        var defs = constructors.map(function (constructor) {
+        var defs = flatmap(constructors, function (constructor) {
             var ctorName = first(constructor);
             var ctorParams = tail(constructor);
             var ctor = mkFunction(function (env, args) {
@@ -118,12 +121,12 @@
                 each(zip(ctorParams, args), function(x) { instance.members[first(x).name] = second(x); });
                 return instance; });
             ctor.params = ctorParams;
-            return [[ctorName, ctor]].concat(
-                ctorParams.map(function (param) {
-                    return [mkSymbol(ctorName.name + "." + param.name),
-                            mkFunction(function (env, args) { return first(args).members[param.name]; })]; })); });
-        var defForms = concat(defs).map(function (x) { return mkList(mkSymbol("def"), first(x), second(x)); });
-        return arrayToList([mkSymbol("do")].concat(defForms)); });
+            return cons([ctorName, ctor],
+                        ctorParams.map(function (param) {
+                            return [mkSymbol(ctorName.name + "." + param.name),
+                                    mkFunction(function (env, args) { return first(args).members[param.name]; })]; })); });
+        var defForms = map(defs, function (x) { return mkList(mkSymbol("def"), first(x), second(x)); });
+        return arrayToList(cons(mkSymbol("do"), defForms)); });
 
     bootstrap["eval"] = mkFunction(function (env, args) {
         var x = first(args);
@@ -168,7 +171,7 @@
 
     function appliedFunctionForm (params, body, args) {
         // ((fn (names) body) args)
-        return arrayToList([mkList(mkSymbol("fn"), arrayToList(params), body)].concat(args)); }
+        return arrayToList(cons(mkList(mkSymbol("fn"), arrayToList(params), body), args)); }
 
     bootstrap["let"] = mkMacro(function (env, args) {
         // TODO: verify 2 args
