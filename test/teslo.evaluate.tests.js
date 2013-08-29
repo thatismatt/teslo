@@ -271,7 +271,7 @@
             });
 
             test("match - symbol is bound to matched value", function() {
-                var env = evaluate('(def m (fn (x) (match x a a)))');
+                var env = evaluate("(def m (fn (x) (match x a a)))");
                 assert.equal(evaluateForm("(m 1)", env).value, 1);
                 assert.equal(evaluateForm("(m 2)", env).value, 2);
             });
@@ -294,32 +294,33 @@
             });
 
             test("match - matching clause's body is evaluated", function() {
-                var env = evaluate('(deft T (A)) (def m (fn (x) (match x (A) (+ 1 2))))');
+                var env = evaluate("(deft T (A)) (def m (fn (x) (match x (A) (+ 1 2))))");
                 assert.equal(evaluateForm("(m (A))", env).value, 3);
             });
 
             test("match - destructuring, same name as member", function() {
-                var env = evaluate('(deft T (A a)) (def m (fn (x) (match x (A a) a)))');
+                var env = evaluate("(deft T (A a)) (def m (fn (x) (match x (A a) a)))");
                 assert.equal(evaluateForm("(m (A 1))", env).value, 1);
             });
 
             test("match - destructuring, different name to member", function() {
-                var env = evaluate('(deft T (A a)) (def m (fn (x) (match x (A b) b)))');
+                var env = evaluate("(deft T (A a)) (def m (fn (x) (match x (A b) b)))");
                 assert.equal(evaluateForm("(m (A 1))", env).value, 1);
             });
 
             test("match - constructor with parameters", function() {
                 var env = evaluate([
-                    '(deft T (A) (B u) (C v w) (D x y z))',
-                    '(def m (fn (x) (match x (A) 0',
-                    '                        (B a) a',
-                    '                        (C b c) (+ b c)',
-                    '                        (D d e f) (+ d e f))))'].join("\n"));
+                    "(deft T (A) (B u) (C v w) (D x y z))",
+                    "(def m (fn (x) (match x (A) 0",
+                    "                        (B a) a",
+                    "                        (C b c) (+ b c)",
+                    "                        (D d e f) (+ d e f))))"].join("\n"));
                 assert.equal(evaluateForm("(m (A))", env).value, 0);
                 assert.equal(evaluateForm("(m (B 1))", env).value, 1);
                 assert.equal(evaluateForm("(m (C 1 2))", env).value, 3);
                 assert.equal(evaluateForm("(m (D 1 2 3))", env).value, 6);
             });
+
         });
 
         suite("macro", function () {
