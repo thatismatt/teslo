@@ -34,6 +34,7 @@
     // AST
     function mkType (x) { return { name: x, type: { name: "Type" } }; }
     function mkList () { var l = toArray(arguments); l.type = mkType("List"); return l; }
+    function arrayToList (a) { return mkList.apply(null, a); }
     function mkSymbol (x) { return { name: x, type: mkType("Symbol") }; }
     function mkString (x) { return { value: x, type: mkType("String") }; }
     function mkNumber (x) { return { value: x, type: mkType("Number") }; }
@@ -59,7 +60,7 @@
             .map(second).map(mkKeyword);
     var list = cromp.recursive(function () {
         return cromp.between(open, close, cromp.optional(forms))
-            .map(function(x) { return mkList.apply(null, x); }); });
+            .map(arrayToList); });
     var macro = cromp.recursive(function () {
         return cromp.choose(quote,
                             syntaxQuote,
@@ -121,7 +122,7 @@
                 ctorParams.map(function (param) {
                     return [mkSymbol(ctorName.name + "." + param.name),
                             mkFunction(function (env, args) { return first(args).members[param.name]; })]; })); });
-        return mkList.apply(null, [mkSymbol("do")].concat(concat(defs).map(function (x) { return mkList(mkSymbol("def"), first(x), second(x)); }))); });
+        return arrayToList([mkSymbol("do")].concat(concat(defs).map(function (x) { return mkList(mkSymbol("def"), first(x), second(x)); }))); });
 
     bootstrap["eval"] = mkFunction(function (env, args) {
         var x = first(args);
@@ -166,7 +167,7 @@
 
     function appliedFunctionForm (params, body, args) {
         // ((fn (names) body) args)
-        return mkList.apply(null, [mkList(mkSymbol("fn"), mkList.apply(null, params), body)].concat(args)); }
+        return arrayToList([mkList(mkSymbol("fn"), arrayToList(params), body)].concat(args)); }
 
     bootstrap["let"] = mkMacro(function (env, args) {
         // TODO: verify 2 args
