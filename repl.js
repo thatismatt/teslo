@@ -27,9 +27,10 @@ function repl() {
             var result = teslo.evaluate(line, env);
             if (result.length) {
                 for (var i = 0; i < result.length; i++) {
-                    env.def("$" + resultIndex, result[i]);
-                    teslo.evaluate("(print $" + resultIndex + ")", env);
-                    resultIndex++; } } }
+                    if (result[i]) {
+                        env.def("$" + resultIndex, result[i]);
+                        teslo.evaluate("(print $" + resultIndex + ")", env);
+                        resultIndex++; } } } }
            try {
                 evaluateLine();
            } catch (e) {
