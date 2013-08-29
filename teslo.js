@@ -12,13 +12,14 @@
     function multiply (a, b) { return a * b; }
     function divide (a, b) { return a / b; }
     function each (arr, f) { for (var i = 0; i < arr.length; i++) { f(arr[i]); } }
+    function map (arr, f) { var r = []; each(arr, function (x) { r.push(f(x)); }); return r; }
     function concat (x) { return Array.prototype.concat.apply([], x); };
     function reverseFind (arr, f) { var i = arr.length, r; while (!r && i--) { r = f(arr[i]); } return r; }
     function zip (as, bs) { return as.map(function(a, i) { return [a, bs[i]]; }); }
     function curry (f) { var args = tail(arguments);
                          return function () { return f.apply(null, args.concat(toArray(arguments))); }; }
     function typeEquals (a, b) { return a.type.name === b.type.name; }
-    function equals (a, b) { return typeEquals(a, b) && a.value === b.value; }
+    function equals (a, b) { return typeEquals(a, b) && a.value && b.value && a.value === b.value; }
 
     function isOfType (t) { return function(x) { return x.type && x.type.name === t; }; }
     var isList = isOfType("List");
@@ -209,7 +210,7 @@
             isKeyword(arg)   ? ":" + arg.name :
             isFunction(arg)  ? "<Function>" :
             isMacro(arg)     ? "<Macro>" :
-            isList(arg)      ? "(" + arg.map(mkList).map(curry(bootstrap.string.invoke, env)).join(" ") + ")" :
+            isList(arg)      ? "(" + map(arg, mkList).map(curry(bootstrap.string.invoke, env)).join(" ") + ")" :
             /* otherwise */    arg; });
 
     bootstrap["print"] = mkFunction(function (env, args) {

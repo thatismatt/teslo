@@ -321,6 +321,12 @@
                 assert.equal(evaluateForm("(m (D 1 2 3))", env).value, 6);
             });
 
+            test("match - List", function() {
+                var env = teslo.environment();
+                var result = teslo.evaluate("(deft List (A x))", env);
+                assert.equal(evaluateForm("(match (A 1) (A a) a)", env).value, 1);
+            });
+
         });
 
         suite("macro", function () {

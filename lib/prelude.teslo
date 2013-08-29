@@ -1,2 +1,7 @@
-;; (deft List (Cons h t)
-;;            (Nil))
+(deft List (Cons head tail)
+           (Nil))
+
+(def nil (Nil))
+(def first Cons.head)
+(def tail (fn (l) (match l (Cons h t) t
+                           (Nil) nil)))
