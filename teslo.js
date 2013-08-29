@@ -24,6 +24,7 @@
     var flatmap = compose(concat, map);
     function typeEquals (a, b) { return a.type.name === b.type.name; }
     function equals (a, b) { return typeEquals(a, b) && a.value && b.value && a.value === b.value; }
+    function name (x) { return x.name; }
 
     function isOfType (t) { return function (x) { return x.type && x.type.name === t; }; }
     var isList = isOfType("List");
@@ -32,14 +33,15 @@
     var isSymbol = isOfType("Symbol");
     var isKeyword = isOfType("Keyword");
     var isFunction = isOfType("Function");
+    var isType = isOfType("Type");
     function isMacro (x) { return isFunction(x) && x.macro; }
     function isSpecial (x) { return isFunction(x) && x.special; }
 
     // AST
-    function mkType (x, params) { var t = { name: x, type: { name: "Type" }, params: params }; t.invoke = mkInstance(t); return t; }
-    function mkInstance (t) { return function (env, args) {
-        return { type: t,
-                 members: zipmap(map(t.params, function (p) { return p.name; }), args) }; }; };
+    function mkType (x, params) {
+        return { name: x, type: { name: "Type" }, params: params,
+                 invoke: function (env, args) {
+                     return { type: this, members: zipmap(map(params, name), args) }; } }; }
     function mkList () { var l = toArray(arguments); l.type = mkType("List"); return l; }
     function arrayToList (a) { return mkList.apply(null, a); }
     function mkSymbol (x) { return { name: x, type: mkType("Symbol") }; }
@@ -208,15 +210,18 @@
             isString(arg)    ? '"' + arg.value + '"' :
             isNumber(arg)    ? arg.value :
             isKeyword(arg)   ? ":" + arg.name :
-            isFunction(arg)  ? "<Function>" :
+            isSpecial(arg)   ? "<Special Form>" :
             isMacro(arg)     ? "<Macro>" :
+            isFunction(arg)  ? "<Function>" :
+            isType(arg)      ? "<Type " + arg.name + ">" :
             isList(arg)      ? "(" + map(arg, mkList).map(curry(bootstrap.string.invoke, env)).join(" ") + ")" :
+            arg.type         ? "(" + arg.type.name + ")" :
             /* otherwise */    arg; });
 
     bootstrap["print"] = mkFunction(function (env, args) {
         console.log(bootstrap.string.invoke(env, args)); });
 
-    // TODO: atom, =, cons, head, tail, cond, defn, defmacro, ns
+    // TODO: atom, =, cond, defn, defmacro, ns
     // TODO: "interop"/"introspection" - name, vars, lookup/env
 
     // Numeric functions
