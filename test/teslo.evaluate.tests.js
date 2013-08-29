@@ -199,29 +199,24 @@
                 isOfType("T", env, "x");
             });
 
-            test("define type with explicit constructor", function() {
-                var env = evaluate("(deft T (C)) (def x (C))");
-                isOfType("T", env, "x");
-            });
-
             test("define type with two constructors", function() {
-                var env = evaluate("(deft T (C1) (C2)) (def x1 (C1)) (def x2 (C2))");
-                isOfType("T", env, "x1");
-                isOfType("T", env, "x2");
+                var env = evaluate("(deft (A) (B)) (def a (A)) (def b (B))");
+                isOfType("A", env, "a");
+                isOfType("B", env, "b");
             });
 
             test("define type with constructor taking one parameter", function() {
-                var env = evaluate("(deft (T a)) (def x (T 1)) (def y (T.a x))");
+                var env = evaluate("(deft (T a)) (def x (T 1)) (def y (match x (T a) a))");
                 isOfType("T", env, "x");
                 assert.equal(env.lookup("y").value, 1);
             });
 
             test("define type with constructor taking multiple parameters", function() {
-                var env = evaluate("(deft (T a b c)) (def x (T 1 2 3)) (def xa (T.a x)) (def xb (T.b x)) (def xc (T.c x))");
+                var env = evaluate("(deft (T a b c)) (def x (T 1 2 3))");
                 isOfType("T", env, "x");
-                assert.equal(env.lookup("xa").value, 1);
-                assert.equal(env.lookup("xb").value, 2);
-                assert.equal(env.lookup("xc").value, 3);
+                assert.equal(evaluateForm("(match x (T a b c) a)", env).value, 1);
+                assert.equal(evaluateForm("(match x (T a b c) b)", env).value, 2);
+                assert.equal(evaluateForm("(match x (T a b c) c)", env).value, 3);
             });
 
         });
@@ -288,29 +283,29 @@
             });
 
             test("match - constructor", function() {
-                var env = evaluate('(deft T (A) (B)) (def m (fn (x) (match x (A) "A" (B) "B")))');
+                var env = evaluate('(deft (A) (B)) (def m (fn (x) (match x (A) "A" (B) "B")))');
                 assert.equal(evaluateForm("(m (A))", env).value, "A");
                 assert.equal(evaluateForm("(m (B))", env).value, "B");
             });
 
             test("match - matching clause's body is evaluated", function() {
-                var env = evaluate("(deft T (A)) (def m (fn (x) (match x (A) (+ 1 2))))");
+                var env = evaluate("(deft (A)) (def m (fn (x) (match x (A) (+ 1 2))))");
                 assert.equal(evaluateForm("(m (A))", env).value, 3);
             });
 
             test("match - destructuring, same name as member", function() {
-                var env = evaluate("(deft T (A a)) (def m (fn (x) (match x (A a) a)))");
+                var env = evaluate("(deft (A a)) (def m (fn (x) (match x (A a) a)))");
                 assert.equal(evaluateForm("(m (A 1))", env).value, 1);
             });
 
             test("match - destructuring, different name to member", function() {
-                var env = evaluate("(deft T (A a)) (def m (fn (x) (match x (A b) b)))");
+                var env = evaluate("(deft (A a)) (def m (fn (x) (match x (A b) b)))");
                 assert.equal(evaluateForm("(m (A 1))", env).value, 1);
             });
 
             test("match - constructor with parameters", function() {
                 var env = evaluate([
-                    "(deft T (A) (B u) (C v w) (D x y z))",
+                    "(deft (A) (B u) (C v w) (D x y z))",
                     "(def m (fn (x) (match x (A) 0",
                     "                        (B a) a",
                     "                        (C b c) (+ b c)",
@@ -319,12 +314,6 @@
                 assert.equal(evaluateForm("(m (B 1))", env).value, 1);
                 assert.equal(evaluateForm("(m (C 1 2))", env).value, 3);
                 assert.equal(evaluateForm("(m (D 1 2 3))", env).value, 6);
-            });
-
-            test("match - List", function() {
-                var env = teslo.environment();
-                var result = teslo.evaluate("(deft List (A x))", env);
-                assert.equal(evaluateForm("(match (A 1) (A a) a)", env).value, 1);
             });
 
         });
