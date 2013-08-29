@@ -1,3 +1,4 @@
+var fs = require("fs");
 var teslo = require("./teslo");
 var readline = require("readline");
 
@@ -11,7 +12,9 @@ function completer (env) {
     return [hits, line.replace("(", "")]; }; }
 
 function repl() {
+    var prelude = fs.readFileSync("lib/prelude.teslo", { encoding: "utf8" });
     var env = teslo.environment();
+    teslo.evaluate(prelude, env);
     var rdln = readline.createInterface({
         input: process.stdin,
         output: process.stdout,
