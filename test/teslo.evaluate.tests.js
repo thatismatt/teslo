@@ -81,7 +81,10 @@
                 assert.equal(env.lookup("div").value, 1);
             });
 
-            // minus with one arg negates
+            test("minus with one arg negates", function() {
+                var result = evaluateForm("(- 1)");
+                assert.equal(result.value, -1);
+            });
 
             test("maths symbols", function() {
                 var env = evaluate("(def a 1) (def b 2) (def c (+ a b))");

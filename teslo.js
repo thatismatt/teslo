@@ -224,7 +224,7 @@
          function (p) { var n = first(p); var f = second(p);
              bootstrap[n] = mkFunction(function (env, args) { return mkNumber(
                  args.map(function (x) { return x.value; })
-                     .reduce(f)); }); });
+                     .reduce(f) * (n === "-" && args.length === 1 ? -1 : 1)); }); });
 
     // Evaluation
     function Environment (frame) { this.frames = mkList(frame); }
