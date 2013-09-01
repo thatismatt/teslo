@@ -147,6 +147,17 @@
             return x; } });
 
     bootstrap["quote"] = mkSpecial(function (env, args) { return first(args); });
+    bootstrap["syntax-quote"] = mkSpecial(function (env, args) {
+        function isUnquote (f) { return isSymbol(f) && f.name === "unquote"; }
+        function unquoteForm (form) {
+            if (isList(form)) {
+                if (isUnquote(first(form)))
+                    return evaluateForm(env, second(form));
+                else
+                    return arrayToList(map(form, unquoteForm)); }
+            else
+                return form; }
+        return unquoteForm(args[0]); });
 
     function compile (mk) {
         return function (lexEnv, args) {

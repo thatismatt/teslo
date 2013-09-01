@@ -4,12 +4,21 @@
     var assert = chai.assert;
 
     // assert helpers
-    function isOfType (type, env, name) {
-        function lookup (env, name) { assert.equal(env.lookup(name).type.name, type); };
-        return arguments.length === 1 ? lookup : lookup(env, name); }
+    function isOfType (type) {
+        function assertType (a1, a2) {
+            var o = a2 ? a1.lookup(a2) : a1;
+            assert.equal(o.type.name, type); };
+        return arguments.length === 1
+            ? assertType
+            : assertType.apply(null, Array.prototype.slice.call(arguments, 1)); }
     var isFunction = isOfType("Function");
     var isList = isOfType("List");
-    var isNumber = isOfType("Number");
+    function isNumber (a1, a2, value) {
+        isOfType("Number", a1, a2);
+        if (value) assert.equal((a2 ? a1.lookup(a2) : a1).value, value); }
+    function isSymbol (a1, a2, sname) {
+        isOfType("Symbol", a1, a2);
+        if (sname) assert.equal((a2 ? a1.lookup(a2) : a1).name, sname); }
     function isType (env, name, tname) {
         isOfType("Type", env, name);
         if (tname) assert.equal(env.lookup(name).name, tname); }
@@ -321,6 +330,32 @@
 
         });
 
+        suite("syntax quote", function () {
+
+            test("plain (not spliced) forms pass through", function () {
+                var env = evaluate("(def a `b)");
+                isSymbol(env, "a", "b");
+            });
+
+            test("splice", function () {
+                var env = evaluate("(def b 1) (def a `~b)");
+                isNumber(env, "a", 1);
+            });
+
+            test("multiple spliced forms inside other plain forms", function () {
+                var env = evaluate("(def b 1) (def a `(x (y ~b ~b) ~b))");
+                var a = env.lookup("a");
+                isList(a);
+                isSymbol(a[0], null, "x");
+                isList(a[1]);
+                isSymbol(a[1][0], null, "y");
+                isNumber(a[1][1], null, 1);
+                isNumber(a[1][2], null, 1);
+                isNumber(a[2], null, 1);
+            });
+
+        });
+
         suite("macro", function () {
 
             test("identity", function () {
@@ -337,6 +372,16 @@
             test("the value a macro returns is evaluated", function () {
                 var env = evaluate("(def m (macro () '(+ 1 2)))");
                 assert.equal(evaluateForm("(m)", env).value, 3);
+            });
+
+            test("syntax quote and splice", function () {
+                var env = evaluate("(def m (macro (x) `'~x))");
+                assert.equal(evaluateForm("(m a)", env).name, "a");
+            });
+
+            test("def symbol argument", function () {
+                var env = evaluate("(def m (macro (x) `(def ~x 1))) (m a)");
+                assert.equal(env.lookup("a").value, 1);
             });
 
         });
