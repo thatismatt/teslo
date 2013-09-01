@@ -244,6 +244,8 @@
         return new Environment(globals); };
 
     function evaluateForm (env, form) { return bootstrap.eval.invoke(env, mkList(form)); }
+    // DEBUG
+    // function log (args) { bootstrap.print.invoke(null, args); }
 
     teslo.evaluate = function (src, env) {
         var result = teslo.parse(src);
