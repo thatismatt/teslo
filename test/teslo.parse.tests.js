@@ -172,36 +172,6 @@
 
         });
 
-        suite("examples", function () {
-
-            function example (name, testFn) {
-                test(name + " example", function (done) {
-                    readFile("examples/" + name + ".teslo", function (f) {
-                        var result = teslo.parse(f);
-                        assert.ok(result.success);
-                        testFn(result);
-                        done();
-                    });
-                });
-            }
-
-            example("identity", function (result) {
-                assert.equal(result.forms.length, 1);
-                var def = result.forms[0];
-                assert.equal(def.type.name, "List");
-                assert.equal(def.length, 3);
-                assert.equal(def[0].type.name, "Symbol");
-                assert.equal(def[0].name, "def");
-                assert.equal(def[1][1].type.name, "Symbol");
-                assert.equal(def[1][1].name, "x");
-            });
-
-            example("prelude", function (result) {});
-
-            example("list", function (result) {});
-
-        });
-
     });
 
 })(this.mocha || new require("mocha").Mocha,
