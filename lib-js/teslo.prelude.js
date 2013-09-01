@@ -1,0 +1,1 @@
+(function (teslo) { teslo.prelude = "(deft (Cons head tail)\n      (Nil))\n\n(def nil (Nil))\n(def first (fn (l) (match l (Cons h t) h)))\n(def tail (fn (l) (match l (Cons h t) t\n                           (Nil) nil)))\n"; })(this.teslo || require('../'))
