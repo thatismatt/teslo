@@ -386,6 +386,14 @@
 
         });
 
+        suite("prelude", function () {
+
+            test("identity", function () {
+                isNumber(evaluateForm("(identity 1)"), null, 1);
+            });
+
+        });
+
     });
 
     // TODO: test prelude environment

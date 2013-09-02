@@ -1,3 +1,5 @@
+(def identity (fn (x) x))
+
 (deft (Cons head tail)
       (Nil))
 
