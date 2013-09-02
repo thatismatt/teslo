@@ -400,7 +400,4 @@
 
 })(this.mocha || new require("mocha").Mocha,
    this.chai || require("chai"),
-   this.teslo || (function () {
-       var teslo = require("../");
-       teslo.prelude = require("fs").readFileSync("lib/prelude.teslo", { encoding: "utf8" });
-       return teslo; })());
+   this.teslo || require("../lib-js/teslo.prelude.js") && require("../"));
