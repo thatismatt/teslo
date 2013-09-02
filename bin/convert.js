@@ -1,4 +1,3 @@
-//*
 var fs = require("fs");
 
 function template (name, src) { return ["(function (teslo) { teslo.", name, " = ", JSON.stringify(src), "; })(this.teslo || require('../'))"].join(""); };
@@ -11,4 +10,3 @@ function convert (name) {
 }
 
 if (require.main === module) convert("prelude");
-//*/
