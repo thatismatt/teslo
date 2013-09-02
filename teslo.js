@@ -217,16 +217,18 @@
 
     bootstrap["string"] = mkFunction(function (env, args) {
         var arg = first(args);
+        var str = compose(curry(bootstrap.string.invoke, env), mkList);
         return isSymbol(arg) ? arg.name :
             isString(arg)    ? '"' + arg.value + '"' :
             isNumber(arg)    ? arg.value :
             isKeyword(arg)   ? ":" + arg.name :
-            isSpecial(arg)   ? "<Special Form>" :
+            isSpecial(arg)   ? "<Special>" :
             isMacro(arg)     ? "<Macro>" :
             isFunction(arg)  ? "<Function>" :
             isType(arg)      ? "<Type " + arg.name + ">" :
-            isList(arg)      ? "(" + map(arg, mkList).map(curry(bootstrap.string.invoke, env)).join(" ") + ")" :
-            arg.type         ? "(" + arg.type.name + ")" :
+            isList(arg)      ? "(" + map(arg, str).join(" ") + ")" :
+            arg.type         ? str(arrayToList(cons(arg.type.name, map(Object.keys(arg.members),
+                                         function (k) { return str(arg.members[k]); })))) :
             /* otherwise */    arg; });
 
     bootstrap["print"] = mkFunction(function (env, args) {
