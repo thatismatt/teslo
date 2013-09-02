@@ -14,6 +14,7 @@ function completer (env) {
 
 function repl() {
     var env = teslo.environment();
+    env.def("js-print", { invoke: function (env, args) { console.log(args[0]); } });
     teslo.evaluate(teslo.prelude, env);
     var rdln = readline.createInterface({
         input: process.stdin,
