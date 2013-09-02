@@ -4,24 +4,23 @@
     var assert = chai.assert;
 
     // assert helpers
-    function isOfType (type) {
-        function assertType (a1, a2) {
-            var o = a2 ? a1.lookup(a2) : a1;
-            assert.equal(o.type.name, type); };
-        return arguments.length === 1
-            ? assertType
-            : assertType.apply(null, Array.prototype.slice.call(arguments, 1)); }
+    function isOfType (type, propFn) {
+        // args: env, n
+        //    OR env, n, v
+        //    OR o
+        //    OR o, v
+        return function (a, b, c) {
+            var aIsEnv = a.constructor.name === "Environment";
+            var o = aIsEnv ? a.lookup(b) : a;
+            var v = aIsEnv ? c : b;
+            assert.equal(o.type.name, type);
+            if (propFn && v) assert.equal(propFn(o), v); }; }
     var isFunction = isOfType("Function");
     var isList = isOfType("List");
-    function isNumber (a1, a2, value) {
-        isOfType("Number", a1, a2);
-        if (value) assert.equal((a2 ? a1.lookup(a2) : a1).value, value); }
-    function isSymbol (a1, a2, sname) {
-        isOfType("Symbol", a1, a2);
-        if (sname) assert.equal((a2 ? a1.lookup(a2) : a1).name, sname); }
-    function isType (env, name, tname) {
-        isOfType("Type", env, name);
-        if (tname) assert.equal(env.lookup(name).name, tname); }
+    var isNumber = isOfType("Number", function (o) { return o.value; });
+    var isString = isOfType("String", function (o) { return o.value; });
+    var isSymbol = isOfType("Symbol", function (o) { return o.name; });
+    var isType = isOfType("Type", function (o) { return o.name; });
 
     suite("evaluate", function () {
 
@@ -45,38 +44,38 @@
 
             test("assign 1 to x", function () {
                 var env = evaluate("(def x 1)");
-                assert.equal(env.lookup("x").value, 1);
+                isNumber(env, "x", 1);
             });
 
             test("assign 2 to y", function () {
                 var env = evaluate("(def y 2)");
-                assert.equal(env.lookup("y").value, 2);
+                isNumber(env, "y", 2);
             });
 
             test('assign "Hello, World" to greeting', function () {
                 var env = evaluate('(def greeting "Hello, World")');
-                assert.equal(env.lookup("greeting").value, "Hello, World");
+                isString(env, "greeting", "Hello, World");
             });
 
             test("assign list to my-list", function () {
                 var env = evaluate("(def my-list '(1 2 3))");
                 var myList = env.lookup("my-list");
                 isList(env, "my-list");
-                assert.equal(myList[0].value, 1);
-                assert.equal(myList[1].value, 2);
-                assert.equal(myList[2].value, 3);
+                isNumber(myList[0], 1);
+                isNumber(myList[1], 2);
+                isNumber(myList[2], 3);
             });
 
             test("two defs", function () {
                 var env = evaluate("(def a 1) (def b 2)");
-                assert.equal(env.lookup("a").value, 1);
-                assert.equal(env.lookup("b").value, 2);
+                isNumber(env, "a", 1);
+                isNumber(env, "b", 2);
             });
 
             test("assign a to b", function () {
                 var env = evaluate("(def a 1) (def b a)");
-                assert.equal(env.lookup("a").value, 1);
-                assert.equal(env.lookup("b").value, 1);
+                isNumber(env, "a", 1);
+                isNumber(env, "b", 1);
             });
 
             test("maths with values", function () {
@@ -84,25 +83,25 @@
                                 "(def sub (- 6 1 2))",
                                 "(def mul (* 1 2 3))",
                                 "(def div (/ 12 4 3))"].join(""));
-                assert.equal(env.lookup("add").value, 3);
-                assert.equal(env.lookup("sub").value, 3);
-                assert.equal(env.lookup("mul").value, 6);
-                assert.equal(env.lookup("div").value, 1);
+                isNumber(env, "add", 3);
+                isNumber(env, "sub", 3);
+                isNumber(env, "mul", 6);
+                isNumber(env, "div", 1);
             });
 
             test("minus with one arg negates", function () {
                 var result = evaluateForm("(- 1)");
-                assert.equal(result.value, -1);
+                isNumber(result, -1);
             });
 
             test("maths symbols", function () {
                 var env = evaluate("(def a 1) (def b 2) (def c (+ a b))");
-                assert.equal(env.lookup("c").value, 3);
+                isNumber(env, "c", 3);
             });
 
             test("eval", function () {
                 var env = evaluate("(def a (eval '(+ 1 2)))");
-                assert.equal(env.lookup("a").value, 3);
+                isNumber(env, "a", 3);
             });
 
         });
@@ -111,23 +110,23 @@
 
             test("let with one binding", function () {
                 var env = evaluate("(def x (let (y 1) y))");
-                assert.equal(env.lookup("x").value, 1);
+                isNumber(env, "x", 1);
             });
 
             test("let with two bindings", function () {
                 var env = evaluate("(def x (let (y 1 z 2) (+ y z)))");
-                assert.equal(env.lookup("x").value, 3);
+                isNumber(env, "x", 3);
             });
 
             test("let bindings hide globals", function () {
                 var env = evaluate("(def y 2) (def x (let (y 1) y))");
-                assert.equal(env.lookup("x").value, 1);
+                isNumber(env, "x", 1);
             });
 
             test("let over lambda", function () {
                 var env = evaluate("(def f (let (y 1) (fn () y)))");
                 isFunction(env, "f");
-                assert.equal(evaluateForm("(f)", env).value, 1);
+                isNumber(evaluateForm("(f)", env), 1);
             });
 
             // dependent let bindings: (let (x 1 y x) ...)
@@ -137,19 +136,19 @@
 
             test("evaluates all arguments", function () {
                 var env = evaluate("(do (def a 1) (def b 2))");
-                assert.equal(env.lookup("a").value, 1);
-                assert.equal(env.lookup("b").value, 2);
+                isNumber(env, "a", 1);
+                isNumber(env, "b", 2);
             });
 
             test("evaluates arguments in order", function () {
                 var env = evaluate("(do (def a 1) (def b (+ a 1)))");
-                assert.equal(env.lookup("a").value, 1);
-                assert.equal(env.lookup("b").value, 2);
+                isNumber(env, "a", 1);
+                isNumber(env, "b", 2);
             });
 
             test("returns result of last argument", function () {
                 var result = evaluateForm("(do 1 2 3 4)");
-                assert.equal(result.value, 4);
+                isNumber(result, 4);
             });
 
         });
@@ -163,28 +162,23 @@
 
             test("create and invoke function", function () {
                 var env = evaluate("(def x ((fn () 1) 1))");
-                isNumber(env, "x");
-                assert.equal(env.lookup("x").value, 1);
+                isNumber(env, "x", 1);
             });
 
             test("define a function and invoke", function () {
                 var env = evaluate("(def f (fn () 1)) (def x (f))");
-                isNumber(env, "x");
-                assert.equal(env.lookup("x").value, 1);
+                isNumber(env, "x", 1);
             });
 
             test("invoke function with different args", function () {
                 var env = evaluate("(def f (fn (a) a)) (def x (f 1)) (def y (f 2))");
-                isNumber(env, "x");
-                assert.equal(env.lookup("x").value, 1);
-                isNumber(env, "y");
-                assert.equal(env.lookup("y").value, 2);
+                isNumber(env, "x", 1);
+                isNumber(env, "y", 2);
             });
 
             test("closure", function () {
                 var env = evaluate("(def f (let (a 1) (fn () a))) (def x (f))");
-                isNumber(env, "x");
-                assert.equal(env.lookup("x").value, 1);
+                isNumber(env, "x", 1);
             });
 
         });
@@ -198,8 +192,7 @@
 
             test("create named type", function () {
                 var env = evaluate('(def t (create-type "T"))');
-                isType(env, "t");
-                assert.equal(env.lookup("t").name, "T");
+                isType(env, "t", "T");
             });
 
         });
@@ -208,27 +201,27 @@
 
             test("define type", function () {
                 var env = evaluate("(deft (T)) (def x (T))");
-                isOfType("T", env, "x");
+                isOfType("T")(env, "x");
             });
 
             test("define type with two constructors", function () {
                 var env = evaluate("(deft (A) (B)) (def a (A)) (def b (B))");
-                isOfType("A", env, "a");
-                isOfType("B", env, "b");
+                isOfType("A")(env, "a");
+                isOfType("B")(env, "b");
             });
 
             test("define type with constructor taking one parameter", function () {
                 var env = evaluate("(deft (T a)) (def x (T 1)) (def y (match x (T a) a))");
-                isOfType("T", env, "x");
-                assert.equal(env.lookup("y").value, 1);
+                isOfType("T")(env, "x");
+                isNumber(env, "y", 1);
             });
 
             test("define type with constructor taking multiple parameters", function () {
                 var env = evaluate("(deft (T a b c)) (def x (T 1 2 3))");
-                isOfType("T", env, "x");
-                assert.equal(evaluateForm("(match x (T a b c) a)", env).value, 1);
-                assert.equal(evaluateForm("(match x (T a b c) b)", env).value, 2);
-                assert.equal(evaluateForm("(match x (T a b c) c)", env).value, 3);
+                isOfType("T")(env, "x");
+                isNumber(evaluateForm("(match x (T a b c) a)", env), 1);
+                isNumber(evaluateForm("(match x (T a b c) b)", env), 2);
+                isNumber(evaluateForm("(match x (T a b c) c)", env), 3);
             });
 
         });
@@ -237,15 +230,15 @@
 
             test("comment macro", function () {
                 var env = evaluate("(def a 1) (comment (def not-evaled 3)) (def b 2)");
-                assert.equal(env.lookup("a").value, 1);
-                assert.equal(env.lookup("b").value, 2);
+                isNumber(env, "a", 1);
+                isNumber(env, "b", 2);
                 assert.equal(env.lookup("not-evaled"), undefined);
             });
 
             test(";; syntax", function () {
                 var env = evaluate("(def a 1)\n;; a comment\n(def b 2)");
-                assert.equal(env.lookup("a").value, 1);
-                assert.equal(env.lookup("b").value, 2);
+                isNumber(env, "a", 1);
+                isNumber(env, "b", 2);
             });
 
         });
@@ -268,51 +261,51 @@
 
             test("match - value", function () {
                 var result = evaluateForm('(match 1 1 "one")');
-                assert.equal(result.value, "one");
+                isString(result, "one");
             });
 
             test("match - symbol is catch all", function () {
                 var env = evaluate('(def m (fn (x) (match x a "catchall")))');
-                assert.equal(evaluateForm("(m 1)", env).value, "catchall");
-                assert.equal(evaluateForm("(m 2)", env).value, "catchall");
+                isString(evaluateForm("(m 1)", env), "catchall");
+                isString(evaluateForm("(m 2)", env), "catchall");
             });
 
             test("match - symbol is bound to matched value", function () {
                 var env = evaluate("(def m (fn (x) (match x a a)))");
-                assert.equal(evaluateForm("(m 1)", env).value, 1);
-                assert.equal(evaluateForm("(m 2)", env).value, 2);
+                isNumber(evaluateForm("(m 1)", env), 1);
+                isNumber(evaluateForm("(m 2)", env), 2);
             });
 
             test("match - value must be exact match", function () {
                 var env = evaluate('(def m (fn (x) (match x 1 "one" 2 "two")))');
-                assert.equal(evaluateForm("(m 1)", env).value, "one");
-                assert.equal(evaluateForm("(m 2)", env).value, "two");
+                isString(evaluateForm("(m 1)", env), "one");
+                isString(evaluateForm("(m 2)", env), "two");
             });
 
             test("match - type", function () {
                 var env = evaluate('(deft (A)) (def m (fn (x) (match x (A) "A")))');
-                assert.equal(evaluateForm("(m (A))", env).value, "A");
+                isString(evaluateForm("(m (A))", env), "A");
             });
 
             test("match - constructor", function () {
                 var env = evaluate('(deft (A) (B)) (def m (fn (x) (match x (A) "A" (B) "B")))');
-                assert.equal(evaluateForm("(m (A))", env).value, "A");
-                assert.equal(evaluateForm("(m (B))", env).value, "B");
+                isString(evaluateForm("(m (A))", env), "A");
+                isString(evaluateForm("(m (B))", env), "B");
             });
 
             test("match - matching clause's body is evaluated", function () {
                 var env = evaluate("(deft (A)) (def m (fn (x) (match x (A) (+ 1 2))))");
-                assert.equal(evaluateForm("(m (A))", env).value, 3);
+                isNumber(evaluateForm("(m (A))", env), 3);
             });
 
             test("match - destructuring, same name as member", function () {
                 var env = evaluate("(deft (A a)) (def m (fn (x) (match x (A a) a)))");
-                assert.equal(evaluateForm("(m (A 1))", env).value, 1);
+                isNumber(evaluateForm("(m (A 1))", env), 1);
             });
 
             test("match - destructuring, different name to member", function () {
                 var env = evaluate("(deft (A a)) (def m (fn (x) (match x (A b) b)))");
-                assert.equal(evaluateForm("(m (A 1))", env).value, 1);
+                isNumber(evaluateForm("(m (A 1))", env), 1);
             });
 
             test("match - constructor with parameters", function () {
@@ -322,10 +315,10 @@
                     "                        (B a) a",
                     "                        (C b c) (+ b c)",
                     "                        (D d e f) (+ d e f))))"].join("\n"));
-                assert.equal(evaluateForm("(m (A))", env).value, 0);
-                assert.equal(evaluateForm("(m (B 1))", env).value, 1);
-                assert.equal(evaluateForm("(m (C 1 2))", env).value, 3);
-                assert.equal(evaluateForm("(m (D 1 2 3))", env).value, 6);
+                isNumber(evaluateForm("(m (A))", env), 0);
+                isNumber(evaluateForm("(m (B 1))", env), 1);
+                isNumber(evaluateForm("(m (C 1 2))", env), 3);
+                isNumber(evaluateForm("(m (D 1 2 3))", env), 6);
             });
 
         });
@@ -346,12 +339,12 @@
                 var env = evaluate("(def b 1) (def a `(x (y ~b ~b) ~b))");
                 var a = env.lookup("a");
                 isList(a);
-                isSymbol(a[0], null, "x");
+                isSymbol(a[0], "x");
                 isList(a[1]);
-                isSymbol(a[1][0], null, "y");
-                isNumber(a[1][1], null, 1);
-                isNumber(a[1][2], null, 1);
-                isNumber(a[2], null, 1);
+                isSymbol(a[1][0], "y");
+                isNumber(a[1][1], 1);
+                isNumber(a[1][2], 1);
+                isNumber(a[2], 1);
             });
 
         });
@@ -360,8 +353,8 @@
 
             test("identity", function () {
                 var env = evaluate("(def m (macro (x) x))");
-                assert.equal(evaluateForm("(m 1)", env).value, 1);
-                assert.equal(evaluateForm("(m 2)", env).value, 2);
+                isNumber(evaluateForm("(m 1)", env), 1);
+                isNumber(evaluateForm("(m 2)", env), 2);
             });
 
             test("macro arguments aren't evaluated", function () {
@@ -371,17 +364,17 @@
 
             test("the value a macro returns is evaluated", function () {
                 var env = evaluate("(def m (macro () '(+ 1 2)))");
-                assert.equal(evaluateForm("(m)", env).value, 3);
+                isNumber(evaluateForm("(m)", env), 3);
             });
 
             test("syntax quote and splice", function () {
                 var env = evaluate("(def m (macro (x) `'~x))");
-                assert.equal(evaluateForm("(m a)", env).name, "a");
+                isSymbol(evaluateForm("(m a)", env), "a");
             });
 
             test("def symbol argument", function () {
                 var env = evaluate("(def m (macro (x) `(def ~x 1))) (m a)");
-                assert.equal(env.lookup("a").value, 1);
+                isNumber(env, "a", 1);
             });
 
         });
@@ -389,7 +382,7 @@
         suite("prelude", function () {
 
             test("identity", function () {
-                isNumber(evaluateForm("(identity 1)"), null, 1);
+                isNumber(evaluateForm("(identity 1)"), 1);
             });
 
         });
