@@ -17,7 +17,7 @@
     function cons (a, b) { return concat([[a], b]); }
     function reverseFind (arr, f) { var i = arr.length, r; while (!r && i--) { r = f(arr[i]); } return r; }
     function zip (as, bs) { return map(as, function (a, i) { return [a, bs[i]]; }); }
-    function zipmap (as, bs) { var r = {}; map(zip(as, bs), function (x) { r[x[0]] = x[1]; }); return r; }
+    function zipmap (ks, vs) { var r = {}; map(zip(ks, vs), function (x) { r[x[0]] = x[1]; }); return r; }
     function compose (f, g) { return function () { return f(g.apply(null, arguments)); }; }
     function curry (f) { var args = tail(arguments);
                          return function () { return f.apply(null, args.concat(toArray(arguments))); }; }
