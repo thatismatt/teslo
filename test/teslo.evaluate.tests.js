@@ -381,8 +381,29 @@
 
         suite("prelude", function () {
 
+            test("first", function () {
+                isNumber(evaluateForm("(first '(1))"), 1);
+            });
+
+            test("rest", function () {
+                var rest = evaluateForm("(rest '(1 2 3))");
+                isList(rest);
+                isNumber(rest[0], 2);
+                isNumber(rest[1], 3);
+            });
+
             test("identity", function () {
                 isNumber(evaluateForm("(identity 1)"), 1);
+            });
+
+            test("defn", function () {
+                var env = evaluate("(defn (f x) x)");
+                isNumber(evaluateForm("(f 1)", env), 1);
+            });
+
+            test("defm", function () {
+                var env = evaluate("(defm (m x) `~(first x))");
+                isNumber(evaluateForm("(m (1 2))", env), 1);
             });
 
         });

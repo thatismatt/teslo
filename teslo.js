@@ -6,7 +6,7 @@
     function third (arr) { return arr[2]; }
     function last (arr) { return arr[arr.length - 1]; }
     function toArray (x) { return Array.prototype.slice.call(x, 0); }
-    function tail (arr) { return Array.prototype.slice.call(arr, 1); }
+    function rest (arr) { return Array.prototype.slice.call(arr, 1); }
     function add (a, b) { return a + b; }
     function subtract (a, b) { return a - b; }
     function multiply (a, b) { return a * b; }
@@ -19,7 +19,7 @@
     function zip (as, bs) { return map(as, function (a, i) { return [a, bs[i]]; }); }
     function zipmap (ks, vs) { var r = {}; map(zip(ks, vs), function (x) { r[x[0]] = x[1]; }); return r; }
     function compose (f, g) { return function () { return f(g.apply(null, arguments)); }; }
-    function curry (f) { var args = tail(arguments);
+    function curry (f) { var args = rest(arguments);
                          return function () { return f.apply(null, args.concat(toArray(arguments))); }; }
     var flatmap = compose(concat, map);
     function typeEquals (a, b) { return a.type.name === b.type.name; }
@@ -118,7 +118,7 @@
     bootstrap["deft"] = mkMacro(function (env, args) {
         var defs = map(args, function (constructor) {
             var name = first(constructor);
-            var params = tail(constructor);
+            var params = rest(constructor);
             // (def T (create-type "T" params))
             var createType = [mkSymbol("create-type"), mkString(name.name)];
             if (params.length) createType.push(arrayToList(params));
@@ -133,8 +133,8 @@
             var f = evaluateForm(env, first(x));
             // TODO: check f is a function
             var fargs = isMacro(f) || isSpecial(f)
-                    ? tail(x) // if evaluating a macro or special form, don't evaluate args
-                    : tail(x).map(curry(evaluateForm, env));
+                    ? rest(x) // if evaluating a macro or special form, don't evaluate args
+                    : rest(x).map(curry(evaluateForm, env));
             var result = f.invoke(env, fargs);
             return isMacro(f)
                 ? evaluateForm(env, result)
@@ -161,7 +161,7 @@
 
     function compile (mk) {
         return function (lexEnv, args) {
-            var lexFrames = tail(lexEnv.frames);
+            var lexFrames = rest(lexEnv.frames);
             var params = first(args);
             var body = second(args);
             return mk(function (env, args) {
@@ -193,7 +193,7 @@
 
     bootstrap["match"] = mkMacro(function (env, args) {
         var toMatch = evaluateForm(env, first(args));
-        var matchForms = tail(args);
+        var matchForms = rest(args);
         for (var i = 0; i < matchForms.length; i += 2) {
             var pattern = matchForms[i];
             var body = matchForms[i + 1];
@@ -201,7 +201,7 @@
             if (isSymbol(pattern)) return appliedFunctionForm([pattern], body, [toMatch]);
             if (isList(pattern) && first(pattern).name === toMatch.type.name) {
                 var fargs = map(toMatch.type.params, function (x) { return toMatch.members[x.name]; });
-                return appliedFunctionForm(tail(pattern), body, fargs); } }
+                return appliedFunctionForm(rest(pattern), body, fargs); } }
         return undefined; });
 
     bootstrap["comment"] = mkSpecial(function (env, args) { });
@@ -233,6 +233,12 @@
 
     bootstrap["print"] = mkFunction(function (env, args) {
         console.log(bootstrap.string.invoke(env, args)); });
+
+    // Array functions, used in prelude macros
+    bootstrap["first"] = mkFunction(function (env, args) {
+        return first(first(args)); });
+    bootstrap["rest"] = mkFunction(function (env, args) {
+        return arrayToList(rest(first(args))); });
 
     // TODO: atom, =, cond, defn, defmacro, ns
     // TODO: "interop"/"introspection" - name, vars, lookup/env
