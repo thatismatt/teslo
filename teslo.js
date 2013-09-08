@@ -202,7 +202,7 @@
             if (isList(pattern) && first(pattern).name === toMatch.type.name) {
                 var fargs = map(toMatch.type.params, function (x) { return toMatch.members[x.name]; });
                 return appliedFunctionForm(rest(pattern), body, fargs); } }
-        return undefined; });
+        throw new Error("No matching clause."); });
 
     bootstrap["comment"] = mkSpecial(function (env, args) { });
 
