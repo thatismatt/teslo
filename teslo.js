@@ -240,7 +240,7 @@
     bootstrap["rest"] = mkFunction(function (env, args) {
         return arrayToList(rest(first(args))); });
 
-    // TODO: atom, =, cond, defn, defmacro, ns
+    // TODO: atom, =, cond, ns
     // TODO: "interop"/"introspection" - name, vars, lookup/env
 
     // Numeric functions
