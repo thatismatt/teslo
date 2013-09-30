@@ -410,8 +410,6 @@
 
     });
 
-    // TODO: test prelude environment
-
 })(this.mocha || new require("mocha").Mocha,
    this.chai || require("chai"),
    this.teslo || require("../lib-js/teslo.prelude.js") && require("../"));
