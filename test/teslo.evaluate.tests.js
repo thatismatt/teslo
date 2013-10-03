@@ -161,7 +161,7 @@
             });
 
             test("create and invoke function", function () {
-                var env = evaluate("(def x ((fn () 1) 1))");
+                var env = evaluate("(def x ((fn () 1)))");
                 isNumber(env, "x", 1);
             });
 
