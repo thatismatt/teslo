@@ -12,6 +12,7 @@
     function multiply (a, b) { return a * b; }
     function divide (a, b) { return a / b; }
     function each (arr, f) { for (var i = 0; i < arr.length; i++) { f(arr[i], i); } }
+    function each2 (arr, f) { for (var i = 0; i < arr.length; i += 2) { f(arr[i], arr[i + 1]); } }
     function map (arr, f) { var r = []; each(arr || [], function (x, i) { r.push(f(x, i)); }); return r; }
     function concat (x) { return Array.prototype.concat.apply([], x); };
     function cons (a, b) { return concat([[a], b]); }
@@ -177,7 +178,7 @@
         var bindings = first(args);
         var names = [];
         var fargs = [];
-        for (var i = 0; i < bindings.length; i += 2) { names.push(bindings[i]); fargs.push(bindings[i + 1]); }
+        each2(bindings, function(n, v) { names.push(n); fargs.push(v); });
         return appliedFunctionForm(names, second(args), fargs); });
 
     bootstrap["match"] = mkMacro(function (env, args) {
