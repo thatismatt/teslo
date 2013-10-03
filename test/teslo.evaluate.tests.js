@@ -185,12 +185,7 @@
 
         suite("type", function () {
 
-            test("create anonymous type", function () {
-                var env = evaluate("(def t (create-type))");
-                isType(env, "t");
-            });
-
-            test("create named type", function () {
+            test("create type", function () {
                 var env = evaluate('(def t (create-type "T"))');
                 isType(env, "t", "T");
             });
@@ -200,24 +195,18 @@
         suite("deft", function () {
 
             test("define type", function () {
-                var env = evaluate("(deft (T)) (def x (T))");
+                var env = evaluate("(deft T ()) (def x (T))");
                 isOfType("T")(env, "x");
             });
 
-            test("define type with two constructors", function () {
-                var env = evaluate("(deft (A) (B)) (def a (A)) (def b (B))");
-                isOfType("A")(env, "a");
-                isOfType("B")(env, "b");
-            });
-
             test("define type with constructor taking one parameter", function () {
-                var env = evaluate("(deft (T a)) (def x (T 1)) (def y (match x (T a) a))");
+                var env = evaluate("(deft T (a)) (def x (T 1)) (def y (match x (T a) a))");
                 isOfType("T")(env, "x");
                 isNumber(env, "y", 1);
             });
 
             test("define type with constructor taking multiple parameters", function () {
-                var env = evaluate("(deft (T a b c)) (def x (T 1 2 3))");
+                var env = evaluate("(deft T (a b c)) (def x (T 1 2 3))");
                 isOfType("T")(env, "x");
                 isNumber(evaluateForm("(match x (T a b c) a)", env), 1);
                 isNumber(evaluateForm("(match x (T a b c) b)", env), 2);
@@ -283,42 +272,23 @@
             });
 
             test("match - type", function () {
-                var env = evaluate('(deft (A)) (def m (fn (x) (match x (A) "A")))');
+                var env = evaluate('(deft A ()) (def m (fn (x) (match x (A) "A")))');
                 isString(evaluateForm("(m (A))", env), "A");
-            });
-
-            test("match - constructor", function () {
-                var env = evaluate('(deft (A) (B)) (def m (fn (x) (match x (A) "A" (B) "B")))');
-                isString(evaluateForm("(m (A))", env), "A");
-                isString(evaluateForm("(m (B))", env), "B");
             });
 
             test("match - matching clause's body is evaluated", function () {
-                var env = evaluate("(deft (A)) (def m (fn (x) (match x (A) (+ 1 2))))");
+                var env = evaluate("(deft A ()) (def m (fn (x) (match x (A) (+ 1 2))))");
                 isNumber(evaluateForm("(m (A))", env), 3);
             });
 
             test("match - destructuring, same name as member", function () {
-                var env = evaluate("(deft (A a)) (def m (fn (x) (match x (A a) a)))");
+                var env = evaluate("(deft A (a)) (def m (fn (x) (match x (A a) a)))");
                 isNumber(evaluateForm("(m (A 1))", env), 1);
             });
 
             test("match - destructuring, different name to member", function () {
-                var env = evaluate("(deft (A a)) (def m (fn (x) (match x (A b) b)))");
+                var env = evaluate("(deft A (a)) (def m (fn (x) (match x (A b) b)))");
                 isNumber(evaluateForm("(m (A 1))", env), 1);
-            });
-
-            test("match - constructor with parameters", function () {
-                var env = evaluate([
-                    "(deft (A) (B u) (C v w) (D x y z))",
-                    "(def m (fn (x) (match x (A) 0",
-                    "                        (B a) a",
-                    "                        (C b c) (+ b c)",
-                    "                        (D d e f) (+ d e f))))"].join("\n"));
-                isNumber(evaluateForm("(m (A))", env), 0);
-                isNumber(evaluateForm("(m (B 1))", env), 1);
-                isNumber(evaluateForm("(m (C 1 2))", env), 3);
-                isNumber(evaluateForm("(m (D 1 2 3))", env), 6);
             });
 
         });
@@ -397,12 +367,12 @@
             });
 
             test("defn", function () {
-                var env = evaluate("(defn (f x) x)");
+                var env = evaluate("(defn f (x) x)");
                 isNumber(evaluateForm("(f 1)", env), 1);
             });
 
             test("defm", function () {
-                var env = evaluate("(defm (m x) `~(first x))");
+                var env = evaluate("(defm m (x) `~(first x))");
                 isNumber(evaluateForm("(m (1 2))", env), 1);
             });
 

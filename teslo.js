@@ -115,17 +115,6 @@
         env.def(symbol.name, val);
         return symbol; });
 
-    bootstrap["deft"] = mkMacro(function (env, args) {
-        var defs = map(args, function (constructor) {
-            var name = first(constructor);
-            var params = rest(constructor);
-            // (def T (create-type "T" params))
-            var createType = [mkSymbol("create-type"), mkString(name.name)];
-            if (params.length) createType.push(arrayToList(params));
-            return mkList(mkSymbol("def"), name, arrayToList(createType));
-        });
-        return arrayToList(cons(mkSymbol("do"), defs)); });
-
     bootstrap["eval"] = mkFunction(function (env, args) {
         var x = first(args);
         if (isList(x)) {
@@ -208,8 +197,11 @@
 
     bootstrap["type"] = mkFunction(function (env, args) { return first(args).type; });
     bootstrap["create-type"] = mkSpecial(function (env, args) {
-        var name = first(args);
+        var name = evaluateForm(env, first(args));
         return mkType(name && name.value, second(args)); });
+
+    bootstrap["name"] = mkMacro(function (env, args) {
+        return mkString(first(args).name); });
 
     bootstrap["do"] = mkSpecial(function (env, args) {
         var results = args.map(curry(evaluateForm, env));
@@ -241,7 +233,7 @@
         return arrayToList(rest(first(args))); });
 
     // TODO: atom, =, cond, ns
-    // TODO: "interop"/"introspection" - name, vars, lookup/env
+    // TODO: "interop"/"introspection" - vars, lookup/env
 
     // Numeric functions
     each([["+", add], ["-", subtract], ["*", multiply], ["/", divide]],
