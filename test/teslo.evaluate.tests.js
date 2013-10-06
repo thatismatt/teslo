@@ -181,6 +181,8 @@
                 isNumber(env, "x", 1);
             });
 
+            // argument destructuring
+
         });
 
         suite("type", function () {
