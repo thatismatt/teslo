@@ -152,15 +152,17 @@
     function compile (mk) {
         return function (lexEnv, args) {
             var lexFrames = rest(lexEnv.frames);
-            var params = first(args);
-            var body = second(args);
-            return mk(function (env, args) {
-                // TODO: check this.params.length === args.length
+            var arityDispatch = {};
+            each2(args, function (params, body) {
+                arityDispatch[params.length] = { params: params, body: body }; });
+            return mk(function (env, fargs) {
+                // TODO: test arity
+                var ad = arityDispatch[fargs.length];
                 each(lexFrames, function (f) { env.pushFrame(f); });
                 var frame = {};
                 env.pushFrame(frame);
-                each(zip(params, args), function (x) { frame[first(x).name] = second(x); });
-                var result = evaluateForm(env, body);
+                each(zip(ad.params, fargs), function (x) { frame[first(x).name] = second(x); });
+                var result = evaluateForm(env, ad.body);
                 env.popFrame();
                 each(lexFrames, function () { env.popFrame(); });
                 return result; }); }; }

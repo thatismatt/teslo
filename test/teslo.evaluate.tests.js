@@ -181,6 +181,13 @@
                 isNumber(env, "x", 1);
             });
 
+            test("overload on argument count", function () {
+                var env = evaluate("(def f (fn () 0 (x) 1 (x y) 2))");
+                isNumber(evaluateForm("(f)", env), 0);
+                isNumber(evaluateForm("(f 1)", env), 1);
+                isNumber(evaluateForm("(f 1 2)", env), 2);
+            });
+
             // argument destructuring
 
         });
