@@ -197,11 +197,13 @@
             });
 
             test("variadic function with an initial named parameter", function () {
-                var env = evaluate("(def f (fn (x . xs) xs))");
+                var env = evaluate("(def f (fn (x . xs) `(~x ~xs)))");
                 var oneArg = evaluateForm("(f 1)", env);
-                isList(oneArg, []);
+                isNumber(oneArg[0], 1);
+                isList(oneArg[1], []);
                 var twoArgs = evaluateForm("(f 1 2)", env);
-                isList(twoArgs, [2]);
+                isNumber(twoArgs[0], 1);
+                isList(twoArgs[1], [2]);
             });
 
             // argument destructuring
