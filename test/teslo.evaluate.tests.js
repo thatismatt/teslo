@@ -4,6 +4,7 @@
     var assert = chai.assert;
 
     // assert helpers
+    function simplify (o) { return o.type.name === "Number" ? o.value : o.name; }
     function isOfType (type, propFn) {
         // args: env, n
         //    OR env, n, v
@@ -17,7 +18,7 @@
             assert.equal(o.type.name, type);
             if (propFn && v) assert.deepEqual(propFn(o), v); }; }
     var isFunction = isOfType("Function");
-    var isList = isOfType("List", function (o) { var r = []; for (var i = 0; i < o.length; i++) { r.push(o[i].value || o[i].name); } return r; } );
+    var isList = isOfType("List", function (o) { var r = []; for (var i = 0; i < o.length; i++) { r.push(simplify(o[i])); } return r; } );
     var isNumber = isOfType("Number", function (o) { return o.value; });
     var isString = isOfType("String", function (o) { return o.value; });
     var isSymbol = isOfType("Symbol", function (o) { return o.name; });
