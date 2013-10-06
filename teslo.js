@@ -140,14 +140,14 @@
     bootstrap["quote"] = mkSpecial(function (env, args) { return first(args); });
     bootstrap["syntax-quote"] = mkSpecial(function (env, args) {
         function isUnquote (f) { return isSymbol(f) && (f.name === "unquote" || f.name === "unquote-splice"); }
+        function isSplicedForm (f) { return isList(f) && isSymbol(first(f)) && first(f).name === "unquote-splice"; }
         function unquoteForm (form) {
             if (isList(form)) {
                 if (isUnquote(first(form)))
                     return evaluateForm(env, second(form));
                 else
-                    return arrayToList(flatmap(form,
-                                               function (f) { var result = unquoteForm(f);
-                                                              return isList(f) && first(f).name === "unquote-splice" ? result : [result]; })); }
+                    return arrayToList(
+                        flatmap(form, function (f) { return isSplicedForm(f) ? unquoteForm(f) : [unquoteForm(f)]; })); }
             else
                 return form; }
         return unquoteForm(args[0]); });
