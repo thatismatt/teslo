@@ -15,9 +15,9 @@
             var v = aIsEnv ? c : b;
             assert.ok(o.type, "no type property");
             assert.equal(o.type.name, type);
-            if (propFn && v) assert.equal(propFn(o), v); }; }
+            if (propFn && v) assert.deepEqual(propFn(o), v); }; }
     var isFunction = isOfType("Function");
-    var isList = isOfType("List");
+    var isList = isOfType("List", function (o) { var r = []; for (var i = 0; i < o.length; i++) { r.push(o[i].value || o[i].name); } return r; } );
     var isNumber = isOfType("Number", function (o) { return o.value; });
     var isString = isOfType("String", function (o) { return o.value; });
     var isSymbol = isOfType("Symbol", function (o) { return o.name; });
@@ -61,10 +61,7 @@
             test("assign list to my-list", function () {
                 var env = evaluate("(def my-list '(1 2 3))");
                 var myList = env.lookup("my-list");
-                isList(env, "my-list");
-                isNumber(myList[0], 1);
-                isNumber(myList[1], 2);
-                isNumber(myList[2], 3);
+                isList(env, "my-list", [1, 2, 3]);
             });
 
             test("two defs", function () {
@@ -297,10 +294,7 @@
                 var a = env.lookup("a");
                 isList(a);
                 isSymbol(a[0], "x");
-                isList(a[1]);
-                isSymbol(a[1][0], "y");
-                isNumber(a[1][1], 1);
-                isNumber(a[1][2], 1);
+                isList(a[1], ["y", 1, 1]);
                 isNumber(a[2], 1);
             });
 
@@ -344,9 +338,7 @@
 
             test("rest", function () {
                 var rest = evaluateForm("(rest '(1 2 3))");
-                isList(rest);
-                isNumber(rest[0], 2);
-                isNumber(rest[1], 3);
+                isList(rest, [2, 3]);
             });
 
             test("identity", function () {
