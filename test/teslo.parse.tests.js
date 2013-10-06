@@ -1,4 +1,4 @@
-(function (mocha, chai, teslo, readFile) {
+(function (mocha, chai, teslo) {
 
     chai.Assertion.includeStack = true;
     var assert = chai.assert;
@@ -176,9 +176,4 @@
 
 })(this.mocha || new require("mocha").Mocha,
    this.chai || require("chai"),
-   this.teslo || require("../"),
-   this.$ ? this.$.get
-          : function (f, c) {
-              var r = require("fs").readFile;
-              return r(f, { encoding: "utf8" },
-                       function (e, d) { if (e) throw e; c(d); }); });
+   this.teslo || require("../"));
