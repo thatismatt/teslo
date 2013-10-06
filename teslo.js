@@ -122,7 +122,7 @@
         if (isList(x)) {
             // TODO: (eval ()) ?
             var f = evaluateForm(env, first(x));
-            // TODO: check f is a function
+            // TODO: check f can be invoked
             var fargs = isMacro(f) || isSpecial(f)
                     ? rest(x) // if evaluating a macro or special form, don't evaluate args
                     : rest(x).map(curry(evaluateForm, env));
