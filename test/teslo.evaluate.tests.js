@@ -313,9 +313,14 @@
                 isSymbol(env, "a", "b");
             });
 
-            test("splice", function () {
+            test("unquote", function () {
                 var env = evaluate("(def b 1) (def a `~b)");
                 isNumber(env, "a", 1);
+            });
+
+            test("unquote splice", function () {
+                var env = evaluate("(def b '(1 2 3)) (def a `(0 ~@b))");
+                isList(env, "a", [0, 1, 2, 3]);
             });
 
             test("multiple spliced forms inside other plain forms", function () {
