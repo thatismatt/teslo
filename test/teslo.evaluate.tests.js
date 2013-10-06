@@ -348,6 +348,8 @@
                 isNumber(evaluateForm("(f 1)", env), 1);
             });
 
+            // defn - overload on argument count
+
             test("defm", function () {
                 var env = evaluate("(defm m (x) `~(first x))");
                 isNumber(evaluateForm("(m (1 2))", env), 1);
