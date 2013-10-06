@@ -186,6 +186,24 @@
                 isNumber(evaluateForm("(f 1 2)", env), 2);
             });
 
+            test("variadic function", function () {
+                var env = evaluate("(def f (fn (. xs) xs))");
+                var noArgs = evaluateForm("(f)", env);
+                isList(noArgs, []);
+                var oneArg = evaluateForm("(f 1)", env);
+                isList(oneArg, [1]);
+                var twoArgs = evaluateForm("(f 1 2)", env);
+                isList(twoArgs, [1, 2]);
+            });
+
+            test("variadic function with an initial named parameter", function () {
+                var env = evaluate("(def f (fn (x . xs) xs))");
+                var oneArg = evaluateForm("(f 1)", env);
+                isList(oneArg, []);
+                var twoArgs = evaluateForm("(f 1 2)", env);
+                isList(twoArgs, [2]);
+            });
+
             // argument destructuring
 
         });

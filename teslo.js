@@ -19,6 +19,7 @@
     function reverseFind (arr, f) { var i = arr.length, r; while (!r && i--) { r = f(arr[i]); } return r; }
     function zip (as, bs) { return map(as, function (a, i) { return [a, bs[i]]; }); }
     function zipmap (ks, vs) { var r = {}; map(zip(ks, vs), function (x) { r[x[0]] = x[1]; }); return r; }
+    function any (arr, f) { for (var i = 0; i < arr.length; i++) { if (f(arr[i])) { return true; } } return false; }
     function compose (f, g) { return function () { return f(g.apply(null, arguments)); }; }
     function curry (f) { var args = rest(arguments);
                          return function () { return f.apply(null, args.concat(toArray(arguments))); }; }
@@ -154,14 +155,21 @@
             var lexFrames = rest(lexEnv.frames);
             var arityDispatch = {};
             each2(args, function (params, body) {
-                arityDispatch[params.length] = { params: params, body: body }; });
+                var isVariadic = any(params, function(p) { return p.name === "."; });
+                // TODO: only allow one variadic signature
+                arityDispatch[isVariadic ? "." : params.length] = { params: params, body: body }; });
             return mk(function (env, fargs) {
-                // TODO: test arity
-                var ad = arityDispatch[fargs.length];
-                each(lexFrames, function (f) { env.pushFrame(f); });
+                var ad = arityDispatch[fargs.length] // exact arity match
+                        || arityDispatch["."];       // variadic signature
+                // if (!x && !v) { TODO: error on arity }
                 var frame = {};
+                for (var i = 0; i < ad.params.length; i++) {
+                    if (ad.params[i].name === ".") {
+                        frame[ad.params[i + 1].name] = mkList.apply(null, fargs.slice(i));
+                        break; }
+                    frame[ad.params[i].name] = fargs[i]; }
+                each(lexFrames, function (f) { env.pushFrame(f); });
                 env.pushFrame(frame);
-                each(zip(ad.params, fargs), function (x) { frame[first(x).name] = second(x); });
                 var result = evaluateForm(env, ad.body);
                 env.popFrame();
                 each(lexFrames, function () { env.popFrame(); });
