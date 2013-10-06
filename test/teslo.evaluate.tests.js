@@ -192,29 +192,6 @@
 
         });
 
-        suite("deft", function () {
-
-            test("define type", function () {
-                var env = evaluate("(deft T ()) (def x (T))");
-                isOfType("T")(env, "x");
-            });
-
-            test("define type with constructor taking one parameter", function () {
-                var env = evaluate("(deft T (a)) (def x (T 1)) (def y (match x (T a) a))");
-                isOfType("T")(env, "x");
-                isNumber(env, "y", 1);
-            });
-
-            test("define type with constructor taking multiple parameters", function () {
-                var env = evaluate("(deft T (a b c)) (def x (T 1 2 3))");
-                isOfType("T")(env, "x");
-                isNumber(evaluateForm("(match x (T a b c) a)", env), 1);
-                isNumber(evaluateForm("(match x (T a b c) b)", env), 2);
-                isNumber(evaluateForm("(match x (T a b c) c)", env), 3);
-            });
-
-        });
-
         suite("comment", function () {
 
             test("comment macro", function () {
@@ -374,6 +351,25 @@
             test("defm", function () {
                 var env = evaluate("(defm m (x) `~(first x))");
                 isNumber(evaluateForm("(m (1 2))", env), 1);
+            });
+
+            test("deft", function () {
+                var env = evaluate("(deft T ()) (def x (T))");
+                isOfType("T")(env, "x");
+            });
+
+            test("deft - constructor taking one parameter", function () {
+                var env = evaluate("(deft T (a)) (def x (T 1)) (def y (match x (T a) a))");
+                isOfType("T")(env, "x");
+                isNumber(env, "y", 1);
+            });
+
+            test("deft - constructor taking multiple parameters", function () {
+                var env = evaluate("(deft T (a b c)) (def x (T 1 2 3))");
+                isOfType("T")(env, "x");
+                isNumber(evaluateForm("(match x (T a b c) a)", env), 1);
+                isNumber(evaluateForm("(match x (T a b c) b)", env), 2);
+                isNumber(evaluateForm("(match x (T a b c) c)", env), 3);
             });
 
         });
