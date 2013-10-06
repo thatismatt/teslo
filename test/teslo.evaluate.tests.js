@@ -13,6 +13,7 @@
             var aIsEnv = a.constructor.name === "Environment";
             var o = aIsEnv ? a.lookup(b) : a;
             var v = aIsEnv ? c : b;
+            assert.ok(o.type, "no type property");
             assert.equal(o.type.name, type);
             if (propFn && v) assert.equal(propFn(o), v); }; }
     var isFunction = isOfType("Function");
