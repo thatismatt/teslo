@@ -150,6 +150,16 @@
                 return form; }
         return unquoteForm(args[0]); });
 
+    function bind (frame, params, args) {
+        for (var i = 0; i < params.length; i++) {
+            if (isList(params[i])) {
+                var targs = map(args[i].type.params, function (x) { return args[i].members[x.name]; });
+                bind(frame, rest(params[i]), targs); }
+            if (params[i].name === ".") {
+                frame[params[i + 1].name] = mkList.apply(null, args.slice(i));
+                break; }
+            frame[params[i].name] = args[i]; } }
+
     function compile (mk) {
         return function (lexEnv, args) {
             var lexFrames = rest(lexEnv.frames);
@@ -163,11 +173,7 @@
                         || arityDispatch["."];       // variadic signature
                 // if (!x && !v) { TODO: error on arity }
                 var frame = {};
-                for (var i = 0; i < ad.params.length; i++) {
-                    if (ad.params[i].name === ".") {
-                        frame[ad.params[i + 1].name] = mkList.apply(null, fargs.slice(i));
-                        break; }
-                    frame[ad.params[i].name] = fargs[i]; }
+                bind(frame, ad.params, fargs);
                 each(lexFrames, function (f) { env.pushFrame(f); });
                 env.pushFrame(frame);
                 var result = evaluateForm(env, ad.body);
@@ -198,10 +204,9 @@
             var pattern = matchForms[i];
             var body = matchForms[i + 1];
             if (equals(pattern, toMatch)) return body;
-            if (isSymbol(pattern)) return appliedFunctionForm([pattern], body, [toMatch]);
-            if (isList(pattern) && first(pattern).name === toMatch.type.name) {
-                var fargs = map(toMatch.type.params, function (x) { return toMatch.members[x.name]; });
-                return appliedFunctionForm(rest(pattern), body, fargs); } }
+            if (isSymbol(pattern) ||
+                isList(pattern) && first(pattern).name === toMatch.type.name) {
+                return appliedFunctionForm([pattern], body, [toMatch]); } }
         throw new Error("No matching clause."); });
 
     bootstrap["comment"] = mkSpecial(function (env, args) { });
