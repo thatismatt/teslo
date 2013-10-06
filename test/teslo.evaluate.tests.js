@@ -206,7 +206,15 @@
                 isList(twoArgs[1], [2]);
             });
 
-            // argument destructuring
+            test("argument destructuring", function () {
+                var env = evaluate("(deft A (a)) (def f (fn ((A a)) a))");
+                isNumber(evaluateForm("(f (A 1))", env), 1);
+            });
+
+            test("nested argument destructuring", function () {
+                var env = evaluate("(deft A (a)) (def f (fn ((A (A a))) a))");
+                isNumber(evaluateForm("(f (A (A 1)))", env), 1);
+            });
 
         });
 
