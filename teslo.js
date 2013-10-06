@@ -142,14 +142,10 @@
         function isUnquote (f) { return isSymbol(f) && (f.name === "unquote" || f.name === "unquote-splice"); }
         function isSplicedForm (f) { return isList(f) && isSymbol(first(f)) && first(f).name === "unquote-splice"; }
         function unquoteForm (form) {
-            if (isList(form)) {
-                if (isUnquote(first(form)))
-                    return evaluateForm(env, second(form));
-                else
-                    return arrayToList(
-                        flatmap(form, function (f) { return isSplicedForm(f) ? unquoteForm(f) : [unquoteForm(f)]; })); }
-            else
-                return form; }
+            if (!isList(form)) return form;
+            if (isUnquote(first(form))) return evaluateForm(env, second(form));
+            return arrayToList(
+                flatmap(form, function (f) { return isSplicedForm(f) ? unquoteForm(f) : [unquoteForm(f)]; })); }
         return unquoteForm(args[0]); });
 
     function bind (frame, params, args) {
