@@ -40,10 +40,13 @@
     function isSpecial (x) { return isFunction(x) && x.special; }
 
     // AST
-    function mkType (x, params) {
-        return { name: x, type: { name: "Type" }, params: params,
+    function mkType (x, constructorList) {
+        var cs = {};
+        constructorList && each(constructorList, function (c) { cs[c.length] = c; });
+        return { name: x, type: { name: "Type" }, constructors: cs,
                  invoke: function (env, args) {
-                     return { type: this, members: zipmap(map(params, name), args) }; } }; }
+                     var c = this.constructors[args.length];
+                     return { type: this, constructor: c, members: zipmap(map(c, name), args) }; } }; }
     function mkList () { var l = toArray(arguments); l.type = mkType("List"); return l; }
     function arrayToList (a) { return mkList.apply(null, a); }
     function mkSymbol (x) { return { name: x, type: mkType("Symbol") }; }
@@ -203,7 +206,9 @@
             var body = matchForms[i + 1];
             if (equals(pattern, toMatch)) return body;
             if (isSymbol(pattern) ||
-                isList(pattern) && first(pattern).name === toMatch.type.name) {
+                (isList(pattern) &&
+                 first(pattern).name === toMatch.type.name &&
+                 rest(pattern).length === toMatch.constructor.length)) {
                 return appliedFunctionForm([pattern], body, [toMatch]); } }
         throw new Error("No matching clause."); });
 
@@ -212,7 +217,7 @@
     bootstrap["type"] = mkFunction(function (env, args) { return first(args).type; });
     bootstrap["create-type"] = mkSpecial(function (env, args) {
         var name = evaluateForm(env, first(args));
-        return mkType(name && name.value, second(args)); });
+        return mkType(name && name.value, rest(args)); });
 
     bootstrap["name"] = mkMacro(function (env, args) {
         return mkString(first(args).name); });
