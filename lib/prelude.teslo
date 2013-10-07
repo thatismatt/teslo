@@ -1,10 +1,10 @@
-(def identity (fn (x) x))
-
 (def defm (macro (name signature body) `(def ~name (macro ~signature ~body))))
 
 (defm defn (name signature body) `(def ~name (fn ~signature ~body)))
 
 (defm deft (tname . params) `(def ~tname (create-type (name ~tname) ~@params)))
+
+(defn identity (x) x)
 
 (deft List ()
            (head tail))
