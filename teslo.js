@@ -151,7 +151,7 @@
     function bind (frame, params, args) {
         for (var i = 0; i < params.length; i++) {
             if (isList(params[i])) {
-                var targs = map(args[i].type.params, function (x) { return args[i].members[x.name]; });
+                var targs = map(args[i].constructor, function (p) { return args[i].members[p.name]; });
                 bind(frame, rest(params[i]), targs); }
             if (params[i].name === ".") {
                 frame[params[i + 1].name] = mkList.apply(null, args.slice(i));
