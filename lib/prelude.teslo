@@ -1,15 +1,15 @@
 (def identity (fn (x) x))
 
-;; (deft List ()
-;;            (head tail))
-
-;; (def nil (List))
-;; (def first (fn (l) (match l (List h t) h)))
-;; (def rest (fn (l) (match l (List h t) t
-;;                            (List) nil)))
-
 (def defm (macro (name signature body) `(def ~name (macro ~signature ~body))))
 
 (defm defn (name signature body) `(def ~name (fn ~signature ~body)))
 
-(defm deft (tname params) `(def ~tname (create-type (name ~tname) ~params)))
+(defm deft (tname . params) `(def ~tname (create-type (name ~tname) ~@params)))
+
+(deft List ()
+           (head tail))
+
+;; (def nil (List))
+;; (defn first (List h t) h)
+;; (def rest (fn (l) (match l (List h t) t
+;;                            (List) nil)))

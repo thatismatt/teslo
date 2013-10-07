@@ -306,7 +306,7 @@
 
             test("match - destructuring, constructors with different parameter counts", function () {
                 var env = evaluate([
-                    "(def A (create-type \"A\" () (a) (a b)))",
+                    "(deft A () (a) (a b))",
                     "(def m (fn (x) (match x (A) 0 (A a) 1 (A a b) 2)))"].join(""));
                 isNumber(evaluateForm("(m (A))", env), 0);
                 isNumber(evaluateForm("(m (A 1))", env), 1);
