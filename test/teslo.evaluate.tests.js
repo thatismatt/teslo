@@ -419,6 +419,11 @@
                 isNumber(evaluateForm("(match x (T a b c) c)", env), 3);
             });
 
+            test("lists", function () {
+                isList(evaluateForm("(List)"));
+                isList(evaluateForm("(List 1 (List))"));
+            });
+
         });
 
     });
