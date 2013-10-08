@@ -187,6 +187,18 @@
                 isNumber(evaluateForm("(f 1 2)", env), 2);
             });
 
+            test("overload on argument type", function () {
+                var env = evaluate("(deft A ()) (deft B ()) (def f (fn ((A)) 0 ((B)) 1))");
+                isNumber(evaluateForm("(f (A))", env), 0);
+                isNumber(evaluateForm("(f (B))", env), 1);
+            });
+
+            test("overload on argument type constructor", function () {
+                var env = evaluate("(deft A () (a)) (def f (fn ((A)) 0 ((A a)) 1))");
+                isNumber(evaluateForm("(f (A))", env), 0);
+                isNumber(evaluateForm("(f (A 1))", env), 1);
+            });
+
             test("variadic function", function () {
                 var env = evaluate("(def f (fn (. xs) xs))");
                 var noArgs = evaluateForm("(f)", env);
