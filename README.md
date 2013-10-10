@@ -14,7 +14,7 @@ Teslo has:
  * data types - with overloading on constructor argument count
  * pattern matching
  * argument destructuring - in function arguments, let bindings, and match expressions
- * repl
+ * repl - with tab completion
  * function overloading on argument count and type
  * variadic functions
  * lexical scoping & closures
