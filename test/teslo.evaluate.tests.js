@@ -128,6 +128,11 @@
                 isNumber(evaluateForm("(f)", env), 1);
             });
 
+            test("let bindings destructure", function () {
+                var env = evaluate("(deft A (a)) (def x (let ((A a) (A 1)) a))");
+                isNumber(env, "x", 1);
+            });
+
             // dependent let bindings: (let (x 1 y x) ...)
         });
 
