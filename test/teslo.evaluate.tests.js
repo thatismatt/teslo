@@ -185,6 +185,11 @@
                 isNumber(env, "x", 1);
             });
 
+            test("lexical scoping", function () {
+                var env = evaluate("(def x 1) (defn f () x)");
+                isNumber(evaluateForm("(let (x 2) (f))", env), 1);
+            });
+
             test("overload on argument count", function () {
                 var env = evaluate("(def f (fn () 0 (x) 1 (x y) 2))");
                 isNumber(evaluateForm("(f)", env), 0);

@@ -164,23 +164,21 @@
 
     function compile (mk) {
         return function (lexEnv, args) {
-            var lexFrames = rest(lexEnv.frames);
+            var env = lexEnv.clone();
             var arityDispatch = {};
             each2(args, function (params, body) {
                 var isVariadic = any(params, function(p) { return p.name === "."; });
                 // TODO: only allow one variadic signature
                 arityDispatch[isVariadic ? "." : params.length] = { params: params, body: body }; });
-            return mk(function (env, fargs) {
+            return mk(function (_env, fargs) {
                 var ad = arityDispatch[fargs.length] // exact arity match
                         || arityDispatch["."];       // variadic signature
                 // if (!x && !v) { TODO: error on arity }
                 var frame = {};
                 bind(frame, ad.params, fargs);
-                each(lexFrames, function (f) { env.pushFrame(f); });
                 env.pushFrame(frame);
                 var result = evaluateForm(env, ad.body);
                 env.popFrame();
-                each(lexFrames, function () { env.popFrame(); });
                 return result; }); }; }
 
     bootstrap["fn"] = mkMacro(compile(mkFunction));
@@ -268,6 +266,10 @@
     Environment.prototype.pushFrame = function (frame) { this.frames.push(frame || {}); };
     Environment.prototype.popFrame = function () { this.frames.pop(); };
     Environment.prototype.def = function (n, v) { first(this.frames)[n] = v; };
+    Environment.prototype.clone = function () {
+        var env = new Environment();
+        env.frames = toArray(this.frames);
+        return env; };
 
     teslo.environment = function () {
         var globals = {};
