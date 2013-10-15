@@ -158,6 +158,7 @@
                 bind(frame, rest(params[i]), targs); }
             if (params[i].name === ".") {
                 frame[params[i + 1].name] = mkList.apply(null, args.slice(i));
+                // TODO: error if there are params after the rest param
                 break; }
             frame[params[i].name] = args[i]; } }
 
