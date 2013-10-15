@@ -21,7 +21,7 @@ Teslo has:
 
 ## Tell me more
 
-Well... teslo is very early on in its development, to see example code the best place to look is the test suite, you can [see them run in the browser](http://thatismatt.github.com/teslo) or [see their source](https://github.com/thatismatt/teslo/blob/master/test/teslo.evaluate.tests.js).
+Well... teslo is very early on in its development, to see example code the best place to look is the [test suite](https://github.com/thatismatt/teslo/blob/master/test/teslo.evaluate.tests.js).
 
 Or, if you're really brave (and have Node.js installed) you code try out the repl:
 
