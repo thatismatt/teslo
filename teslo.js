@@ -125,7 +125,7 @@
         if (isList(x)) {
             if (x.length === 0) return x;
             var f = evaluateForm(env, first(x));
-            // TODO: check f can be invoked
+            if (!f.invoke) throw new Error(bootstrap.string.invoke(null, [f]) + " can't be invoked.");
             var fargs = isMacro(f) || isSpecial(f)
                     ? rest(x) // if evaluating a macro or special form, don't evaluate args
                     : rest(x).map(curry(evaluateForm, env));
