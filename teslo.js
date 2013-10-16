@@ -123,7 +123,7 @@
     bootstrap["eval"] = mkFunction(function (env, args) {
         var x = first(args);
         if (isList(x)) {
-            // TODO: (eval ()) ?
+            if (x.length === 0) return x;
             var f = evaluateForm(env, first(x));
             // TODO: check f can be invoked
             var fargs = isMacro(f) || isSpecial(f)
