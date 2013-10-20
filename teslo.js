@@ -15,7 +15,7 @@
     function each2 (arr, f) { for (var i = 0; i < arr.length; i += 2) { f(arr[i], arr[i + 1]); } }
     function map (arr, f) { var r = []; each(arr || [], function (x, i) { r.push(f(x, i)); }); return r; }
     function concat (x) { return Array.prototype.concat.apply([], x); };
-    function cons (a, b) { return concat([[a], b]); }
+    function cons (a, b) { return arrayToList(concat([[a], b])); }
     function reverseFind (arr, f) { var i = arr.length, r; while (!r && i--) { r = f(arr[i]); } return r; }
     function zip (as, bs) { return map(as, function (a, i) { return [a, bs[i]]; }); }
     function zipmap (ks, vs) { var r = {}; map(zip(ks, vs), function (x) { r[x[0]] = x[1]; }); return r; }
@@ -208,7 +208,7 @@
 
     function appliedFunctionForm (fs, args) {
         var nbs = flatmap(fs, function (f) { return [arrayToList(f.params), f.body]; });
-        return arrayToList(cons(arrayToList(cons(mkSymbol("fn"), nbs)), args)); }
+        return cons(cons(mkSymbol("fn"), nbs), args); }
 
     bootstrap["let"] = mkMacro(function (env, args) {
         // TODO: verify 2 args
@@ -250,8 +250,8 @@
             isFunction(arg)  ? "<Function>" :
             isType(arg)      ? "<Type " + arg.name + ">" :
             isList(arg)      ? "(" + map(arg, str).join(" ") + ")" :
-            arg.type         ? str(arrayToList(cons(arg.type.name, map(Object.keys(arg.members),
-                                         function (k) { return str(arg.members[k]); })))) :
+            arg.type         ? str(cons(arg.type.name, map(Object.keys(arg.members),
+                                         function (k) { return str(arg.members[k]); }))) :
             /* otherwise */    arg; });
 
     bootstrap["print"] = mkFunction(function (env, args) {
