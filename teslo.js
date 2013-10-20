@@ -213,10 +213,9 @@
     bootstrap["let"] = mkMacro(function (env, args) {
         // TODO: verify 2 args
         // TODO: verify even number of binding forms
-        var bindings = first(args);
         var names = [];
         var fargs = [];
-        each2(bindings, function(n, v) { names.push(n); fargs.push(v); });
+        each2(first(args), function(n, v) { names.push(n); fargs.push(v); });
         return appliedFunctionForm([{ params: names, body: second(args) }], fargs); });
 
     bootstrap["match"] = mkMacro(function (env, args) {
