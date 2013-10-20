@@ -16,7 +16,7 @@
             var v = aIsEnv ? c : b;
             assert.ok(o.type, "no type property");
             assert.equal(o.type.name, type);
-            if (propFn && v) assert.deepEqual(propFn(o), v); }; }
+            if (propFn && v !== undefined) assert.deepEqual(propFn(o), v); }; }
     var isFunction = isOfType("Function");
     var isList = isOfType("List", function (o) { var r = []; for (var i = 0; i < o.length; i++) { r.push(simplify(o[i])); } return r; } );
     var isNumber = isOfType("Number", function (o) { return o.value; });

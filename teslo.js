@@ -167,6 +167,20 @@
                 break; }
             frame[params[i].name] = args[i]; } }
 
+    function match (ads, fargs) {
+        if (ads.length === 1) return first(ads);
+        var toMatch = first(fargs);
+        for (var i = 0; i < ads.length; i += 1) {
+            // TODO: extend to all params
+            var ad = ads[i];
+            var pattern = first(ad.params);
+            if (equals(pattern, toMatch)) return ad;
+            if (isSymbol(pattern) ||
+                (isList(pattern) &&
+                 first(pattern).name === toMatch.type.name &&
+                 rest(pattern).length === toMatch.constructor.length)) { return ad; } }
+        throw new Error("No matching pattern"); }
+
     function compile (mk) {
         return function (lexEnv, args) {
             var env = lexEnv.clone();
@@ -174,11 +188,14 @@
             each2(args, function (params, body) {
                 var isVariadic = any(params, function(p) { return p.name === "."; });
                 // TODO: only allow one variadic signature
-                arityDispatch[isVariadic ? "." : params.length] = { params: params, body: body }; });
+                var k = isVariadic ? "." : params.length;
+                arityDispatch[k] = arityDispatch[k] || [];
+                arityDispatch[k].push({ params: params, body: body }); });
             return mk(function (_env, fargs) {
-                var ad = arityDispatch[fargs.length] // exact arity match
-                        || arityDispatch["."];       // variadic signature
-                // if (!x && !v) { TODO: error on arity }
+                var ads = arityDispatch[fargs.length] // exact arity match
+                        || arityDispatch["."];        // variadic signature
+                // if (!ads) { TODO: error on arity }
+                var ad = match(ads, fargs);
                 var frame = {};
                 bind(frame, ad.params, fargs);
                 env.pushFrame(frame);
@@ -189,9 +206,9 @@
     bootstrap["fn"] = mkSpecial(compile(mkFunction));
     bootstrap["macro"] = mkSpecial(compile(mkMacro));
 
-    function appliedFunctionForm (params, body, args) {
-        // ((fn (names) body) args)
-        return arrayToList(cons(mkList(mkSymbol("fn"), arrayToList(params), body), args)); }
+    function appliedFunctionForm (fs, args) {
+        var nbs = flatmap(fs, function (f) { return [arrayToList(f.params), f.body]; });
+        return arrayToList(cons(arrayToList(cons(mkSymbol("fn"), nbs)), args)); }
 
     bootstrap["let"] = mkMacro(function (env, args) {
         // TODO: verify 2 args
@@ -200,21 +217,12 @@
         var names = [];
         var fargs = [];
         each2(bindings, function(n, v) { names.push(n); fargs.push(v); });
-        return appliedFunctionForm(names, second(args), fargs); });
+        return appliedFunctionForm([{ params: names, body: second(args) }], fargs); });
 
     bootstrap["match"] = mkMacro(function (env, args) {
-        var toMatch = evaluateForm(env, first(args));
-        var matchForms = rest(args);
-        for (var i = 0; i < matchForms.length; i += 2) {
-            var pattern = matchForms[i];
-            var body = matchForms[i + 1];
-            if (equals(pattern, toMatch)) return body;
-            if (isSymbol(pattern) ||
-                (isList(pattern) &&
-                 first(pattern).name === toMatch.type.name &&
-                 rest(pattern).length === toMatch.constructor.length)) {
-                return appliedFunctionForm([pattern], body, [toMatch]); } }
-        throw new Error("No matching clause."); });
+        var fs = [];
+        each2(rest(args), function (pattern, body) { fs.push({ params: [pattern], body: body }); });
+        return appliedFunctionForm(fs, [first(args)]); });
 
     bootstrap["comment"] = mkSpecial(function (env, args) { });
 
