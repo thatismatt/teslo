@@ -407,7 +407,7 @@
             });
 
             test("result not evaluated", function () {
-                var env = evaluate(" (defm m (x) `(~x ~x))");
+                var env = evaluate("(defm m (x) `(~x ~x))");
                 isList(evaluateForm("(macro-expand (m a))", env), ["a", "a"]);
             });
 
