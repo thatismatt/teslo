@@ -399,6 +399,20 @@
 
         });
 
+        suite("macro-expand", function () {
+
+            test("identity", function () {
+                var env = evaluate("(defm m (x) x)");
+                isNumber(evaluateForm("(macro-expand (m 1))", env), 1);
+            });
+
+            test("result not evaluated", function () {
+                var env = evaluate(" (defm m (x) `(~x ~x))");
+                isList(evaluateForm("(macro-expand (m a))", env), ["a", "a"]);
+            });
+
+        });
+
         suite("prelude", function () {
 
             test("first", function () {

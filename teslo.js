@@ -120,17 +120,17 @@
         env.def(symbol.name, val);
         return symbol; });
 
-    function macroExpand (env, args) {
+    bootstrap["macro-expand"] = mkSpecial(function (env, args) {
         var form = first(args);
         if (isList(form)) {
             var f = first(form);
             if (isSymbol(f)) {
                 var x = env.lookup(f.name);
                 if (x && isMacro(x)) return x.invoke(env, rest(form)); } }
-        return form; }
+        return form; });
 
     bootstrap["eval"] = mkFunction(function (env, args) {
-        var x = macroExpand(env, args);
+        var x = bootstrap["macro-expand"].invoke(env, args);
         if (isList(x)) {
             if (x.length === 0) return x;
             var f = evaluateForm(env, first(x));
