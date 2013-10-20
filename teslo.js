@@ -139,12 +139,11 @@
                     ? rest(x) // if evaluating a special form, don't evaluate args
                     : rest(x).map(curry(evaluateForm, env));
             return f.invoke(env, fargs); }
-        else if (isSymbol(x)) {
+        if (isSymbol(x)) {
             var v = env.lookup(x.name);
             if (!v) throw new Error("'" + x.name + "' not in scope.");
             return v; }
-        else {
-            return x; } });
+        return x; });
 
     bootstrap["quote"] = mkSpecial(function (env, args) { return first(args); });
     bootstrap["syntax-quote"] = mkSpecial(function (env, args) {
