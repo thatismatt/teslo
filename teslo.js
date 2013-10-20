@@ -20,7 +20,7 @@
     function zip (as, bs) { return map(as, function (a, i) { return [a, bs[i]]; }); }
     function zipmap (ks, vs) { var r = {}; map(zip(ks, vs), function (x) { r[x[0]] = x[1]; }); return r; }
     function any (arr, f) { for (var i = 0; i < arr.length; i++) { if (f(arr[i])) { return true; } } return false; }
-    function compose (f, g) { return function () { return f(g.apply(null, arguments)); }; }
+    function compose (f, g, h) { return h ? compose(f, compose(g, h)) : function () { return f(g.apply(null, arguments)); }; }
     function curry (f) { var args = rest(arguments);
                          return function () { return f.apply(null, args.concat(toArray(arguments))); }; }
     var flatmap = compose(concat, map);
@@ -120,13 +120,19 @@
         env.def(symbol.name, val);
         return symbol; });
 
+    function tryExpandForm (env, form) {
+        var f = first(form);
+        if (isSymbol(f)) {
+            var x = env.lookup(f.name);
+            if (x && isMacro(x)) return x.invoke(env, rest(form)); }
+        return form; }
+
     bootstrap["macro-expand"] = mkSpecial(function (env, args) {
         var form = first(args);
-        if (isList(form)) {
-            var f = first(form);
-            if (isSymbol(f)) {
-                var x = env.lookup(f.name);
-                if (x && isMacro(x)) return x.invoke(env, rest(form)); } }
+        if (isList(form) && form.length > 0) {
+            var expanded = tryExpandForm(env, form);
+            if (!isList(expanded)) return expanded;
+            return arrayToList(map(expanded, compose(curry(bootstrap["macro-expand"].invoke, env), mkList))); }
         return form; });
 
     bootstrap["eval"] = mkFunction(function (env, args) {
@@ -230,7 +236,7 @@
         var name = evaluateForm(env, first(args));
         return mkType(name && name.value, rest(args)); });
 
-    bootstrap["name"] = mkMacro(function (env, args) {
+    bootstrap["name"] = mkSpecial(function (env, args) {
         return mkString(first(args).name); });
 
     bootstrap["do"] = mkSpecial(function (env, args) {
@@ -290,12 +296,14 @@
 
     function evaluateForm (env, form) { return bootstrap.eval.invoke(env, mkList(form)); }
     // DEBUG
-    // function log (args) { bootstrap.print.invoke(null, args); }
+    // function log (args) { bootstrap.print.invoke(null, mkList(args)); }
 
     teslo.evaluate = function (src, env) {
         var result = teslo.parse(src);
         if (result.success)
-            return result.forms.map(curry(evaluateForm, env));
+            return result.forms.map(compose(curry(evaluateForm, env),
+                                            curry(bootstrap["macro-expand"].invoke, env),
+                                            mkList));
         else
             throw new Error("Parse error: " + (result.message || "unknown error")); };
 
