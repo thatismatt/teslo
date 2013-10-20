@@ -120,19 +120,25 @@
         env.def(symbol.name, val);
         return symbol; });
 
+    function macroExpand (env, args) {
+        var form = first(args);
+        if (isList(form)) {
+            var f = first(form);
+            if (isSymbol(f)) {
+                var x = env.lookup(f.name);
+                if (x && isMacro(x)) return x.invoke(env, rest(form)); } }
+        return form; }
+
     bootstrap["eval"] = mkFunction(function (env, args) {
-        var x = first(args);
+        var x = macroExpand(env, args);
         if (isList(x)) {
             if (x.length === 0) return x;
             var f = evaluateForm(env, first(x));
             if (!f.invoke) throw new Error(bootstrap.string.invoke(null, [f]) + " can't be invoked.");
-            var fargs = isMacro(f) || isSpecial(f)
-                    ? rest(x) // if evaluating a macro or special form, don't evaluate args
+            var fargs = isSpecial(f)
+                    ? rest(x) // if evaluating a special form, don't evaluate args
                     : rest(x).map(curry(evaluateForm, env));
-            var result = f.invoke(env, fargs);
-            return isMacro(f)
-                ? evaluateForm(env, result)
-                : result; }
+            return f.invoke(env, fargs); }
         else if (isSymbol(x)) {
             var v = env.lookup(x.name);
             if (!v) throw new Error("'" + x.name + "' not in scope.");
@@ -181,8 +187,8 @@
                 env.popFrame();
                 return result; }); }; }
 
-    bootstrap["fn"] = mkMacro(compile(mkFunction));
-    bootstrap["macro"] = mkMacro(compile(mkMacro));
+    bootstrap["fn"] = mkSpecial(compile(mkFunction));
+    bootstrap["macro"] = mkSpecial(compile(mkMacro));
 
     function appliedFunctionForm (params, body, args) {
         // ((fn (names) body) args)
