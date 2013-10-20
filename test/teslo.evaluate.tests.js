@@ -373,6 +373,10 @@
                 isNumber(evaluateForm("(m 2)", env), 2);
             });
 
+            test("anonymous", function () {
+                isNumber(evaluateForm("((macro (x) x) 1)"), 1);
+            });
+
             test("macro arguments aren't evaluated", function () {
                 var env = evaluate("(def m (macro (x) 0))");
                 evaluateForm("(m (i-dont-exist))", env);
