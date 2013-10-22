@@ -1,6 +1,6 @@
 (def defm (macro (name signature body) `(def ~name (macro ~signature ~body))))
 
-(defm defn (name signature body) `(def ~name (fn ~signature ~body)))
+(defm defn (name . signatures) `(def ~name (fn ~@signatures)))
 
 (defm deft (tname . params) `(def ~tname (create-type (name ~tname) ~@params)))
 
