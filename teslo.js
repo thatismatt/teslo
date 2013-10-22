@@ -48,7 +48,7 @@
         return { name: x, type: { name: "Type" }, constructors: cs,
                  invoke: function (env, args) {
                      var c = this.constructors[args.length];
-                     // TODO: if (!c) { error, no contructor match }
+                     if (!c) throw new Error("No matching constructor");
                      return { type: this, constructor: c, members: zipmap(map(c, name), args) }; } }; }
     function mkList () { var l = toArray(arguments); l.type = mkType("List"); return l; }
     function arrayToList (a) { return mkList.apply(null, a); }
