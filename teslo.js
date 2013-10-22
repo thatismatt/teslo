@@ -16,16 +16,18 @@
     function map (arr, f) { var r = []; each(arr || [], function (x, i) { r.push(f(x, i)); }); return r; }
     function concat (x) { return Array.prototype.concat.apply([], x); };
     function cons (a, b) { return arrayToList(concat([[a], b])); }
+    function find (arr, f) { for (var i = 0; i < arr.length; i++) { if (f(arr[i], i)) return arr[i]; } return undefined; }
     function reverseFind (arr, f) { var i = arr.length, r; while (!r && i--) { r = f(arr[i]); } return r; }
     function zip (as, bs) { return map(as, function (a, i) { return [a, bs[i]]; }); }
     function zipmap (ks, vs) { var r = {}; map(zip(ks, vs), function (x) { r[x[0]] = x[1]; }); return r; }
+    function all (arr, f) { for (var i = 0; i < arr.length; i++) { if (!f(arr[i])) { return false; } } return true; }
     function any (arr, f) { for (var i = 0; i < arr.length; i++) { if (f(arr[i])) { return true; } } return false; }
     function compose (f, g, h) { return h ? compose(f, compose(g, h)) : function () { return f(g.apply(null, arguments)); }; }
     function curry (f) { var args = rest(arguments);
                          return function () { return f.apply(null, args.concat(toArray(arguments))); }; }
     var flatmap = compose(concat, map);
     function typeEquals (a, b) { return a.type.name === b.type.name; }
-    function equals (a, b) { return typeEquals(a, b) && a.value && b.value && a.value === b.value; }
+    function equals (a, b) { return typeEquals(a, b) && a.value !== undefined && b.value !== undefined && a.value === b.value; }
     function name (x) { return x.name; }
 
     function isOfType (t) { return function (x) { return x.type && x.type.name === t; }; }
@@ -174,18 +176,18 @@
                 break; }
             frame[params[i].name] = args[i]; } }
 
-    function match (ads, fargs) {
+    function match (pattern, arg) {
+        return isList(pattern) &&
+            first(pattern).name === arg.type.name &&
+            rest(pattern).length === arg.constructor.length; }
+
+    function matches (ads, args) {
         if (ads.length === 1) return first(ads);
-        var toMatch = first(fargs);
-        for (var i = 0; i < ads.length; i += 1) {
-            // TODO: extend to all params
-            var ad = ads[i];
-            var pattern = first(ad.params);
-            if (equals(pattern, toMatch)) return ad;
-            if (isSymbol(pattern) ||
-                (isList(pattern) &&
-                 first(pattern).name === toMatch.type.name &&
-                 rest(pattern).length === toMatch.constructor.length)) { return ad; } }
+        var ad = find(ads, function (ad) {
+            return all(zip(ad.params, args), function (x) {
+                var pattern = first(x), arg = second(x);
+                return equals(pattern, arg) || isSymbol(pattern) || match(pattern, arg); }); });
+            if (ad) return ad;
         throw new Error("No matching pattern"); }
 
     function compile (mk) {
@@ -202,7 +204,7 @@
                 var ads = arityDispatch[fargs.length] // exact arity match
                         || arityDispatch["."];        // variadic signature
                 // if (!ads) { TODO: error on arity }
-                var ad = match(ads, fargs);
+                var ad = matches(ads, fargs);
                 var frame = {};
                 bind(frame, ad.params, fargs);
                 env.pushFrame(frame);
