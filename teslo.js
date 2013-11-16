@@ -106,7 +106,6 @@
 
     teslo.parse = function (src) {
         var a = cromp.parse(file, src);
-        //console.log(a);
         return { forms: a.result,
                  success: a.success,
                  message: a.message }; };
