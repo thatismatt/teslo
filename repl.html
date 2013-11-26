@@ -1,0 +1,65 @@
+<!doctype html>
+<html>
+  <head>
+    <title>teslo</title>
+    <style type="text/css" media="screen">
+      body { font: 20px/1.5 "Helvetica Neue", Helvetica, Arial, sans-serif; decoration: no }
+      h1, #container { margin: 20px 50px; }
+      h1 a { text-decoration: none; color: black; }
+      h1 a:hover { text-decoration: underline; color: black; }
+      .hidden { display: none; }
+      #out, #in { font: 12px/1.5 monospace; }
+      #in { border-width: 1px; border-color: #bbb; }
+    </style>
+  </head>
+  <body>
+    <h1><a href="./">teslo</a></h1>
+    <div id="container">
+      <div id="out"></div>
+      <form>
+        <input id="in" autocomplete="off" />
+        <input class="hidden" type="submit" />
+      </form>
+    </div>
+    <script type="text/javascript" src="node_modules/cromp/cromp.js"></script>
+    <script type="text/javascript" src="teslo.js"></script>
+    <script type="text/javascript" src="lib-js/teslo.prelude.js"></script>
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script type="text/javascript">
+      (function () {
+
+        var $in = $('#in');
+        var $out = $('#out');
+        var resultIndex = 0;
+        var env = teslo.environment();
+        teslo.evaluate(teslo.prelude, env);
+
+        function read () {
+          var line = $in.val();
+          $in.val("");
+          return line; }
+
+        function eval (line) {
+          function evaluateLine () {
+            var result = teslo.evaluate(line, env)[0];
+            if (result) {
+              resultIndex++;
+              env.def("$" + resultIndex, result);
+              return teslo.evaluate("(string $" + resultIndex + ")", env)[0]; } }
+
+           try {
+             return evaluateLine();
+           } catch (e) {
+             return e; } }
+
+        function print (result) {
+          $out.append($("<div>").text(result)); }
+
+        $("form").submit(function () {
+          print(eval(read()));
+          return false; });
+
+      })();
+    </script>
+  </body>
+</html>
