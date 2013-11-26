@@ -1,4 +1,3 @@
-var fs = require("fs");
 var teslo = require("./teslo");
 require("./lib-js/teslo.prelude.js");
 var readline = require("readline");
