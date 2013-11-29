@@ -9,7 +9,9 @@
 (deft List ()
            (head tail))
 
-;; (def nil (List))
+(def nil (List))
+
 ;; (defn first (List h t) h)
-;; (def rest (fn (l) (match l (List h t) t
-;;                            (List) nil)))
+
+;; (defn rest (List h t) t
+;;            (List) nil)
