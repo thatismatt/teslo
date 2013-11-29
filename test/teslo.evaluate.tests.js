@@ -11,9 +11,10 @@
         //    OR o
         //    OR o, v
         return function (a, b, c) {
-            var aIsEnv = a.constructor.name === "Environment";
+            var aIsEnv = a && a.constructor.name === "Environment";
             var o = aIsEnv ? a.lookup(b) : a;
             var v = aIsEnv ? c : b;
+            assert.isDefined(o);
             assert.ok(o.type, "no type property");
             assert.equal(o.type.name, type);
             if (propFn && v !== undefined) assert.deepEqual(propFn(o), v); }; }
