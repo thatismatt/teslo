@@ -52,11 +52,14 @@
            } catch (e) {
              return e; } }
 
-        function print (result) {
-          $out.append($("<div>").text(result)); }
+        function print (prefix, result) {
+          $out.append($("<div>").text(prefix + " " + result)); }
 
         $("form").submit(function () {
-          print(eval(read()));
+          var line = read();
+          if (line) {
+            print("$", line);
+            print(">", eval(line)); }
           return false; });
 
       })();
