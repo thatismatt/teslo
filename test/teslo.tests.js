@@ -245,8 +245,14 @@
 
             test("maths with values", function() {
                 var env = teslo.environment();
-                teslo.evaluate("(def three (+ 1 2))", env);
-                assert.equal(env.lookup("three").value, 3);
+                teslo.evaluate(["(def add (+ 1 2))",
+                                "(def sub (- 6 1 2))",
+                                "(def mul (* 1 2 3))",
+                                "(def div (/ 12 4 3))"].join(""), env);
+                assert.equal(env.lookup("add").value, 3);
+                assert.equal(env.lookup("sub").value, 3);
+                assert.equal(env.lookup("mul").value, 6);
+                assert.equal(env.lookup("div").value, 1);
             });
 
             test("maths symbols", function() {

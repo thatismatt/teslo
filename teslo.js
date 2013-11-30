@@ -8,7 +8,10 @@
     function toArray (x) { return Array.prototype.slice.call(x, 0); }
     function isArray (x) { return Object.prototype.toString.call(x) === "[object Array]"; }
     function tail (arr) { return Array.prototype.slice.call(arr, 1); }
-    function plus (a, b) { return a + b; }
+    function add (a, b) { return a + b; }
+    function subtract (a, b) { return a - b; }
+    function multiply (a, b) { return a * b; }
+    function divide (a, b) { return a / b; }
     function each (arr, f) { for (var i = 0; i < arr.length; i++) { f(arr[i]); } }
     function reverseFind (arr, f) { var i = arr.length, r; while (!r && i--) { r = f(arr[i]); } return r; }
     function zip (as, bs) { return as.map(function(a, i) { return [a, bs[i]]; }); }
@@ -40,7 +43,7 @@
     // Parser
     var open = cromp.character("(");
     var close = cromp.character(")");
-    var symbol = cromp.regex(/[a-zA-Z0-9+=\-*?]+/).map(first).map(mkSymbol);
+    var symbol = cromp.regex(/[a-zA-Z0-9+=\-*\/?]+/).map(first).map(mkSymbol);
     var whitespace = cromp.regex(/\s+/);
     var optionalWhitespace = cromp.optional(whitespace);
     var eof = cromp.regex(/$/);
@@ -111,9 +114,6 @@
                     return x;
                 }
             } },
-        "+": { invoke: function (env, args) { return mkNumber(
-            args.map(function (x) { return prelude.eval.invoke(env, x).value; })
-                .reduce(plus)); } },
         "quote": { invoke: function (env, form) { return first(form); } },
         "fn": { invoke: mkFunction },
         "let": { invoke: function (env, args) {
@@ -127,9 +127,17 @@
             var result = prelude.eval.invoke(env, body);
             env.popFrame();
             return result; } }
-        // TODO: atom, =, cons, head, tail, cond, defn, ns, -, *, /
+        // TODO: atom, =, cons, head, tail, cond, defn, ns
         // TODO: "interop"/"introspection" - type, name, vars, lookup
     };
+
+    // Numeric fns
+    each([["+", add], ["-", subtract], ["*", multiply], ["/", divide]],
+         function (p) { var n = first(p); var f = second(p);
+             prelude[n] = {
+                 invoke: function (env, args) { return mkNumber(
+                     args.map(function (x) { return prelude.eval.invoke(env, x).value; })
+                         .reduce(f)); } }; });
 
     // Evaluation
     function Environment (frame) { this.frames = frame ? [frame] : []; }
@@ -148,7 +156,7 @@
         if (result.success) {
             return result.forms.map(curry(prelude.eval.invoke, env));
         } else {
-            throw new Error(result.message);
+            throw new Error("Parse error: " + (result.message || "unknown error"));
         } };
 
 })(typeof exports === "undefined" ? this["teslo"] = {} : exports,
