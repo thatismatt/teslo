@@ -9,7 +9,11 @@
       h1 a:hover { text-decoration: underline; color: black; }
       .hidden { display: none; }
       #out, #in { font: 12px/1.5 monospace; }
-      #in { border-width: 1px; border-color: #bbb; }
+      #out { height: 200px; overflow: auto; }
+      #in { width: 300px; border-width: 1px; border-color: #bbb; }
+      .in { color: #444; }
+      .out { color: #449; }
+      .error { color: #944; }
     </style>
   </head>
   <body>
@@ -30,7 +34,9 @@
 
         var $in = $('#in');
         var $out = $('#out');
-        var resultIndex = 0;
+        var $form = $("form");
+        var history = [];
+        var historyIndex = 0;
         var env = teslo.environment();
         teslo.evaluate(teslo.prelude, env);
 
@@ -43,24 +49,37 @@
           function evaluateLine () {
             var result = teslo.evaluate(line, env)[0];
             if (result) {
-              resultIndex++;
-              env.def("$" + resultIndex, result);
-              return teslo.evaluate("(string $" + resultIndex + ")", env)[0]; } }
+              env.def("$" + history.length, result);
+              return teslo.evaluate("(string $" + history.length + ")", env)[0]; } }
 
            try {
              return evaluateLine();
            } catch (e) {
              return e; } }
 
-        function print (prefix, result) {
-          $out.append($("<div>").text(prefix + " " + result)); }
+        function print (result, cssClass, prefix) {
+          $out.append($("<div class=" + cssClass + ">").text((prefix || "") + result)); }
 
-        $("form").submit(function () {
+        $form.submit(function () {
           var line = read();
           if (line) {
-            print("$", line);
-            print(">", eval(line)); }
+            history.push(line);
+            historyIndex = history.length;
+            print(line, "in", "> ");
+            var result = eval(line);
+            print(result, result instanceof Error ? "error" : "out"); }
+          $out.scrollTop($out[0].scrollHeight);
           return false; });
+
+        $form.keyup(function (e) {
+          var key = e.keyCode || e.which;
+          if (key === 38 && historyIndex > 0) { // up
+            historyIndex--;
+            $in.val(history[historyIndex]); }
+          if (key === 40 && historyIndex < history.length) { // down
+            historyIndex++;
+            $in.val(history[historyIndex]); }
+        });
 
       })();
     </script>
