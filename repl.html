@@ -58,7 +58,9 @@
              return e; } }
 
         function print (result, cssClass, prefix) {
-          $out.append($("<div class=" + cssClass + ">").text((prefix || "") + result)); }
+          $out.append($("<div>")
+              .addClass(cssClass)
+              .text((prefix || "") + result)); }
 
         $form.submit(function () {
           var line = read();
