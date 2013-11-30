@@ -35,7 +35,7 @@
                      var frame = {};
                      env.pushFrame(frame);
                      each(zip(this.params, args), function(x) { frame[first(x).name] = second(x); });
-                     var result = prelude.eval.invoke(env, this.body);
+                     var result = evaluateForm(env, this.body);
                      env.popFrame();
                      each(lexFrames, function () { env.popFrame(); });
                      return result; } }; };
@@ -97,15 +97,19 @@
             invoke: function (env, args) {
                 // Q: if symbol is not a symbol, should we eval it? to support (def (symbol "a") 1)
                 var symbol = first(args);
-                var val = prelude.eval.invoke(env, second(args));
-                env.def(symbol.name, val);
-            } },
+                var val = evaluateForm(env, second(args));
+                env.def(symbol.name, val); },
+            type: "macro" },
         "eval": {
-            invoke: function (env, x) {
+            invoke: function (env, args) {
+                var x = first(args);
                 if (x.type === "list") {
                     // TODO: (eval ()) ?
-                    var fn = prelude.eval.invoke(env, first(x));
-                    return fn.invoke(env, tail(x));
+                    var f = evaluateForm(env, first(x));
+                    var fargs = f.type === "macro"
+                            ? tail(x) // if the form is a macro, defer the decision about evaluating args
+                            : tail(x).map(curry(evaluateForm, env));
+                    return f.invoke(env, fargs);
                 } else if (x.type === "symbol") {
                     var v = env.lookup(x.name);
                     if (!v) throw new Error("'" + x.name + "' not in scope.");
@@ -113,20 +117,27 @@
                 } else {
                     return x;
                 }
-            } },
-        "quote": { invoke: function (env, form) { return first(form); } },
-        "fn": { invoke: mkFunction },
-        "let": { invoke: function (env, args) {
-            // TODO: verify 2 args
-            // TODO: verify even number of binding forms
-            var bindings = first(args);
-            var body = second(args);
-            var frame = {};
-            for (var i = 0; i < bindings.length; i += 2) { frame[bindings[i].name] = bindings[i + 1]; }
-            env.pushFrame(frame);
-            var result = prelude.eval.invoke(env, body);
-            env.popFrame();
-            return result; } }
+            },
+            type: "function" },
+        "quote": {
+            invoke: function (env, args) { return first(args); },
+            type: "macro" },
+        "fn": {
+            invoke: mkFunction,
+            type: "macro" },
+        "let": {
+            invoke: function (env, args) {
+                // TODO: verify 2 args
+                // TODO: verify even number of binding forms
+                var bindings = first(args);
+                var body = second(args);
+                var frame = {};
+                for (var i = 0; i < bindings.length; i += 2) { frame[bindings[i].name] = bindings[i + 1]; }
+                env.pushFrame(frame);
+                var result = evaluateForm(env, body);
+                env.popFrame();
+                return result; },
+            type: "macro" }
         // TODO: atom, =, cons, head, tail, cond, defn, ns
         // TODO: "interop"/"introspection" - type, name, vars, lookup
     };
@@ -136,8 +147,9 @@
          function (p) { var n = first(p); var f = second(p);
              prelude[n] = {
                  invoke: function (env, args) { return mkNumber(
-                     args.map(function (x) { return prelude.eval.invoke(env, x).value; })
-                         .reduce(f)); } }; });
+                     args.map(function (x) { return x.value; })
+                         .reduce(f)); },
+                 type: "function" }; });
 
     // Evaluation
     function Environment (frame) { this.frames = frame ? [frame] : []; }
@@ -151,10 +163,12 @@
         for (var n in prelude) { globals[n] = prelude[n]; }
         return new Environment(globals); };
 
+    function evaluateForm (env, form) { return prelude.eval.invoke(env, [form]); }
+
     teslo.evaluate = function (src, env) {
         var result = teslo.parse(src);
         if (result.success) {
-            return result.forms.map(curry(prelude.eval.invoke, env));
+            return result.forms.map(curry(evaluateForm, env));
         } else {
             throw new Error("Parse error: " + (result.message || "unknown error"));
         } };

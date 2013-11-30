@@ -261,6 +261,12 @@
                 assert.equal(env.lookup("c").value, 3);
             });
 
+            test("eval", function() {
+                var env = teslo.environment();
+                teslo.evaluate("(def a (eval '(+ 1 2)))", env);
+                assert.equal(env.lookup("a").value, 3);
+            });
+
         });
 
         suite("let", function () {
