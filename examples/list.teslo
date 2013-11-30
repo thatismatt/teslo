@@ -1,0 +1,6 @@
+(ns list)
+
+(deftype List (Cons h t)
+              (Nil))
+
+(def l (Cons 1 (Cons 2 (Cons 3 (Cons 4 (Nil))))))

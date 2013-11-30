@@ -1,0 +1,15 @@
+{
+    "name": "teslo",
+    "main": "teslo",
+    "version": "0.1.0",
+    "dependencies": {
+        "cromp": "git://github.com/thatismatt/cromp.git"
+    },
+    "devDependencies": {
+        "mocha": "",
+        "chai": ""
+    },
+    "scripts": {
+        "test": "mocha -u tdd -R spec"
+    }
+}
