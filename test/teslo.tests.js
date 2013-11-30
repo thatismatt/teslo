@@ -83,6 +83,13 @@
                 assert.equal(result.forms[0].value, "Hello world!");
             });
 
+            test("empty string", function() {
+                var result = teslo.parse('""');
+                assert.ok(result.success);
+                assert.equal(result.forms[0].type, "string");
+                assert.equal(result.forms[0].value, "");
+            });
+
             test("keyword", function() {
                 var result = teslo.parse(':kwd');
                 assert.ok(result.success);

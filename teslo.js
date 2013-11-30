@@ -50,9 +50,8 @@
     var number = cromp.regex(/[0-9]+/).map(first)
             .map(function (x) { return mkNumber(parseInt(x, 10)); });
     var string = cromp.between(
-        cromp.character('"'),
-        cromp.character('"'),
-        cromp.regex(/[^"]+/).map(first))
+        cromp.character('"'), cromp.character('"'),
+        cromp.optional(cromp.regex(/[^"]+/)).map(function (m) { return m || [""]; }).map(first))
             .map(mkString);
     var keyword = cromp.seq(cromp.character(":"), cromp.regex(/[a-z]+/))
             .map(second).map(mkKeyword);
@@ -89,7 +88,8 @@
         var a = cromp.parse(file, src);
         //console.log(a);
         return { forms: a.result,
-                 success: a.success }; };
+                 success: a.success,
+                 message: a.message }; };
 
     // prelude
     var prelude = {
