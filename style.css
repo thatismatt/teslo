@@ -3,7 +3,7 @@ h1, #container { margin: 20px 50px; }
 h1 a { text-decoration: none; color: black; }
 h1 a:hover { text-decoration: underline; color: black; }
 .hidden { display: none; }
-#out, #in { font: 12px/1.5 monospace; }
+#out, #in, #env { font: 12px/1.5 monospace; }
 #out { height: 200px; overflow: auto; }
 #in { width: 300px; border-width: 1px; border-color: #bbb; }
 .in { color: #444; }
