@@ -1,5 +1,5 @@
-body { font: 20px/1.5 "Helvetica Neue", Helvetica, Arial, sans-serif; decoration: no }
-h1, #container { margin: 20px 50px; }
+body, .pure-g-r [class *= "pure-u"] { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; decoration: no }
+h1 { margin: 20px 50px; }
 h1 a { text-decoration: none; color: black; }
 h1 a:hover { text-decoration: underline; color: black; }
 .hidden { display: none; }

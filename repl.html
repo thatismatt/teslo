@@ -2,17 +2,24 @@
 <html>
   <head>
     <title>teslo</title>
+    <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.3.0/pure-min.css" type="text/css" media="screen" />
     <link rel="stylesheet" href="style.css" type="text/css" media="screen" />
   </head>
   <body>
-    <h1><a href="./">teslo</a></h1>
-    <div id="container">
-      <div id="out"></div>
-      <form>
-        <input id="in" autocomplete="off" />
-        <input class="hidden" type="submit" />
-      </form>
-      <div id="env"></div>
+    <div class="pure-g-r">
+      <div class="pure-u-1">
+        <h1><a href="./">teslo</a></h1>
+      </div>
+      <div class="pure-u-1-2">
+        <div id="out"></div>
+        <form>
+          <input id="in" autocomplete="off" />
+          <input class="hidden" type="submit" />
+        </form>
+      </div>
+      <div class="pure-u-1-2">
+        <div id="env"></div>
+      </div>
     </div>
     <script type="text/javascript" src="node_modules/cromp/cromp.js"></script>
     <script type="text/javascript" src="teslo.js"></script>
