@@ -47,7 +47,7 @@
             var result = teslo.evaluate(line, env)[0];
             if (result) {
               env.def("$" + history.length, result);
-              return teslo.evaluate("(string $" + history.length + ")", env)[0]; } }
+              return toString("$" + history.length); } }
 
            try {
              return evaluateLine();
@@ -64,7 +64,10 @@
           Object.keys(env.frames[0])
             .sort()
             .map(function (n) {
-              $env.append($("<div>").text(n + " " + teslo.evaluate("(string " + n + ")", env)[0])) }); }
+              $env.append($("<div>").text(n + " " + toString(n))) }); }
+
+        function toString(x) {
+          teslo.evaluate("(string " + x + ")", env)[0]; }
 
         $form.submit(function () {
           var line = read();
