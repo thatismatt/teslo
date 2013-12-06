@@ -210,7 +210,7 @@
             return mk(function (_env, fargs) {
                 var ads = arityDispatch[fargs.length] // exact arity match
                         || arityDispatch["."];        // variadic signature
-                // if (!ads) { TODO: error on arity }
+                if (!ads) { throw new Error("No matching overload."); }
                 var ad = matches(ads, fargs);
                 var frame = bind(ad.params, fargs);
                 var env2 = env.child();
