@@ -78,7 +78,6 @@
 
             test("number - decimal", function () {
                 var result = teslo.parse("123.123");
-                console.log(result);
                 assert.ok(result.success);
                 assert.equal(result.forms[0].type.name, "Number");
                 assert.equal(result.forms[0].value, 123.123);
