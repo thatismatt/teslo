@@ -42,6 +42,7 @@
     var isType = isOfType("Type");
     function isMacro (x) { return isFunction(x) && x.macro; }
     function isSpecial (x) { return isFunction(x) && x.special; }
+    function isOfTypeSymbol (x) { return isSymbol(x) && x.name === ":"; }
 
     // AST
     function mkType (x, constructorList) {
@@ -65,7 +66,7 @@
     // Parser
     var open = cromp.character("(");
     var close = cromp.character(")");
-    var symbol = cromp.regex(/[a-zA-Z0-9+=\-_*\/?.$]+/).map(first).map(mkSymbol);
+    var symbol = cromp.regex(/[a-zA-Z0-9+=\-_*\/?.:$]+/).map(first).map(mkSymbol);
     var whitespace = cromp.regex(/\s+/);
     var optionalWhitespace = cromp.optional(whitespace);
     var eof = cromp.regex(/$/);
@@ -170,6 +171,9 @@
         var frame = {};
         for (var i = 0; i < params.length; i++) {
             if (isList(params[i])) {
+                if (params[i].length === 3 && isOfTypeSymbol(second(params[i]))) {
+                    frame[first(params[i]).name] = args[i];
+                    return frame; }
                 var targs = map(args[i].constructor, function (p) { return args[i].members[p.name]; });
                 return merge(frame, bind(rest(params[i]), targs)); }
             if (params[i].name === ".") {
@@ -180,9 +184,11 @@
         return frame; }
 
     function match (pattern, arg) {
-        return isList(pattern) &&
-            first(pattern).name === arg.type.name &&
-            rest(pattern).length === arg.constructor.length; }
+        if (!isList(pattern)) return false;
+        if (pattern.length === 3 && isOfTypeSymbol(second(pattern)))
+            return third(pattern).name === arg.type.name;
+        return first(pattern).name === arg.type.name
+            && rest(pattern).length === arg.constructor.length; }
 
     function matches (ads, args) {
         var ad = find(ads, function (ad) {

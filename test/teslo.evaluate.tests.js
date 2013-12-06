@@ -220,6 +220,17 @@
                 isNumber(evaluateForm("(f (A) (B))", env), 1);
             });
 
+            test("overload on argument type without destructuring", function () {
+                var env = evaluate("(deft A ()) (defn f ((a : A)) a)");
+                isOfType("A")(evaluateForm("(f (A))", env));
+            });
+
+            test("overload on multiple argument types without destructuring", function () {
+                var env = evaluate("(deft A ()) (deft B ()) (defn f ((a : A) (b : A)) 0 ((a : A) (b : B)) 1)");
+                isNumber(evaluateForm("(f (A) (A))", env), 0);
+                isNumber(evaluateForm("(f (A) (B))", env), 1);
+            });
+
             test("overload on argument values", function () {
                 var env = evaluate("(def f (fn (0) 0 (1) 1))");
                 isNumber(evaluateForm("(f 0)", env), 0);
