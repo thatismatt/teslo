@@ -67,8 +67,8 @@
     var whitespace = cromp.regex(/\s+/);
     var optionalWhitespace = cromp.optional(whitespace);
     var eof = cromp.regex(/$/);
-    var number = cromp.regex(/[0-9]+(\.[0-9]+)?/).map(first)
-            .map(function (x) { return mkNumber(parseFloat(x)); });
+    var number = cromp.regex(/(\.[0-9]+)|[0-9]+(\.[0-9]+)?/)
+            .map(first).map(parseFloat).map(mkNumber);
     var string = cromp.between(
         cromp.character('"'), cromp.character('"'),
         cromp.optional(cromp.regex(/[^"]+/)).map(function (m) { return m || [""]; }).map(first))

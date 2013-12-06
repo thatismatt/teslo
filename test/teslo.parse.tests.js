@@ -77,10 +77,12 @@
             });
 
             test("number - decimal", function () {
-                var result = teslo.parse("123.123");
+                var result = teslo.parse("123.123 .456");
                 assert.ok(result.success);
                 assert.equal(result.forms[0].type.name, "Number");
                 assert.equal(result.forms[0].value, 123.123);
+                assert.equal(result.forms[1].type.name, "Number");
+                assert.equal(result.forms[1].value, 0.456);
             });
 
             test("string", function () {
