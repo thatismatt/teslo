@@ -29,10 +29,12 @@
                          return function () { return f.apply(null, args.concat(toArray(arguments))); }; }
     var flatmap = compose(concat, map);
     function typeEquals (a, b) { return a.type.name === b.type.name; }
-    function equals (a, b) { return typeEquals(a, b) && a.value !== undefined && b.value !== undefined && a.value === b.value; }
+    function equals (a, b) { return typeEquals(a, b)
+                             && ((isKeyword(a) && a.name === b.name)
+                              || (a.value !== undefined && b.value !== undefined && a.value === b.value)); }
     function name (x) { return x.name; }
 
-    function isOfType (t) { return function (x) { return x.type && x.type.name === t; }; }
+    function isOfType (t) { return function (x) { return x && x.type && x.type.name === t; }; }
     var isList = isOfType("List");
     var isString = isOfType("String");
     var isNumber = isOfType("Number");
@@ -76,7 +78,7 @@
         cromp.character('"'), cromp.character('"'),
         cromp.optional(cromp.regex(/[^"]+/)).map(function (m) { return m || [""]; }).map(first))
             .map(mkString);
-    var keyword = cromp.seq(cromp.character(":"), cromp.regex(/[a-z]+/))
+    var keyword = cromp.seq(cromp.character(":"), cromp.regex(/[a-z]+/).map(first))
             .map(second).map(mkKeyword);
     var list = cromp.recursive(function () {
         return cromp.between(open, close, cromp.optional(forms))

@@ -328,10 +328,16 @@
                 isNumber(evaluateForm("(m 2)", env), 2);
             });
 
-            test("match - value must be exact match", function () {
+            test("match - value exact match", function () {
                 var env = evaluate('(def m (fn (x) (match x 1 "one" 2 "two")))');
                 isString(evaluateForm("(m 1)", env), "one");
                 isString(evaluateForm("(m 2)", env), "two");
+            });
+
+            test("match - keyword exact match", function () {
+                var env = evaluate('(def m (fn (x) (match x :one "one" :two "two")))');
+                isString(evaluateForm("(m :one)", env), "one");
+                isString(evaluateForm("(m :two)", env), "two");
             });
 
             test("match - type", function () {
