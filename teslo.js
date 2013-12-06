@@ -17,7 +17,6 @@
     function concat (x) { return Array.prototype.concat.apply([], x); };
     function cons (a, b) { return arrayToList(concat([[a], b])); }
     function find (arr, f) { for (var i = 0; i < arr.length; i++) { if (f(arr[i], i)) return arr[i]; } return undefined; }
-    function reverseFind (arr, f) { var i = arr.length, r; while (!r && i--) { r = f(arr[i]); } return r; }
     function zip (as, bs) { return map(as, function (a, i) { return [a, bs[i]]; }); }
     function zipmap (ks, vs) { var r = {}; map(zip(ks, vs), function (x) { r[x[0]] = x[1]; }); return r; }
     function all (arr, f) { for (var i = 0; i < arr.length; i++) { if (!f(arr[i])) { return false; } } return true; }
@@ -195,8 +194,7 @@
         throw new Error("No matching pattern"); }
 
     function compile (mk) {
-        return function (lexEnv, args) {
-            var env = lexEnv.clone();
+        return function (env, args) {
             var arityDispatch = {};
             each2(args, function (params, body) {
                 var isVariadic = any(params, function(p) { return p.name === "."; });
@@ -210,9 +208,9 @@
                 // if (!ads) { TODO: error on arity }
                 var ad = matches(ads, fargs);
                 var frame = bind(ad.params, fargs);
-                env.pushFrame(frame);
-                var result = evaluateForm(env, ad.body);
-                env.popFrame();
+                var env2 = env.child();
+                for (var i in frame) { env2.def(i, frame[i]); }
+                var result = evaluateForm(env2, ad.body);
                 return result; }); }; }
 
     bootstrap["fn"] = mkSpecial(compile(mkFunction));
@@ -285,20 +283,18 @@
                      .reduce(f) * (n === "-" && args.length === 1 ? -1 : 1)); }); });
 
     // Evaluation
-    function Environment (frame) { this.frames = mkList(frame); }
-    Environment.prototype.lookup = function (n) { return reverseFind(this.frames, function (f) { return f[n]; }); };
-    Environment.prototype.pushFrame = function (frame) { this.frames.push(frame || {}); };
-    Environment.prototype.popFrame = function () { this.frames.pop(); };
-    Environment.prototype.def = function (n, v) { first(this.frames)[n] = v; };
-    Environment.prototype.clone = function () {
-        var env = new Environment();
-        env.frames = toArray(this.frames);
-        return env; };
+    function Environment (parent) {
+        function x () {}
+        if (parent) x.prototype = parent.frames;
+        this.frames = new x; }
+    Environment.prototype.lookup = function (n) { return this.frames[n]; };
+    Environment.prototype.def = function (n, v) { this.frames[n] = v; };
+    Environment.prototype.child = function () { return new Environment(this); };
 
     teslo.environment = function () {
-        var globals = {};
-        for (var n in bootstrap) { globals[n] = bootstrap[n]; }
-        return new Environment(globals); };
+        var env = new Environment();
+        for (var n in bootstrap) { env.def(n, bootstrap[n]); }
+        return env; };
 
     function evaluateForm (env, form) { return bootstrap.eval.invoke(env, mkList(form)); }
     // DEBUG
