@@ -106,7 +106,6 @@
                 assert.equal(result.forms[0].name, "kwd");
             });
 
-            //   doubles
             //   string - escape characters
             //   lists/vectors []
             //   maps {}
