@@ -33,7 +33,7 @@
 
     function displayEnvironment () {
         $env.empty();
-        Object.keys(env.frames[0])
+        Object.keys(env.frames)
             .sort()
             .map(function (n) {
                 $env.append($("<div>").text(n + " " + toString(n))); }); }
