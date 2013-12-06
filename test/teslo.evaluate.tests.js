@@ -32,7 +32,8 @@
             try {
                 teslo.evaluate(teslo.prelude, env); }
             catch(e) {
-                throw new Error("Error while evaluating prelude. (" + e + ")"); }
+                e.message += " [in prelude]";
+                throw e; }
             return env;
         }
 
