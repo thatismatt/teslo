@@ -29,7 +29,10 @@
 
         function setupEnv () {
             var env = teslo.environment();
-            teslo.evaluate(teslo.prelude, env);
+            try {
+                teslo.evaluate(teslo.prelude, env); }
+            catch(e) {
+                throw new Error("Error while evaluating prelude. (" + e + ")"); }
             return env;
         }
 
