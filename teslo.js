@@ -174,7 +174,7 @@
                 return merge(frame, bind(rest(params[i]), targs)); }
             if (params[i].name === ".") {
                 frame[params[i + 1].name] = mkList.apply(null, args.slice(i));
-                // TODO: error if there are params after the rest param
+                // TODO: error if the rest param is malformed - it must be one symbol
                 return frame; }
             frame[params[i].name] = args[i]; }
         return frame; }
