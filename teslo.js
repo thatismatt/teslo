@@ -185,11 +185,10 @@
             rest(pattern).length === arg.constructor.length; }
 
     function matches (ads, args) {
-        if (ads.length === 1) return first(ads);
         var ad = find(ads, function (ad) {
             return all(zip(ad.params, args), function (x) {
                 var pattern = first(x), arg = second(x);
-                return equals(pattern, arg) || isSymbol(pattern) || match(pattern, arg); }); });
+                return isSymbol(pattern) || equals(pattern, arg) || match(pattern, arg); }); });
             if (ad) return ad;
         throw new Error("No matching pattern"); }
 
