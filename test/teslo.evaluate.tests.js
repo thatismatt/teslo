@@ -214,7 +214,7 @@
                 isNumber(evaluateForm("(f (A 1))", env), 1);
             });
 
-            test("overload on multiple arguments type", function () {
+            test("overload on multiple argument types", function () {
                 var env = evaluate("(deft A ()) (deft B ()) (def f (fn ((A) (A)) 0 ((A) (B)) 1))");
                 isNumber(evaluateForm("(f (A) (A))", env), 0);
                 isNumber(evaluateForm("(f (A) (B))", env), 1);
