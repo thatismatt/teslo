@@ -22,6 +22,9 @@
     function zipmap (ks, vs) { var r = {}; map(zip(ks, vs), function (x) { r[x[0]] = x[1]; }); return r; }
     function all (arr, f) { for (var i = 0; i < arr.length; i++) { if (!f(arr[i])) { return false; } } return true; }
     function any (arr, f) { for (var i = 0; i < arr.length; i++) { if (f(arr[i])) { return true; } } return false; }
+    function merge (a, b) { var r = {};
+                            function copyOnTo(x) { for (var i in x) { r[i] = x[i]; } }
+                            copyOnTo(a); copyOnTo(b); return r; }
     function compose (f, g, h) { return h ? compose(f, compose(g, h)) : function () { return f(g.apply(null, arguments)); }; }
     function curry (f) { var args = rest(arguments);
                          return function () { return f.apply(null, args.concat(toArray(arguments))); }; }
@@ -164,16 +167,18 @@
                 flatmap(form, function (f) { return isSplicedForm(f) ? unquoteForm(f) : [unquoteForm(f)]; })); }
         return unquoteForm(args[0]); });
 
-    function bind (frame, params, args) {
+    function bind (params, args) {
+        var frame = {};
         for (var i = 0; i < params.length; i++) {
             if (isList(params[i])) {
                 var targs = map(args[i].constructor, function (p) { return args[i].members[p.name]; });
-                bind(frame, rest(params[i]), targs); }
+                return merge(frame, bind(rest(params[i]), targs)); }
             if (params[i].name === ".") {
                 frame[params[i + 1].name] = mkList.apply(null, args.slice(i));
                 // TODO: error if there are params after the rest param
-                break; }
-            frame[params[i].name] = args[i]; } }
+                return frame; }
+            frame[params[i].name] = args[i]; }
+        return frame; }
 
     function match (pattern, arg) {
         return isList(pattern) &&
@@ -204,8 +209,7 @@
                         || arityDispatch["."];        // variadic signature
                 // if (!ads) { TODO: error on arity }
                 var ad = matches(ads, fargs);
-                var frame = {};
-                bind(frame, ad.params, fargs);
+                var frame = bind(ad.params, fargs);
                 env.pushFrame(frame);
                 var result = evaluateForm(env, ad.body);
                 env.popFrame();
