@@ -267,6 +267,12 @@
                 isNumber(evaluateForm("(f (A (A 1)))", env), 1);
             });
 
+            test("function extension", function () {
+                var env = evaluate("(defn f () 0) (defn f (x) 1)");
+                isNumber(evaluateForm("(f)", env), 0);
+                isNumber(evaluateForm("(f 1)", env), 1);
+            });
+
         });
 
         suite("type", function () {

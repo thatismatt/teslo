@@ -124,7 +124,12 @@
         //    Then def is defined in terms of def-unquoted
         var symbol = first(args);
         var val = evaluateForm(env, second(args));
-        env.def(symbol.name, val);
+        var currentVal = env.lookup(symbol.name);
+        // function extension
+        if (isFunction(currentVal)) {
+            currentVal.overloads = merge(currentVal.overloads, val.overloads); }
+        // function definition
+        else { env.def(symbol.name, val); }
         return symbol; });
 
     function tryExpandForm (env, form) {
@@ -185,40 +190,42 @@
             frame[params[i].name] = args[i]; }
         return frame; }
 
-    function match (pattern, arg) {
+    function isTypeMatch (pattern, arg) {
         if (!isList(pattern)) return false;
         if (pattern.length === 3 && isOfTypeSymbol(second(pattern)))
             return third(pattern).name === arg.type.name;
         return first(pattern).name === arg.type.name
             && rest(pattern).length === arg.constructor.length; }
 
-    function matches (ads, args) {
-        var ad = find(ads, function (ad) {
-            return all(zip(ad.params, args), function (x) {
+    function findMatch (os, args) {
+        var o = find(os, function (o) {
+            return all(zip(o.params, args), function (x) {
                 var pattern = first(x), arg = second(x);
-                return isSymbol(pattern) || equals(pattern, arg) || match(pattern, arg); }); });
-            if (ad) return ad;
+                return isSymbol(pattern) || equals(pattern, arg) || isTypeMatch(pattern, arg); }); });
+        if (o) return o;
         throw new Error("No matching pattern"); }
 
     function compile (mk) {
         return function (env, args) {
-            var arityDispatch = {};
+            var overloads = {};
             each2(args, function (params, body) {
                 var isVariadic = any(params, function(p) { return p.name === "."; });
                 // TODO: only allow one variadic signature
                 var k = isVariadic ? "." : params.length;
-                arityDispatch[k] = arityDispatch[k] || [];
-                arityDispatch[k].push({ params: params, body: body }); });
-            return mk(function (_env, fargs) {
-                var ads = arityDispatch[fargs.length] // exact arity match
-                        || arityDispatch["."];        // variadic signature
-                if (!ads) { throw new Error("No matching overload."); }
-                var ad = matches(ads, fargs);
-                var frame = bind(ad.params, fargs);
+                overloads[k] = overloads[k] || [];
+                overloads[k].push({ params: params, body: body }); });
+            var x = mk(function (_env, fargs) {
+                var os = this.overloads[fargs.length] // exact arity match
+                        || this.overloads["."];        // variadic signature
+                if (!os) { throw new Error("No matching overload."); }
+                var o = findMatch(os, fargs);
+                var frame = bind(o.params, fargs);
                 var env2 = env.child();
                 for (var i in frame) { env2.def(i, frame[i]); }
-                var result = evaluateForm(env2, ad.body);
-                return result; }); }; }
+                var result = evaluateForm(env2, o.body);
+                return result; });
+            x.overloads = overloads;
+            return x; }; }
 
     bootstrap["fn"] = mkSpecial(compile(mkFunction));
     bootstrap["macro"] = mkSpecial(compile(mkMacro));
