@@ -21,9 +21,9 @@
     function zipmap (ks, vs) { var r = {}; map(zip(ks, vs), function (x) { r[x[0]] = x[1]; }); return r; }
     function all (arr, f) { for (var i = 0; i < arr.length; i++) { if (!f(arr[i])) { return false; } } return true; }
     function any (arr, f) { for (var i = 0; i < arr.length; i++) { if (f(arr[i])) { return true; } } return false; }
-    function merge (a, b) { var r = {};
-                            function copyOnTo(x) { for (var i in x) { r[i] = x[i]; } }
-                            copyOnTo(a); copyOnTo(b); return r; }
+    function merge (a, b, conflictFn) {
+        return [{}, a, b].reduce(function (r, x) {
+            for (var i in x) { r[i] = r[i] && conflictFn ? conflictFn(r[i], x[i]) : x[i]; } return r; }); }
     function compose (f, g, h) { return h ? compose(f, compose(g, h)) : function () { return f(g.apply(null, arguments)); }; }
     function curry (f) { var args = rest(arguments);
                          return function () { return f.apply(null, args.concat(toArray(arguments))); }; }
@@ -127,7 +127,7 @@
         var currentVal = env.lookup(symbol.name);
         // function extension
         if (isFunction(currentVal)) {
-            currentVal.overloads = merge(currentVal.overloads, val.overloads); }
+            currentVal.overloads = merge(currentVal.overloads, val.overloads, function (a, b) { return concat([a, b]); }); }
         // function definition
         else { env.def(symbol.name, val); }
         return symbol; });
@@ -214,7 +214,7 @@
                 overloads[k].push({ params: params, body: body }); });
             var x = mk(function (_env, fargs) {
                 var os = this.overloads[fargs.length] // exact arity match
-                        || this.overloads["."];        // variadic signature
+                      || this.overloads["."];         // variadic signature
                 if (!os) throw new Error("No matching overload.");
                 var o = findMatch(os, fargs);
                 if (!o) throw new Error("No matching pattern.");
