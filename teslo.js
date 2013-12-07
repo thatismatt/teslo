@@ -53,7 +53,7 @@
         return { name: x, type: { name: "Type" }, constructors: cs,
                  invoke: function (env, args) {
                      var c = this.constructors[args.length];
-                     if (!c) throw new Error("No matching constructor");
+                     if (!c) throw new Error("No matching constructor.");
                      return { type: this, constructor: c, members: zipmap(map(c, name), args) }; } }; }
     function mkList () { var l = toArray(arguments); l.type = mkType("List"); return l; }
     function arrayToList (a) { return mkList.apply(null, a); }
@@ -321,7 +321,7 @@
                                             curry(bootstrap["macro-expand"].invoke, env),
                                             mkList));
         else
-            throw new Error("Parse error: " + (result.message || "unknown error")); };
+            throw new Error("Parse error: " + (result.message || "unknown error.")); };
 
 })(typeof exports === "undefined" ? this["teslo"] = {} : exports,
    this.cromp || require("cromp"));
