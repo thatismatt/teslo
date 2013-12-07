@@ -217,7 +217,7 @@
             var x = mk(function (_env, fargs) {
                 var os = this.overloads[fargs.length] // exact arity match
                         || this.overloads["."];        // variadic signature
-                if (!os) { throw new Error("No matching overload."); }
+                if (!os) throw new Error("No matching overload.");
                 var o = findMatch(os, fargs);
                 var frame = bind(o.params, fargs);
                 var env2 = env.child();
