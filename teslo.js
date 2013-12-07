@@ -198,12 +198,10 @@
             && rest(pattern).length === arg.constructor.length; }
 
     function findMatch (os, args) {
-        var o = find(os, function (o) {
+        return find(os, function (o) {
             return all(zip(o.params, args), function (x) {
                 var pattern = first(x), arg = second(x);
-                return isSymbol(pattern) || equals(pattern, arg) || isTypeMatch(pattern, arg); }); });
-        if (o) return o;
-        throw new Error("No matching pattern"); }
+                return isSymbol(pattern) || equals(pattern, arg) || isTypeMatch(pattern, arg); }); }); }
 
     function compile (mk) {
         return function (env, args) {
@@ -219,6 +217,7 @@
                         || this.overloads["."];        // variadic signature
                 if (!os) throw new Error("No matching overload.");
                 var o = findMatch(os, fargs);
+                if (!o) throw new Error("No matching pattern.");
                 var frame = bind(o.params, fargs);
                 var env2 = env.child();
                 for (var i in frame) { env2.def(i, frame[i]); }
