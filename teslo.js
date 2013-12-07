@@ -219,9 +219,7 @@
                 var o = findMatch(os, fargs);
                 if (!o) throw new Error("No matching pattern.");
                 var frame = bind(o.params, fargs);
-                var env2 = env.child();
-                for (var i in frame) { env2.def(i, frame[i]); }
-                var result = evaluateForm(env2, o.body);
+                var result = evaluateForm(env.child(frame), o.body);
                 return result; });
             x.overloads = overloads;
             return x; }; }
@@ -302,7 +300,10 @@
         this.frames = new x; }
     Environment.prototype.lookup = function (n) { return this.frames[n]; };
     Environment.prototype.def = function (n, v) { this.frames[n] = v; };
-    Environment.prototype.child = function () { return new Environment(this); };
+    Environment.prototype.child = function (f) {
+        var c = new Environment(this);
+        for (var n in f) { c.def(n, f[n]); }
+        return c; };
 
     teslo.environment = function () {
         var env = new Environment();
