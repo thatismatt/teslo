@@ -62,6 +62,8 @@
             historyIndex++;
             $in.val(history[historyIndex]); } });
 
+    $in.focus();
+
     displayEnvironment();
 
 })(this.teslo);
