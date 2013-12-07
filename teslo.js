@@ -174,6 +174,9 @@
                 flatmap(form, function (f) { return isSplicedForm(f) ? unquoteForm(f) : [unquoteForm(f)]; })); }
         return unquoteForm(args[0]); });
 
+    function membersToArray (x) {
+        return map(x.constructor, function (p) { return x.members[p.name]; }); }
+
     function bind (params, args) {
         var frame = {};
         for (var i = 0; i < params.length; i++) {
@@ -181,8 +184,7 @@
                 if (params[i].length === 3 && isOfTypeSymbol(second(params[i]))) {
                     frame[first(params[i]).name] = args[i];
                     return frame; }
-                var targs = map(args[i].constructor, function (p) { return args[i].members[p.name]; });
-                return merge(frame, bind(rest(params[i]), targs)); }
+                return merge(frame, bind(rest(params[i]), membersToArray(args[i]))); }
             if (params[i].name === ".") {
                 frame[params[i + 1].name] = mkList.apply(null, args.slice(i));
                 // TODO: error if the rest param is malformed - it must be one symbol
@@ -190,18 +192,21 @@
             frame[params[i].name] = args[i]; }
         return frame; }
 
+    function findMatch (os, args) {
+        return find(os, function (o) {
+            return all(zip(o.params, args), isMatch); }); }
+
+    function isMatch (x) {
+        var pattern = first(x), arg = second(x);
+        return isSymbol(pattern) || equals(pattern, arg) || isTypeMatch(pattern, arg); }
+
     function isTypeMatch (pattern, arg) {
         if (!isList(pattern)) return false;
         if (pattern.length === 3 && isOfTypeSymbol(second(pattern)))
             return third(pattern).name === arg.type.name;
         return first(pattern).name === arg.type.name
-            && rest(pattern).length === arg.constructor.length; }
-
-    function findMatch (os, args) {
-        return find(os, function (o) {
-            return all(zip(o.params, args), function (x) {
-                var pattern = first(x), arg = second(x);
-                return isSymbol(pattern) || equals(pattern, arg) || isTypeMatch(pattern, arg); }); }); }
+            && rest(pattern).length === arg.constructor.length
+            && all(zip(rest(pattern), membersToArray(arg)), isMatch); }
 
     function compile (mk) {
         return function (env, args) {

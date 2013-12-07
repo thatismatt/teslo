@@ -267,6 +267,12 @@
                 isNumber(evaluateForm("(f (A (A 1)))", env), 1);
             });
 
+            test("nested pattern matching", function () {
+                var env = evaluate("(deft A (a)) (defn f ((A :one)) 1 ((A :two)) 2)");
+                isNumber(evaluateForm("(f (A :one))", env), 1);
+                isNumber(evaluateForm("(f (A :two))", env), 2);
+            });
+
             test("function extension", function () {
                 var env = evaluate("(defn f () 0) (defn f (x) 1)");
                 isNumber(evaluateForm("(f)", env), 0);
