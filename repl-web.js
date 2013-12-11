@@ -35,8 +35,11 @@
         $env.empty();
         Object.keys(env.frames)
             .sort()
-            .map(function (n) {
-                $env.append($("<div>").text(n + " " + toString(n))); }); }
+            .filter(function (n) { return !/\$[0-9]/.test(n); })
+            .map(function (n, i) {
+                $env.append(
+                    $("<tr>").append($("<td>").text(n))
+                             .append($("<td>").text(toString(n)))); }); }
 
     function toString(x) {
         return teslo.evaluate("(string " + x + ")", env)[0]; }
