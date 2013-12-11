@@ -4,7 +4,7 @@
     var assert = chai.assert;
 
     // assert helpers
-    function simplify (o) { return o.type.name === "Number" ? o.value : o.name; }
+    function simplify (o) { return o.type === "Number" ? o.value : o.name; }
     function isOfType (type, propFn) {
         // args: env, n
         //    OR env, n, v
@@ -16,7 +16,7 @@
             var v = aIsEnv ? c : b;
             assert.isDefined(o);
             assert.ok(o.type, "no type property");
-            assert.equal(o.type.name, type);
+            assert.equal(o.type, type);
             if (propFn && v !== undefined) assert.deepEqual(propFn(o), v); }; }
     var isFunction = isOfType("Function");
     var isList = isOfType("List", function (o) { var r = []; for (var i = 0; i < o.length; i++) { r.push(simplify(o[i])); } return r; } );
@@ -316,13 +316,23 @@
         suite("reflection", function () {
 
             test("type", function () {
-                var env = evaluate("(def a (type 1))");
-                isType(env, "a", "Number");
+                var result = evaluateForm("(type 1)");
+                isType(result, "Number");
             });
 
             test("type of form", function () {
-                var env = evaluate("(def a (type (+ 1 2)))");
-                isType(env, "a", "Number");
+                var result = evaluateForm("(type (+ 1 2))");
+                isType(result, "Number");
+            });
+
+            test("type's type", function () {
+                var result = evaluateForm("(type (type 1))");
+                isType(result, "Type");
+            });
+
+            test("type's type's type", function () {
+                var result = evaluateForm("(type (type (type 1)))");
+                isType(result, "Type");
             });
 
         });

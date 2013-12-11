@@ -24,7 +24,7 @@
                 assert.ok(result.success);
                 assert.equal(result.forms[0].length, 1);
                 assert.equal(result.forms[0][0].name, "f");
-                assert.equal(result.forms[0][0].type.name, "Symbol");
+                assert.equal(result.forms[0][0].type, "Symbol");
             });
 
             test("list containing 2 symbols", function () {
@@ -32,9 +32,9 @@
                 assert.ok(result.success);
                 assert.equal(result.forms[0].length, 2);
                 assert.equal(result.forms[0][0].name, "f");
-                assert.equal(result.forms[0][0].type.name, "Symbol");
+                assert.equal(result.forms[0][0].type, "Symbol");
                 assert.equal(result.forms[0][1].name, "a");
-                assert.equal(result.forms[0][1].type.name, "Symbol");
+                assert.equal(result.forms[0][1].type, "Symbol");
             });
 
             test("multi character symbols", function () {
@@ -72,37 +72,37 @@
             test("number", function () {
                 var result = teslo.parse("123");
                 assert.ok(result.success);
-                assert.equal(result.forms[0].type.name, "Number");
+                assert.equal(result.forms[0].type, "Number");
                 assert.equal(result.forms[0].value, 123);
             });
 
             test("number - decimal", function () {
                 var result = teslo.parse("123.123 .456");
                 assert.ok(result.success);
-                assert.equal(result.forms[0].type.name, "Number");
+                assert.equal(result.forms[0].type, "Number");
                 assert.equal(result.forms[0].value, 123.123);
-                assert.equal(result.forms[1].type.name, "Number");
+                assert.equal(result.forms[1].type, "Number");
                 assert.equal(result.forms[1].value, 0.456);
             });
 
             test("string", function () {
                 var result = teslo.parse('"Hello world!"');
                 assert.ok(result.success);
-                assert.equal(result.forms[0].type.name, "String");
+                assert.equal(result.forms[0].type, "String");
                 assert.equal(result.forms[0].value, "Hello world!");
             });
 
             test("empty string", function () {
                 var result = teslo.parse('""');
                 assert.ok(result.success);
-                assert.equal(result.forms[0].type.name, "String");
+                assert.equal(result.forms[0].type, "String");
                 assert.equal(result.forms[0].value, "");
             });
 
             test("keyword", function () {
                 var result = teslo.parse(':kwd');
                 assert.ok(result.success);
-                assert.equal(result.forms[0].type.name, "Keyword");
+                assert.equal(result.forms[0].type, "Keyword");
                 assert.equal(result.forms[0].name, "kwd");
             });
 
@@ -119,29 +119,29 @@
             test("quote list", function () {
                 var result = teslo.parse("'()"); // (quote ())
                 assert.ok(result.success);
-                assert.equal(result.forms[0].type.name, "List");
-                assert.equal(result.forms[0][0].type.name, "Symbol");
+                assert.equal(result.forms[0].type, "List");
+                assert.equal(result.forms[0][0].type, "Symbol");
                 assert.equal(result.forms[0][0].name, "quote");
-                assert.equal(result.forms[0][1].type.name, "List");
+                assert.equal(result.forms[0][1].type, "List");
                 assert.equal(result.forms[0][1].length, 0);
             });
 
             test("quote symbol in list", function () {
                 var result = teslo.parse("(f 'x)"); // (f (quote x))
                 assert.ok(result.success);
-                assert.equal(result.forms[0][1][0].type.name, "Symbol");
+                assert.equal(result.forms[0][1][0].type, "Symbol");
                 assert.equal(result.forms[0][1][0].name, "quote");
-                assert.equal(result.forms[0][1][1].type.name, "Symbol");
+                assert.equal(result.forms[0][1][1].type, "Symbol");
                 assert.equal(result.forms[0][1][1].name, "x");
             });
 
             test("comment", function () {
                 var result = teslo.parse("; a comment");
                 assert.ok(result.success);
-                assert.equal(result.forms[0].type.name, "List");
-                assert.equal(result.forms[0][0].type.name, "Symbol");
+                assert.equal(result.forms[0].type, "List");
+                assert.equal(result.forms[0][0].type, "Symbol");
                 assert.equal(result.forms[0][0].name, "comment");
-                assert.equal(result.forms[0][1].type.name, "String");
+                assert.equal(result.forms[0][1].type, "String");
                 assert.equal(result.forms[0][1].value, " a comment");
             });
 
@@ -154,8 +154,8 @@
             test("syntax quote", function () {
                 var result = teslo.parse("`(a)"); // (syntax-quote (a))
                 assert.ok(result.success);
-                assert.equal(result.forms[0].type.name, "List");
-                assert.equal(result.forms[0][0].type.name, "Symbol");
+                assert.equal(result.forms[0].type, "List");
+                assert.equal(result.forms[0][0].type, "Symbol");
                 assert.equal(result.forms[0][0].name, "syntax-quote");
                 assert.equal(result.forms[0][1][0].name, "a");
             });
@@ -163,8 +163,8 @@
             test("unquote", function () {
                 var result = teslo.parse("`(~a)"); // (syntax-quote ((unquote a)))
                 assert.ok(result.success);
-                assert.equal(result.forms[0].type.name, "List");
-                assert.equal(result.forms[0][1][0][0].type.name, "Symbol");
+                assert.equal(result.forms[0].type, "List");
+                assert.equal(result.forms[0][1][0][0].type, "Symbol");
                 assert.equal(result.forms[0][1][0][0].name, "unquote");
                 assert.equal(result.forms[0][1][0][1].name, "a");
             });
@@ -172,8 +172,8 @@
             test("unquote splice", function () {
                 var result = teslo.parse("`(~@a)"); // (syntax-quote ((unquote-splice a)))
                 assert.ok(result.success);
-                assert.equal(result.forms[0].type.name, "List");
-                assert.equal(result.forms[0][1][0][0].type.name, "Symbol");
+                assert.equal(result.forms[0].type, "List");
+                assert.equal(result.forms[0][1][0][0].type, "Symbol");
                 assert.equal(result.forms[0][1][0][0].name, "unquote-splice");
                 assert.equal(result.forms[0][1][0][1].name, "a");
             });

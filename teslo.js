@@ -28,13 +28,13 @@
     function curry (f) { var args = rest(arguments);
                          return function () { return f.apply(null, args.concat(toArray(arguments))); }; }
     var flatmap = compose(concat, map);
-    function typeEquals (a, b) { return a.type.name === b.type.name; }
+    function typeEquals (a, b) { return a.type === b.type; }
     function equals (a, b) { return typeEquals(a, b)
                              && ((isKeyword(a) && a.name === b.name)
                               || (a.value !== undefined && b.value !== undefined && a.value === b.value)); }
-    function name (x) { return x.name; }
+    function get (p) { return function (x) { return x[p]; }; }
 
-    function isOfType (t) { return function (x) { return x && x.type && x.type.name === t; }; }
+    function isOfType (t) { return function (x) { return x && x.type === t; }; }
     var isList = isOfType("List");
     var isString = isOfType("String");
     var isNumber = isOfType("Number");
@@ -46,24 +46,31 @@
     function isSpecial (x) { return isFunction(x) && x.special; }
     function isOfTypeSymbol (x) { return isSymbol(x) && x.name === ":"; }
 
-    // AST
-    function mkType (x, constructorList) {
+    // Types
+    var types = {};
+    var typeId = 0;
+    function mkType (name, constructorList) {
+        name = name || "__type__" + typeId++;
         var cs = {};
         constructorList && each(constructorList, function (c) { cs[c.length] = c; });
-        return { name: x, type: { name: "Type" }, constructors: cs,
-                 invoke: function (env, args) {
-                     var c = this.constructors[args.length];
-                     if (!c) throw new Error("No matching constructor.");
-                     return { type: this, constructor: c, members: zipmap(map(c, name), args) }; } }; }
-    function mkList () { var l = toArray(arguments); l.type = mkType("List"); return l; }
+        var t = { name: name, type: "Type", constructors: cs,
+                  invoke: function (env, args) {
+                      var c = this.constructors[args.length];
+                      if (!c) throw new Error("No matching constructor.");
+                      return { type: name, constructor: c, members: zipmap(map(c, get("name")), args) }; } };
+        types[name] = t;
+        return t; }
+    each(["Type", "Function", "Symbol", "String", "Number", "Keyword", "List"], mkType);
+
+    function mkList () { var l = toArray(arguments); l.type = "List"; return l; }
     function arrayToList (a) { return mkList.apply(null, a); }
-    function mkSymbol (x) { return { name: x, type: mkType("Symbol") }; }
-    function mkString (x) { return { value: x, type: mkType("String") }; }
-    function mkNumber (x) { return { value: x, type: mkType("Number") }; }
-    function mkKeyword (x) { return { name: x, type: mkType("Keyword") }; };
+    function mkSymbol (x) { return { name: x, type: "Symbol" }; }
+    function mkString (x) { return { value: x, type: "String" }; }
+    function mkNumber (x) { return { value: x, type: "Number" }; }
+    function mkKeyword (x) { return { name: x, type: "Keyword" }; };
     function mkMacro (f) { var m = mkFunction(f); m.macro = true; return m; };
     function mkSpecial (f) { var s = mkFunction(f); s.special = true; return s; };
-    function mkFunction (f) { return { invoke: f, type: mkType("Function") }; };
+    function mkFunction (f) { return { invoke: f, type: "Function" }; };
 
     // Parser
     var open = cromp.character("(");
@@ -203,8 +210,8 @@
     function isTypeMatch (pattern, arg) {
         if (!isList(pattern)) return false;
         if (pattern.length === 3 && isOfTypeSymbol(second(pattern)))
-            return third(pattern).name === arg.type.name;
-        return first(pattern).name === arg.type.name
+            return third(pattern).name === arg.type;
+        return first(pattern).name === arg.type
             && rest(pattern).length === arg.constructor.length
             && all(zip(rest(pattern), membersToArray(arg)), isMatch); }
 
@@ -251,7 +258,7 @@
 
     bootstrap["comment"] = mkSpecial(function (env, args) { });
 
-    bootstrap["type"] = mkFunction(function (env, args) { return first(args).type; });
+    bootstrap["type"] = mkFunction(function (env, args) { return types[first(args).type]; });
     bootstrap["create-type"] = mkSpecial(function (env, args) {
         var name = evaluateForm(env, first(args));
         return mkType(name && name.value, rest(args)); });
@@ -275,7 +282,7 @@
             isFunction(arg)  ? "<Function>" :
             isType(arg)      ? "<Type " + arg.name + ">" :
             isList(arg)      ? "(" + map(arg, str).join(" ") + ")" :
-            arg.type         ? str(cons(arg.type.name, map(Object.keys(arg.members),
+            arg.type         ? str(cons(arg.type, map(Object.keys(arg.members),
                                          function (k) { return str(arg.members[k]); }))) :
             /* otherwise */    arg; });
 
@@ -313,6 +320,7 @@
     teslo.environment = function () {
         var env = new Environment();
         for (var n in bootstrap) { env.def(n, bootstrap[n]); }
+        //for (var t in types) { env.def(t, types[t]); }
         return env; };
 
     function evaluateForm (env, form) { return bootstrap.eval.invoke(env, mkList(form)); }
