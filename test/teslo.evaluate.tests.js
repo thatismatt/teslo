@@ -138,7 +138,6 @@
                 isNumber(env, "x", 1);
             });
 
-            // dependent let bindings: (let (x 1 y x) ...)
         });
 
         suite("do", function () {

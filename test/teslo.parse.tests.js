@@ -106,12 +106,6 @@
                 assert.equal(result.forms[0].name, "kwd");
             });
 
-            //   string - escape characters
-            //   lists/vectors []
-            //   maps {}
-            //   sets?
-            //   regex?
-
         });
 
         suite("reader macros", function () {
