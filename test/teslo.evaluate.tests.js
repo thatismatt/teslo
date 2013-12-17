@@ -3,13 +3,13 @@
     chai.Assertion.includeStack = true;
     var assert = chai.assert;
 
-    var isOfType =   teslo.test.helpers.isOfType;
+    var isOfType   = teslo.test.helpers.isOfType;
     var isFunction = teslo.test.helpers.isFunction;
-    var isList =     teslo.test.helpers.isList;
-    var isNumber =   teslo.test.helpers.isNumber;
-    var isString =   teslo.test.helpers.isString;
-    var isSymbol =   teslo.test.helpers.isSymbol;
-    var isType =     teslo.test.helpers.isType;
+    var isList     = teslo.test.helpers.isList;
+    var isNumber   = teslo.test.helpers.isNumber;
+    var isString   = teslo.test.helpers.isString;
+    var isSymbol   = teslo.test.helpers.isSymbol;
+    var isType     = teslo.test.helpers.isType;
 
     suite("evaluate", function () {
 
