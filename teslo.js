@@ -29,16 +29,16 @@
                          return function () { return f.apply(null, args.concat(toArray(arguments))); }; }
     var flatmap = compose(concat, map);
     function typeEquals (a, b) { return a.type === b.type; }
-    function equals (a, b) { return typeEquals(a, b)
-                             && ((isKeyword(a) && a.name === b.name)
-                              || (a.value !== undefined && b.value !== undefined && a.value === b.value)); }
+    function equals (a, b) { return a === b
+                             || (isKeyword(a) && isKeyword(b) && a.name === b.name); }
     function get (p) { return function (x) { return x[p]; }; }
 
+    function jsType (x) { return /\[object (\w*)\]/.exec(Object.prototype.toString.call(x))[1]; }
     function isOfType (t) { return function (x) { return x && x.type === t; }; }
     var isList = isOfType("List");
     var isArray = isOfType("Array");
-    var isString = isOfType("String");
-    var isNumber = isOfType("Number");
+    function isString (x) { return Object.prototype.toString.call(x) == "[object String]"; }
+    function isNumber (x) { return Object.prototype.toString.call(x) == "[object Number]"; }
     var isSymbol = isOfType("Symbol");
     var isKeyword = isOfType("Keyword");
     var isFunction = isOfType("Function");
@@ -67,8 +67,6 @@
     function mkArray () { var l = toArray(arguments); l.type = "Array"; return l; }
     function jsArrayToTesloArray (a) { return mkArray.apply(null, a); }
     function mkSymbol (x) { return { name: x, type: "Symbol" }; }
-    function mkString (x) { return { value: x, type: "String" }; }
-    function mkNumber (x) { return { value: x, type: "Number" }; }
     function mkKeyword (x) { return { name: x, type: "Keyword" }; };
     function mkMacro (f) { var m = mkFunction(f); m.macro = true; return m; };
     function mkSpecial (f) { var s = mkFunction(f); s.special = true; return s; };
@@ -82,11 +80,10 @@
     var optionalWhitespace = cromp.optional(whitespace);
     var eof = cromp.regex(/$/);
     var number = cromp.regex(/(\.[0-9]+)|[0-9]+(\.[0-9]+)?/)
-            .map(first).map(parseFloat).map(mkNumber);
+            .map(first).map(parseFloat);
     var string = cromp.between(
         cromp.character('"'), cromp.character('"'),
-        cromp.optional(cromp.regex(/[^"]+/)).map(function (m) { return m || [""]; }).map(first))
-            .map(mkString);
+        cromp.optional(cromp.regex(/[^"]+/)).map(function (m) { return m || [""]; }).map(first));
     var keyword = cromp.seq(cromp.character(":"), cromp.regex(/[a-z]+/).map(first))
             .map(second).map(mkKeyword);
     var list = cromp.recursive(function () {
@@ -115,8 +112,7 @@
             .map(function (x) { return mkArray(mkSymbol("unquote-splice"), second(x)); });
     var comment = cromp.seq(cromp.character(";"),
                             cromp.regex(/.*[\s\S]/).map(first)) // [\s\S] matches & consumes newline (unlike $)
-            .map(function (x) { return mkArray(mkSymbol("comment"),
-                                              mkString(second(x))); });
+            .map(function (x) { return mkArray(mkSymbol("comment"), second(x)); });
 
     teslo.parse = function (src) {
         var a = cromp.parse(file, src);
@@ -260,13 +256,15 @@
 
     bootstrap["comment"] = mkSpecial(function (env, args) { });
 
-    bootstrap["type"] = mkFunction(function (env, args) { return types[first(args).type]; });
+    bootstrap["type"] = mkFunction(function (env, args) {
+        var x = first(args);
+        return types[x.type || jsType(x)]; });
     bootstrap["create-type"] = mkSpecial(function (env, args) {
         var name = evaluateForm(env, first(args));
-        return mkType(name && name.value, rest(args)); });
+        return mkType(name, rest(args)); });
 
     bootstrap["name"] = mkSpecial(function (env, args) {
-        return mkString(first(args).name); });
+        return first(args).name; });
 
     bootstrap["do"] = mkSpecial(function (env, args) {
         var results = args.map(curry(evaluateForm, env));
@@ -276,8 +274,8 @@
         var arg = first(args);
         var str = compose(curry(bootstrap.string.invoke, env), mkArray);
         return isSymbol(arg) ? arg.name :
-            isString(arg)    ? '"' + arg.value + '"' :
-            isNumber(arg)    ? arg.value :
+            isString(arg)    ? '"' + arg + '"' :
+            isNumber(arg)    ? arg :
             isKeyword(arg)   ? ":" + arg.name :
             isSpecial(arg)   ? "<Special>" :
             isMacro(arg)     ? "<Macro>" :
@@ -304,9 +302,9 @@
     // Numeric functions
     each([["+", add], ["-", subtract], ["*", multiply], ["/", divide]],
          function (p) { var n = first(p); var f = second(p);
-             bootstrap[n] = mkFunction(function (env, args) { return mkNumber(
-                 args.map(function (x) { return x.value; })
-                     .reduce(f) * (n === "-" && args.length === 1 ? -1 : 1)); }); });
+             bootstrap[n] = mkFunction(function (env, args) {
+                 return args.map(function (x) { return x; })
+                     .reduce(f) * (n === "-" && args.length === 1 ? -1 : 1); }); });
 
     // Evaluation
     function Environment (parent) {
