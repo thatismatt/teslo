@@ -27,12 +27,9 @@
 
 # Issues
 
- * JS Arrays are of type "List"
-   * Rewrite parse tests to use helper functions to test type
  * Builtins can be overwritten
  * Macros don't check arg count
      (deft) ;=> Error: 'tname' not in scope.
- * JS built in types are wrapped
  * Separate read and eval
  * Change read/parse to do one form at a time
  * No line numbers in errors
@@ -66,3 +63,6 @@
    * registry stores id to type mappings
    * data types have the id
    * `type` looks up the id in the registry
+ * JS Arrays are of type "List"
+   * Rewrite parse tests to use helper functions to test type
+ * Numbers & Strings are boxed
