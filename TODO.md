@@ -36,9 +36,6 @@
 
 # Comms
 
- * Correct Readme:
-   * link to tests (now there are gh-pages)
-   * how to test the repl (no npm step required or online)
  * Move tests to test.html
  * Add an intro (index.html)
  * Example code on repl.html, click to eval
@@ -66,3 +63,6 @@
  * JS Arrays are of type "List"
    * Rewrite parse tests to use helper functions to test type
  * Numbers & Strings are boxed
+ * Correct Readme:
+   * link to tests (now there are gh-pages)
+   * how to test the repl (no npm step required or online)
