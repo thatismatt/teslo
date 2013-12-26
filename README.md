@@ -21,9 +21,17 @@ Teslo has:
 
 ## Tell me more
 
-Well... teslo is very early on in its development, to see example code the best place to look is the [test suite](https://github.com/thatismatt/teslo/blob/master/test/teslo.evaluate.tests.js).
+Well... teslo is very early on in its development, so there isn't much more!
 
-Or, if you're really brave (and have Node.js installed) you code try out the repl:
+### Tests
+
+For example code the best place to look is the test suite, [view the source](https://github.com/thatismatt/teslo/blob/master/test/teslo.evaluate.tests.js) or [run them online](http://thatismatt.github.io/teslo/).
+
+### REPL
+
+There's a web REPL at http://thatismatt.github.io/teslo/repl.html .
+
+Or, if you're feeling brave (and have Node.js installed) you code try out the node REPL:
 
     git clone https://github.com/thatismatt/teslo.git
     cd teslo
