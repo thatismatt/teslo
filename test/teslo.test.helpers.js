@@ -17,21 +17,16 @@
             assert.ok(o.type, "no type property");
             assert.equal(o.type, type);
             if (propFn && v !== undefined) assert.deepEqual(propFn(o), v); }; }
-    var isFunction = isOfType("Function");
-    var isList     = isOfType("List", function (o) { var r = []; for (var i = 0; i < o.length; i++) { r.push(simplify(o[i])); } return r; } );
-    var isNumber   = isOfType("Number", function (o) { return o.value; });
-    var isString   = isOfType("String", function (o) { return o.value; });
-    var isSymbol   = isOfType("Symbol", function (o) { return o.name; });
-    var isType     = isOfType("Type", function (o) { return o.name; });
 
     teslo.test.helpers = {
         isOfType:   isOfType,
-        isFunction: isFunction,
-        isList:     isList,
-        isNumber:   isNumber,
-        isString:   isString,
-        isSymbol:   isSymbol,
-        isType:     isType
+        isFunction: isOfType("Function"),
+        isList:     isOfType("List", function (o) { var r = []; for (var i = 0; i < o.length; i++) { r.push(simplify(o[i])); } return r; } ),
+        isNumber:   isOfType("Number", function (o) { return o.value; }),
+        isString:   isOfType("String", function (o) { return o.value; }),
+        isSymbol:   isOfType("Symbol", function (o) { return o.name; }),
+        isKeyword:  isOfType("Keyword", function (o) { return o.name; }),
+        isType:     isOfType("Type", function (o) { return o.name; })
     };
 })(this.chai || require("chai"),
    this.teslo || require("../"));

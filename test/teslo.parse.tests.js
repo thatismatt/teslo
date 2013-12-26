@@ -3,6 +3,15 @@
     chai.Assertion.includeStack = true;
     var assert = chai.assert;
 
+    var isOfType   = teslo.test.helpers.isOfType;
+    var isFunction = teslo.test.helpers.isFunction;
+    var isList     = teslo.test.helpers.isList;
+    var isNumber   = teslo.test.helpers.isNumber;
+    var isString   = teslo.test.helpers.isString;
+    var isSymbol   = teslo.test.helpers.isSymbol;
+    var isKeyword  = teslo.test.helpers.isKeyword;
+    var isType     = teslo.test.helpers.isType;
+
     suite("parser", function () {
 
         suite("forms", function () {
@@ -23,27 +32,24 @@
                 var result = teslo.parse("(f)");
                 assert.ok(result.success);
                 assert.equal(result.forms[0].length, 1);
-                assert.equal(result.forms[0][0].name, "f");
-                assert.equal(result.forms[0][0].type, "Symbol");
+                isSymbol(result.forms[0][0], "f");
             });
 
             test("list containing 2 symbols", function () {
                 var result = teslo.parse("(f a)");
                 assert.ok(result.success);
                 assert.equal(result.forms[0].length, 2);
-                assert.equal(result.forms[0][0].name, "f");
-                assert.equal(result.forms[0][0].type, "Symbol");
-                assert.equal(result.forms[0][1].name, "a");
-                assert.equal(result.forms[0][1].type, "Symbol");
+                isSymbol(result.forms[0][0], "f");
+                isSymbol(result.forms[0][1], "a");
             });
 
             test("multi character symbols", function () {
                 var result = teslo.parse("(zero one two three)");
                 assert.ok(result.success);
-                assert.equal(result.forms[0][0].name, "zero");
-                assert.equal(result.forms[0][1].name, "one");
-                assert.equal(result.forms[0][2].name, "two");
-                assert.equal(result.forms[0][3].name, "three");
+                isSymbol(result.forms[0][0], "zero");
+                isSymbol(result.forms[0][1], "one");
+                isSymbol(result.forms[0][2], "two");
+                isSymbol(result.forms[0][3], "three");
             });
 
             test("multiple top level lists", function () {
@@ -72,38 +78,32 @@
             test("number", function () {
                 var result = teslo.parse("123");
                 assert.ok(result.success);
-                assert.equal(result.forms[0].type, "Number");
-                assert.equal(result.forms[0].value, 123);
+                isNumber(result.forms[0], 123);
             });
 
             test("number - decimal", function () {
                 var result = teslo.parse("123.123 .456");
                 assert.ok(result.success);
-                assert.equal(result.forms[0].type, "Number");
-                assert.equal(result.forms[0].value, 123.123);
-                assert.equal(result.forms[1].type, "Number");
-                assert.equal(result.forms[1].value, 0.456);
+                isNumber(result.forms[0], 123.123);
+                isNumber(result.forms[1], 0.456);
             });
 
             test("string", function () {
                 var result = teslo.parse('"Hello world!"');
                 assert.ok(result.success);
-                assert.equal(result.forms[0].type, "String");
-                assert.equal(result.forms[0].value, "Hello world!");
+                isString(result.forms[0], "Hello world!");
             });
 
             test("empty string", function () {
                 var result = teslo.parse('""');
                 assert.ok(result.success);
-                assert.equal(result.forms[0].type, "String");
-                assert.equal(result.forms[0].value, "");
+                isString(result.forms[0], "");
             });
 
             test("keyword", function () {
                 var result = teslo.parse(':kwd');
                 assert.ok(result.success);
-                assert.equal(result.forms[0].type, "Keyword");
-                assert.equal(result.forms[0].name, "kwd");
+                isKeyword(result.forms[0], "kwd");
             });
 
         });
@@ -113,30 +113,25 @@
             test("quote list", function () {
                 var result = teslo.parse("'()"); // (quote ())
                 assert.ok(result.success);
-                assert.equal(result.forms[0].type, "List");
-                assert.equal(result.forms[0][0].type, "Symbol");
-                assert.equal(result.forms[0][0].name, "quote");
-                assert.equal(result.forms[0][1].type, "List");
+                isList(result.forms[0]);
+                isSymbol(result.forms[0][0], "quote");
+                isList(result.forms[0][1]);
                 assert.equal(result.forms[0][1].length, 0);
             });
 
             test("quote symbol in list", function () {
                 var result = teslo.parse("(f 'x)"); // (f (quote x))
                 assert.ok(result.success);
-                assert.equal(result.forms[0][1][0].type, "Symbol");
-                assert.equal(result.forms[0][1][0].name, "quote");
-                assert.equal(result.forms[0][1][1].type, "Symbol");
-                assert.equal(result.forms[0][1][1].name, "x");
+                isSymbol(result.forms[0][1][0], "quote");
+                isSymbol(result.forms[0][1][1], "x");
             });
 
             test("comment", function () {
                 var result = teslo.parse("; a comment");
                 assert.ok(result.success);
-                assert.equal(result.forms[0].type, "List");
-                assert.equal(result.forms[0][0].type, "Symbol");
-                assert.equal(result.forms[0][0].name, "comment");
-                assert.equal(result.forms[0][1].type, "String");
-                assert.equal(result.forms[0][1].value, " a comment");
+                isList(result.forms[0]);
+                isSymbol(result.forms[0][0], "comment");
+                isString(result.forms[0][1], " a comment");
             });
 
             test("comment between lists", function () {
@@ -148,28 +143,25 @@
             test("syntax quote", function () {
                 var result = teslo.parse("`(a)"); // (syntax-quote (a))
                 assert.ok(result.success);
-                assert.equal(result.forms[0].type, "List");
-                assert.equal(result.forms[0][0].type, "Symbol");
-                assert.equal(result.forms[0][0].name, "syntax-quote");
-                assert.equal(result.forms[0][1][0].name, "a");
+                isList(result.forms[0]);
+                isSymbol(result.forms[0][0], "syntax-quote");
+                isSymbol(result.forms[0][1][0], "a");
             });
 
             test("unquote", function () {
                 var result = teslo.parse("`(~a)"); // (syntax-quote ((unquote a)))
                 assert.ok(result.success);
-                assert.equal(result.forms[0].type, "List");
-                assert.equal(result.forms[0][1][0][0].type, "Symbol");
-                assert.equal(result.forms[0][1][0][0].name, "unquote");
-                assert.equal(result.forms[0][1][0][1].name, "a");
+                isList(result.forms[0]);
+                isSymbol(result.forms[0][1][0][0], "unquote");
+                isSymbol(result.forms[0][1][0][1], "a");
             });
 
             test("unquote splice", function () {
                 var result = teslo.parse("`(~@a)"); // (syntax-quote ((unquote-splice a)))
                 assert.ok(result.success);
-                assert.equal(result.forms[0].type, "List");
-                assert.equal(result.forms[0][1][0][0].type, "Symbol");
-                assert.equal(result.forms[0][1][0][0].name, "unquote-splice");
-                assert.equal(result.forms[0][1][0][1].name, "a");
+                isList(result.forms[0]);
+                isSymbol(result.forms[0][1][0][0], "unquote-splice");
+                isSymbol(result.forms[0][1][0][1], "a");
             });
 
         });
@@ -178,4 +170,4 @@
 
 })(this.mocha || new require("mocha").Mocha,
    this.chai || require("chai"),
-   this.teslo || require("../"));
+   this.teslo || require("../test/teslo.test.helpers.js") && require("../"));
