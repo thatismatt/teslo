@@ -15,7 +15,7 @@
     function each2 (arr, f) { for (var i = 0; i < arr.length; i += 2) { f(arr[i], arr[i + 1]); } }
     function map (arr, f) { var r = []; each(arr || [], function (x, i) { r.push(f(x, i)); }); return r; }
     function concat (x) { return Array.prototype.concat.apply([], x); };
-    function cons (a, b) { return arrayToList(concat([[a], b])); }
+    function cons (a, b) { return jsArrayToTesloArray(concat([[a], b])); }
     function find (arr, f) { for (var i = 0; i < arr.length; i++) { if (f(arr[i], i)) return arr[i]; } return undefined; }
     function zip (as, bs) { return map(as, function (a, i) { return [a, bs[i]]; }); }
     function zipmap (ks, vs) { var r = {}; map(zip(ks, vs), function (x) { r[x[0]] = x[1]; }); return r; }
@@ -36,12 +36,14 @@
 
     function isOfType (t) { return function (x) { return x && x.type === t; }; }
     var isList = isOfType("List");
+    var isArray = isOfType("Array");
     var isString = isOfType("String");
     var isNumber = isOfType("Number");
     var isSymbol = isOfType("Symbol");
     var isKeyword = isOfType("Keyword");
     var isFunction = isOfType("Function");
     var isType = isOfType("Type");
+    function isSequence (x) { return isList(x) || isArray(x); }
     function isMacro (x) { return isFunction(x) && x.macro; }
     function isSpecial (x) { return isFunction(x) && x.special; }
     function isOfTypeSymbol (x) { return isSymbol(x) && x.name === ":"; }
@@ -62,8 +64,8 @@
         return t; }
     each(["Type", "Function", "Symbol", "String", "Number", "Keyword", "List"], mkType);
 
-    function mkList () { var l = toArray(arguments); l.type = "List"; return l; }
-    function arrayToList (a) { return mkList.apply(null, a); }
+    function mkArray () { var l = toArray(arguments); l.type = "Array"; return l; }
+    function jsArrayToTesloArray (a) { return mkArray.apply(null, a); }
     function mkSymbol (x) { return { name: x, type: "Symbol" }; }
     function mkString (x) { return { value: x, type: "String" }; }
     function mkNumber (x) { return { value: x, type: "Number" }; }
@@ -89,7 +91,7 @@
             .map(second).map(mkKeyword);
     var list = cromp.recursive(function () {
         return cromp.between(open, close, cromp.optional(forms))
-            .map(arrayToList); });
+            .map(jsArrayToTesloArray); });
     var macro = cromp.recursive(function () {
         return cromp.choose(quote,
                             syntaxQuote,
@@ -104,16 +106,16 @@
 
     // Reader Macros
     var quote = cromp.seq(cromp.character("'"), form)
-            .map(function (x) { return mkList(mkSymbol("quote"), second(x)); });
+            .map(function (x) { return mkArray(mkSymbol("quote"), second(x)); });
     var syntaxQuote = cromp.seq(cromp.character("`"), form)
-            .map(function (x) { return mkList(mkSymbol("syntax-quote"), second(x)); });
+            .map(function (x) { return mkArray(mkSymbol("syntax-quote"), second(x)); });
     var unquote = cromp.seq(cromp.character("~"), form)
-            .map(function (x) { return mkList(mkSymbol("unquote"), second(x)); });
+            .map(function (x) { return mkArray(mkSymbol("unquote"), second(x)); });
     var unquoteSplice = cromp.seq(cromp.string("~@"), form)
-            .map(function (x) { return mkList(mkSymbol("unquote-splice"), second(x)); });
+            .map(function (x) { return mkArray(mkSymbol("unquote-splice"), second(x)); });
     var comment = cromp.seq(cromp.character(";"),
                             cromp.regex(/.*[\s\S]/).map(first)) // [\s\S] matches & consumes newline (unlike $)
-            .map(function (x) { return mkList(mkSymbol("comment"),
+            .map(function (x) { return mkArray(mkSymbol("comment"),
                                               mkString(second(x))); });
 
     teslo.parse = function (src) {
@@ -148,15 +150,15 @@
 
     bootstrap["macro-expand"] = mkSpecial(function (env, args) {
         var form = first(args);
-        if (isList(form) && form.length > 0) {
+        if (isSequence(form) && form.length > 0) {
             var expanded = tryExpandForm(env, form);
-            if (!isList(expanded)) return expanded;
-            return arrayToList(map(expanded, compose(curry(bootstrap["macro-expand"].invoke, env), mkList))); }
+            if (!isSequence(expanded)) return expanded;
+            return jsArrayToTesloArray(map(expanded, compose(curry(bootstrap["macro-expand"].invoke, env), mkArray))); }
         return form; });
 
     bootstrap["eval"] = mkFunction(function (env, args) {
         var x = bootstrap["macro-expand"].invoke(env, args);
-        if (isList(x)) {
+        if (isSequence(x)) {
             if (x.length === 0) return x;
             var f = evaluateForm(env, first(x));
             if (!f.invoke) throw new Error(bootstrap.string.invoke(null, [f]) + " can't be invoked.");
@@ -173,11 +175,11 @@
     bootstrap["quote"] = mkSpecial(function (env, args) { return first(args); });
     bootstrap["syntax-quote"] = mkSpecial(function (env, args) {
         function isUnquote (f) { return isSymbol(f) && (f.name === "unquote" || f.name === "unquote-splice"); }
-        function isSplicedForm (f) { return isList(f) && isSymbol(first(f)) && first(f).name === "unquote-splice"; }
+        function isSplicedForm (f) { return isSequence(f) && isSymbol(first(f)) && first(f).name === "unquote-splice"; }
         function unquoteForm (form) {
-            if (!isList(form)) return form;
+            if (!isSequence(form)) return form;
             if (isUnquote(first(form))) return evaluateForm(env, second(form));
-            return arrayToList(
+            return jsArrayToTesloArray(
                 flatmap(form, function (f) { return isSplicedForm(f) ? unquoteForm(f) : [unquoteForm(f)]; })); }
         return unquoteForm(args[0]); });
 
@@ -187,13 +189,13 @@
     function bind (params, args) {
         var frame = {};
         for (var i = 0; i < params.length; i++) {
-            if (isList(params[i])) {
+            if (isSequence(params[i])) {
                 if (params[i].length === 3 && isOfTypeSymbol(second(params[i]))) {
                     frame[first(params[i]).name] = args[i];
                     return frame; }
                 return merge(frame, bind(rest(params[i]), membersToArray(args[i]))); }
             if (params[i].name === ".") {
-                frame[params[i + 1].name] = mkList.apply(null, args.slice(i));
+                frame[params[i + 1].name] = mkArray.apply(null, args.slice(i));
                 // TODO: error if the rest param is malformed - it must be one symbol
                 return frame; }
             frame[params[i].name] = args[i]; }
@@ -208,7 +210,7 @@
         return isSymbol(pattern) || equals(pattern, arg) || isTypeMatch(pattern, arg); }
 
     function isTypeMatch (pattern, arg) {
-        if (!isList(pattern)) return false;
+        if (!isSequence(pattern)) return false;
         if (pattern.length === 3 && isOfTypeSymbol(second(pattern)))
             return third(pattern).name === arg.type;
         return first(pattern).name === arg.type
@@ -240,7 +242,7 @@
     bootstrap["macro"] = mkSpecial(compile(mkMacro));
 
     function appliedFunctionForm (fs, args) {
-        var nbs = flatmap(fs, function (f) { return [arrayToList(f.params), f.body]; });
+        var nbs = flatmap(fs, function (f) { return [jsArrayToTesloArray(f.params), f.body]; });
         return cons(cons(mkSymbol("fn"), nbs), args); }
 
     bootstrap["let"] = mkMacro(function (env, args) {
@@ -272,7 +274,7 @@
 
     bootstrap["string"] = mkFunction(function (env, args) {
         var arg = first(args);
-        var str = compose(curry(bootstrap.string.invoke, env), mkList);
+        var str = compose(curry(bootstrap.string.invoke, env), mkArray);
         return isSymbol(arg) ? arg.name :
             isString(arg)    ? '"' + arg.value + '"' :
             isNumber(arg)    ? arg.value :
@@ -282,6 +284,7 @@
             isFunction(arg)  ? "<Function>" :
             isType(arg)      ? "<Type " + arg.name + ">" :
             isList(arg)      ? "(" + map(arg, str).join(" ") + ")" :
+            isArray(arg)     ? "[" + map(arg, str).join(" ") + "]" :
             arg.type         ? str(cons(arg.type, map(Object.keys(arg.members),
                                          function (k) { return str(arg.members[k]); }))) :
             /* otherwise */    arg; });
@@ -293,7 +296,7 @@
     bootstrap["first"] = mkFunction(function (env, args) {
         return first(first(args)); });
     bootstrap["rest"] = mkFunction(function (env, args) {
-        return arrayToList(rest(first(args))); });
+        return jsArrayToTesloArray(rest(first(args))); });
 
     // TODO: atom, =, cond, ns
     // TODO: "interop"/"introspection" - vars, lookup/env
@@ -323,16 +326,16 @@
         //for (var t in types) { env.def(t, types[t]); }
         return env; };
 
-    function evaluateForm (env, form) { return bootstrap.eval.invoke(env, mkList(form)); }
+    function evaluateForm (env, form) { return bootstrap.eval.invoke(env, mkArray(form)); }
     // DEBUG
-    // function log (args) { bootstrap.print.invoke(null, mkList(args)); }
+    // function log (args) { bootstrap.print.invoke(null, mkArray(args)); }
 
     teslo.evaluate = function (src, env) {
         var result = teslo.parse(src);
         if (result.success)
             return result.forms.map(compose(curry(evaluateForm, env),
                                             curry(bootstrap["macro-expand"].invoke, env),
-                                            mkList));
+                                            mkArray));
         else
             throw new Error("Parse error: " + (result.message || "unknown error.")); };
 

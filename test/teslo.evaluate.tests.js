@@ -5,7 +5,7 @@
 
     var isOfType   = teslo.test.helpers.isOfType;
     var isFunction = teslo.test.helpers.isFunction;
-    var isList     = teslo.test.helpers.isList;
+    var isSequence     = teslo.test.helpers.isSequence;
     var isNumber   = teslo.test.helpers.isNumber;
     var isString   = teslo.test.helpers.isString;
     var isSymbol   = teslo.test.helpers.isSymbol;
@@ -53,7 +53,7 @@
             test("assign list to my-list", function () {
                 var env = evaluate("(def my-list '(1 2 3))");
                 var myList = env.lookup("my-list");
-                isList(env, "my-list", [1, 2, 3]);
+                isSequence(myList, [1, 2, 3]);
             });
 
             test("two defs", function () {
@@ -225,21 +225,21 @@
             test("variadic function", function () {
                 var env = evaluate("(def f (fn (. xs) xs))");
                 var noArgs = evaluateForm("(f)", env);
-                isList(noArgs, []);
+                isSequence(noArgs, []);
                 var oneArg = evaluateForm("(f 1)", env);
-                isList(oneArg, [1]);
+                isSequence(oneArg, [1]);
                 var twoArgs = evaluateForm("(f 1 2)", env);
-                isList(twoArgs, [1, 2]);
+                isSequence(twoArgs, [1, 2]);
             });
 
             test("variadic function with an initial named parameter", function () {
                 var env = evaluate("(def f (fn (x . xs) `(~x ~xs)))");
                 var oneArg = evaluateForm("(f 1)", env);
                 isNumber(oneArg[0], 1);
-                isList(oneArg[1], []);
+                isSequence(oneArg[1], []);
                 var twoArgs = evaluateForm("(f 1 2)", env);
                 isNumber(twoArgs[0], 1);
-                isList(twoArgs[1], [2]);
+                isSequence(twoArgs[1], [2]);
             });
 
             test("argument destructuring", function () {
@@ -398,15 +398,15 @@
 
             test("unquote splice", function () {
                 var env = evaluate("(def b '(1 2 3)) (def a `(0 ~@b))");
-                isList(env, "a", [0, 1, 2, 3]);
+                isSequence(evaluateForm("a", env), [0, 1, 2, 3]);
             });
 
             test("multiple spliced forms inside other plain forms", function () {
                 var env = evaluate("(def b 1) (def a `(x (y ~b ~b) ~b))");
                 var a = env.lookup("a");
-                isList(a);
+                isSequence(a);
                 isSymbol(a[0], "x");
-                isList(a[1], ["y", 1, 1]);
+                isSequence(a[1], ["y", 1, 1]);
                 isNumber(a[2], 1);
             });
 
@@ -455,7 +455,7 @@
 
             test("result not evaluated", function () {
                 var env = evaluate("(defm m (x) `(~x ~x))");
-                isList(evaluateForm("(macro-expand (m a))", env), ["a", "a"]);
+                isSequence(evaluateForm("(macro-expand (m a))", env), ["a", "a"]);
             });
 
         });
@@ -468,7 +468,7 @@
 
             test("rest", function () {
                 var rest = evaluateForm("(rest '(1 2 3))");
-                isList(rest, [2, 3]);
+                isSequence(rest, [2, 3]);
             });
 
             test("identity", function () {
@@ -511,8 +511,8 @@
             });
 
             test("lists", function () {
-                isList(evaluateForm("(List)"));
-                isList(evaluateForm("(List 1 (List))"));
+                isSequence(evaluateForm("(List)"));
+                isSequence(evaluateForm("(List 1 (List))"));
             });
 
         });

@@ -5,7 +5,7 @@
 
     var isOfType   = teslo.test.helpers.isOfType;
     var isFunction = teslo.test.helpers.isFunction;
-    var isList     = teslo.test.helpers.isList;
+    var isSequence = teslo.test.helpers.isSequence;
     var isNumber   = teslo.test.helpers.isNumber;
     var isString   = teslo.test.helpers.isString;
     var isSymbol   = teslo.test.helpers.isSymbol;
@@ -113,9 +113,9 @@
             test("quote list", function () {
                 var result = teslo.parse("'()"); // (quote ())
                 assert.ok(result.success);
-                isList(result.forms[0]);
+                isSequence(result.forms[0]);
                 isSymbol(result.forms[0][0], "quote");
-                isList(result.forms[0][1]);
+                isSequence(result.forms[0][1]);
                 assert.equal(result.forms[0][1].length, 0);
             });
 
@@ -129,7 +129,7 @@
             test("comment", function () {
                 var result = teslo.parse("; a comment");
                 assert.ok(result.success);
-                isList(result.forms[0]);
+                isSequence(result.forms[0]);
                 isSymbol(result.forms[0][0], "comment");
                 isString(result.forms[0][1], " a comment");
             });
@@ -143,7 +143,7 @@
             test("syntax quote", function () {
                 var result = teslo.parse("`(a)"); // (syntax-quote (a))
                 assert.ok(result.success);
-                isList(result.forms[0]);
+                isSequence(result.forms[0]);
                 isSymbol(result.forms[0][0], "syntax-quote");
                 isSymbol(result.forms[0][1][0], "a");
             });
@@ -151,7 +151,7 @@
             test("unquote", function () {
                 var result = teslo.parse("`(~a)"); // (syntax-quote ((unquote a)))
                 assert.ok(result.success);
-                isList(result.forms[0]);
+                isSequence(result.forms[0]);
                 isSymbol(result.forms[0][1][0][0], "unquote");
                 isSymbol(result.forms[0][1][0][1], "a");
             });
@@ -159,7 +159,7 @@
             test("unquote splice", function () {
                 var result = teslo.parse("`(~@a)"); // (syntax-quote ((unquote-splice a)))
                 assert.ok(result.success);
-                isList(result.forms[0]);
+                isSequence(result.forms[0]);
                 isSymbol(result.forms[0][1][0][0], "unquote-splice");
                 isSymbol(result.forms[0][1][0][1], "a");
             });

@@ -20,13 +20,17 @@
 
     teslo.test.helpers = {
         isOfType:   isOfType,
+        isType:     isOfType("Type", function (o) { return o.name; }),
         isFunction: isOfType("Function"),
-        isList:     isOfType("List", function (o) { var r = []; for (var i = 0; i < o.length; i++) { r.push(simplify(o[i])); } return r; } ),
         isNumber:   isOfType("Number", function (o) { return o.value; }),
         isString:   isOfType("String", function (o) { return o.value; }),
         isSymbol:   isOfType("Symbol", function (o) { return o.name; }),
         isKeyword:  isOfType("Keyword", function (o) { return o.name; }),
-        isType:     isOfType("Type", function (o) { return o.name; })
+        isArray:    isOfType("Array", function (o) { var r = []; for (var i = 0; i < o.length; i++) { r.push(simplify(o[i])); } return r; } ),
+        isList:     isOfType("List",
+                             function (o) { var r = []; for (var i = o; i.members.tail; i = i.members.head) {
+                                 r.push(simplify(i.members.head)); } return r; } ),
+        isSequence: function (x) { return teslo.test.helpers["is" + x.type].apply(null, arguments); }
     };
 })(this.chai || require("chai"),
    this.teslo || require("../"));
