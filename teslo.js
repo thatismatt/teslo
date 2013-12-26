@@ -112,7 +112,7 @@
     var unquoteSplice = cromp.seq(cromp.string("~@"), form)
             .map(function (x) { return mkList(mkSymbol("unquote-splice"), second(x)); });
     var comment = cromp.seq(cromp.character(";"),
-                            cromp.regex(/.*[\s\S]/)) // [\s\S] matches & consumes newline (unlike $)
+                            cromp.regex(/.*[\s\S]/).map(first)) // [\s\S] matches & consumes newline (unlike $)
             .map(function (x) { return mkList(mkSymbol("comment"),
                                               mkString(second(x))); });
 
