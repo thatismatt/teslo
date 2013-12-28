@@ -1,24 +1,24 @@
 # Features
 
- * Defining/extending the application of a data type
-    (defn apply ((s : String) (n : Number)) (nth s n)) ("asdf" 1) ;=> "a"
+ * Modularisation
+   * Namespacing
+   * Loading / Requiring
+ * Debugger
+ * Dependent let bindings:
+    (let (x 1 y x) ...)
  * Keywords as member getters
     (deft A (x)) (def a (A "x")) (a :x) ;=> "x"
     ;; implementation:
     (defn apply ((a : A) :x) (. a x))
  * Variadic type constructors `(deft T (. xs))`
- * Modularisation
-   * Namespacing
-   * Loading / Requiring
- * Debugger
+ * Defining/extending the application of a data type
+    (defn apply ((s : String) (n : Number)) (nth s n)) ("asdf" 1) ;=> "a"
  * Escape characters in strings
  * More read literals
    * Arrays - []
    * Maps - {}
    * Sets?
    * Regexs?
- * Dependent let bindings:
-    (let (x 1 y x) ...)
  * Constructor functions for some built in types:
     (Symbol "name")
     (Keyword "name")
