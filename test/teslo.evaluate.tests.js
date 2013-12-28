@@ -320,6 +320,11 @@
                 isType(result, "Type");
             });
 
+            test("type of Array", function () {
+                var result = evaluateForm("(type '())");
+                isType(result, "Array");
+            });
+
         });
 
         suite("pattern matching", function () {

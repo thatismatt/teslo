@@ -62,7 +62,7 @@
                       return { type: name, constructor: c, members: zipmap(map(c, get("name")), args) }; } };
         types[name] = t;
         return t; }
-    each(["Type", "Function", "Symbol", "String", "Number", "Keyword", "List"], mkType);
+    each(["Type", "Function", "Symbol", "String", "Number", "Keyword", "List", "Array"], mkType);
 
     function mkArray () { return toArray(arguments); }
     function jsArrayToTesloArray (a) { return mkArray.apply(null, a); }
