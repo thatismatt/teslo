@@ -291,8 +291,8 @@
     // Array functions
     bootstrap["array-first*"] = mkFunction(function (env, args) {
         return first(first(args)); });
-    bootstrap["rest"] = mkFunction(function (env, args) {
-        return jsArrayToTesloArray(rest(first(args))); });
+    bootstrap["array-rest*"] = mkFunction(function (env, args) {
+        return rest(first(args)); });
 
     // TODO: atom, =, cond, ns
     // TODO: "interop"/"introspection" - vars, lookup/env

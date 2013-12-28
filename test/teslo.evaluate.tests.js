@@ -475,8 +475,13 @@
                 isNumber(evaluateForm("(first (List 1 nil))"), 1);
             });
 
-            test("rest", function () {
+            test("rest - array", function () {
                 var rest = evaluateForm("(rest '(1 2 3))");
+                isSequence(rest, [2, 3]);
+            });
+
+            test("rest - list", function () {
+                var rest = evaluateForm("(rest (List 1 (List 2 (List 3 nil))))");
                 isSequence(rest, [2, 3]);
             });
 

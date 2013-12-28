@@ -7,12 +7,6 @@
 (defn identity (x) x)
 
 
-;; Sequences
-
-(defn first ((a : Array)) (array-first* a)
-            ((List h t)) h)
-
-
 ;; Lists
 
 (deft List ()
@@ -20,5 +14,11 @@
 
 (def nil (List))
 
-;; (defn rest (List h t) t
-;;            (List) nil)
+
+;; Sequences
+
+(defn first ((a : Array)) (array-first* a)
+            ((List h t)) h)
+(defn rest ((a : Array)) (array-rest* a)
+           ((List h t)) t
+           ((List)) nil)
