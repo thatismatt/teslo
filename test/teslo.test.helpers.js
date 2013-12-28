@@ -35,7 +35,7 @@
                                  r.push(simplify(o[i])); } return r; },
                              jsType),
         isList:     isOfType("List",
-                             function (o) { var r = []; for (var i = o; i.members.tail; i = i.members.head) {
+                             function (o) { var r = []; for (var i = o; i.members.tail; i = i.members.tail) {
                                  r.push(simplify(i.members.head)); } return r; } ),
         isSequence: function (x) { return teslo.test.helpers["is" + getType(x)].apply(null, arguments); }
     };
