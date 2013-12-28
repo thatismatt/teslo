@@ -36,9 +36,9 @@
     function jsType (x) { return /\[object (\w*)\]/.exec(Object.prototype.toString.call(x))[1]; }
     function isOfType (t) { return function (x) { return x && x.type === t; }; }
     var isList = isOfType("List");
-    var isArray = isOfType("Array");
-    function isString (x) { return Object.prototype.toString.call(x) == "[object String]"; }
-    function isNumber (x) { return Object.prototype.toString.call(x) == "[object Number]"; }
+    function isArray (x) { return jsType(x) === "Array"; }
+    function isString (x) { return jsType(x) === "String"; }
+    function isNumber (x) { return jsType(x) === "Number"; }
     var isSymbol = isOfType("Symbol");
     var isKeyword = isOfType("Keyword");
     var isFunction = isOfType("Function");
@@ -64,7 +64,7 @@
         return t; }
     each(["Type", "Function", "Symbol", "String", "Number", "Keyword", "List"], mkType);
 
-    function mkArray () { var l = toArray(arguments); l.type = "Array"; return l; }
+    function mkArray () { return toArray(arguments); }
     function jsArrayToTesloArray (a) { return mkArray.apply(null, a); }
     function mkSymbol (x) { return { name: x, type: "Symbol" }; }
     function mkKeyword (x) { return { name: x, type: "Keyword" }; };

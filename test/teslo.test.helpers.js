@@ -20,6 +20,7 @@
             if (propFn && v !== undefined) assert.deepEqual(propFn(o), v); }; }
 
     function jsType (x) { return /\[object (\w*)\]/.exec(Object.prototype.toString.call(x))[1]; }
+    function getType (x) { return x.type || jsType(x); }
 
     teslo.test.helpers = {
         isOfType:   isOfType,
@@ -29,11 +30,15 @@
         isString:   isOfType("String", function (x) { return x; }, jsType),
         isSymbol:   isOfType("Symbol", function (o) { return o.name; }),
         isKeyword:  isOfType("Keyword", function (o) { return o.name; }),
-        isArray:    isOfType("Array", function (o) { var r = []; for (var i = 0; i < o.length; i++) { r.push(simplify(o[i])); } return r; } ),
+        isArray:    isOfType("Array",
+                             function (o) { var r = []; for (var i = 0; i < o.length; i++) {
+                                 r.push(simplify(o[i])); } return r; },
+                             jsType),
         isList:     isOfType("List",
                              function (o) { var r = []; for (var i = o; i.members.tail; i = i.members.head) {
                                  r.push(simplify(i.members.head)); } return r; } ),
-        isSequence: function (x) { return teslo.test.helpers["is" + x.type].apply(null, arguments); }
+        isSequence: function (x) { return teslo.test.helpers["is" + getType(x)].apply(null, arguments); }
     };
+
 })(this.chai || require("chai"),
    this.teslo || require("../"));
