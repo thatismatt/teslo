@@ -34,6 +34,7 @@
     function get (p) { return function (x) { return x[p]; }; }
 
     function jsType (x) { return /\[object (\w*)\]/.exec(Object.prototype.toString.call(x))[1]; }
+    function getType (x) { return x.type || jsType(x); }
     function isOfType (t) { return function (x) { return x && x.type === t; }; }
     var isList = isOfType("List");
     function isArray (x) { return jsType(x) === "Array"; }
@@ -208,7 +209,7 @@
     function isTypeMatch (pattern, arg) {
         if (!isSequence(pattern)) return false;
         if (pattern.length === 3 && isOfTypeSymbol(second(pattern)))
-            return third(pattern).name === arg.type;
+            return third(pattern).name === getType(arg);
         return first(pattern).name === arg.type
             && rest(pattern).length === arg.constructor.length
             && all(zip(rest(pattern), membersToArray(arg)), isMatch); }
@@ -290,8 +291,8 @@
     bootstrap["print"] = mkFunction(function (env, args) {
         console.log(bootstrap.string.invoke(env, args)); });
 
-    // Array functions, used in prelude macros
-    bootstrap["first"] = mkFunction(function (env, args) {
+    // Array functions
+    bootstrap["array-first*"] = mkFunction(function (env, args) {
         return first(first(args)); });
     bootstrap["rest"] = mkFunction(function (env, args) {
         return jsArrayToTesloArray(rest(first(args))); });

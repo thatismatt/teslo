@@ -467,8 +467,12 @@
 
         suite("prelude", function () {
 
-            test("first", function () {
+            test("first - array", function () {
                 isNumber(evaluateForm("(first '(1))"), 1);
+            });
+
+            test("first - list", function () {
+                isNumber(evaluateForm("(first (List 1 nil))"), 1);
             });
 
             test("rest", function () {

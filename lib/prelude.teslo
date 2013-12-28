@@ -6,12 +6,19 @@
 
 (defn identity (x) x)
 
+
+;; Sequences
+
+(defn first ((a : Array)) (array-first* a)
+            ((List h t)) h)
+
+
+;; Lists
+
 (deft List ()
            (head tail))
 
 (def nil (List))
-
-;; (defn first (List h t) h)
 
 ;; (defn rest (List h t) t
 ;;            (List) nil)
