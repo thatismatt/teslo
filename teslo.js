@@ -281,8 +281,8 @@
             isMacro(arg)     ? "<Macro>" :
             isFunction(arg)  ? "<Function>" :
             isType(arg)      ? "<Type " + arg.name + ">" :
+            isArray(arg) ||
             isList(arg)      ? "(" + map(arg, str).join(" ") + ")" :
-            isArray(arg)     ? "[" + map(arg, str).join(" ") + "]" :
             arg.type         ? str(cons(arg.type, map(Object.keys(arg.members),
                                          function (k) { return str(arg.members[k]); }))) :
             /* otherwise */    arg; });
