@@ -28,18 +28,16 @@
     function curry (f) { var args = rest(arguments);
                          return function () { return f.apply(null, args.concat(toArray(arguments))); }; }
     var flatmap = compose(concat, map);
-    function typeEquals (a, b) { return a.type === b.type; }
-    function equals (a, b) { return a === b
-                             || (isKeyword(a) && isKeyword(b) && a.name === b.name); }
+    function equals (a, b) { return a === b || (isKeyword(a) && isKeyword(b) && a.name === b.name); }
     function get (p) { return function (x) { return x[p]; }; }
 
     function jsType (x) { return /\[object (\w*)\]/.exec(Object.prototype.toString.call(x))[1]; }
     function getType (x) { return x.type || jsType(x); }
-    function isOfType (t) { return function (x) { return x && x.type === t; }; }
+    function isOfType (t) { return function (x) { return x && getType(x) === t; }; }
     var isList = isOfType("List");
-    function isArray (x) { return jsType(x) === "Array"; }
-    function isString (x) { return jsType(x) === "String"; }
-    function isNumber (x) { return jsType(x) === "Number"; }
+    var isArray = isOfType("Array");
+    var isString = isOfType("String");
+    var isNumber = isOfType("Number");
     var isSymbol = isOfType("Symbol");
     var isKeyword = isOfType("Keyword");
     var isFunction = isOfType("Function");
@@ -258,8 +256,7 @@
     bootstrap["comment"] = mkSpecial(function (env, args) { });
 
     bootstrap["type"] = mkFunction(function (env, args) {
-        var x = first(args);
-        return types[x.type || jsType(x)]; });
+        return types[getType(first(args))]; });
     bootstrap["create-type"] = mkSpecial(function (env, args) {
         var name = evaluateForm(env, first(args));
         return mkType(name, rest(args)); });
