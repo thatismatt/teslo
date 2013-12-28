@@ -24,9 +24,12 @@
     (Keyword "name")
  * Interfaces / Type Classes
  * Reader macros written in teslo
+ * Metadata
+ * Documentation
 
 # Issues
 
+ * Negative numbers
  * Builtins can be overwritten
  * Macros don't check arg count
      (deft) ;=> Error: 'tname' not in scope.
