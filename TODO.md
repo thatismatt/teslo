@@ -31,8 +31,10 @@
 # Issues
 
  * Builtins can be overwritten
+ * defn doesn't overwrite overloads
+    (defn f () 0) (defn f () 1) (f) ;=> 0
  * Macros don't check arg count
-     (deft) ;=> Error: 'tname' not in scope.
+    (deft) ;=> Error: 'tname' not in scope.
  * Separate read and eval
  * Change read/parse to do one form at a time
  * No line numbers in errors
