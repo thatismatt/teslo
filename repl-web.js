@@ -58,10 +58,12 @@
 
     $form.keyup(function (e) {
         var key = e.keyCode || e.which;
-        if (key === 38 && historyIndex > 0) { // up
+        if (key === 38  // up
+            && historyIndex > 0) {
             historyIndex--;
             $in.val(history[historyIndex]); }
-        if (key === 40 && historyIndex < history.length) { // down
+        if (key === 40 // down
+            && historyIndex < history.length) {
             historyIndex++;
             $in.val(history[historyIndex]); } });
 
