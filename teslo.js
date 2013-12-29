@@ -46,6 +46,7 @@
     function isMacro (x) { return isFunction(x) && x.macro; }
     function isSpecial (x) { return isFunction(x) && x.special; }
     function isOfTypeSymbol (x) { return isSymbol(x) && x.name === ":"; }
+    function isVariadicSymbol (x) { return isSymbol(x) && x.name === "."; }
 
     // Types
     var types = {};
@@ -189,7 +190,7 @@
                     frame[first(params[i]).name] = args[i];
                     return frame; }
                 return merge(frame, bind(rest(params[i]), membersToArray(args[i]))); }
-            if (params[i].name === ".") {
+            if (isVariadicSymbol(params[i])) {
                 frame[params[i + 1].name] = mkArray.apply(null, args.slice(i));
                 // TODO: error if the rest param is malformed - it must be one symbol
                 return frame; }
@@ -216,9 +217,8 @@
         return function (env, args) {
             var overloads = {};
             each2(args, function (params, body) {
-                var isVariadic = any(params, function(p) { return p.name === "."; });
                 // TODO: only allow one variadic signature
-                var k = isVariadic ? "." : params.length;
+                var k = any(params, isVariadicSymbol) ? "." : params.length;
                 overloads[k] = overloads[k] || [];
                 overloads[k].push({ params: params, body: body }); });
             var x = mk(function (_env, fargs) {
