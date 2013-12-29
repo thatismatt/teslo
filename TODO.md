@@ -3,6 +3,7 @@
  * Modularisation
    * Namespacing
    * Loading / Requiring
+   * Private defs
  * Debugger
  * Dependent let bindings:
     (let (x 1 y x) ...)
