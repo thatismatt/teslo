@@ -88,6 +88,14 @@
                 isNumber(result.forms[1], 0.456);
             });
 
+            test("number - negative", function () {
+                var result = teslo.parse("-0 -1 -2.3");
+                assert.ok(result.success);
+                isNumber(result.forms[0], -0); // 0 does not deepEqual -0
+                isNumber(result.forms[1], -1);
+                isNumber(result.forms[2], -2.3);
+            });
+
             test("string", function () {
                 var result = teslo.parse('"Hello world!"');
                 assert.ok(result.success);

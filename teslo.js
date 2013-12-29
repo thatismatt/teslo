@@ -79,7 +79,7 @@
     var whitespace = cromp.regex(/\s+/);
     var optionalWhitespace = cromp.optional(whitespace);
     var eof = cromp.regex(/$/);
-    var number = cromp.regex(/(\.[0-9]+)|[0-9]+(\.[0-9]+)?/)
+    var number = cromp.regex(/-?((\.[0-9]+)|[0-9]+(\.[0-9]+)?)/)
             .map(first).map(parseFloat);
     var string = cromp.between(
         cromp.character('"'), cromp.character('"'),
