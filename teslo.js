@@ -162,7 +162,7 @@
             return f.invoke(env, fargs); }
         if (isSymbol(x)) {
             var v = env.lookup(x.name);
-            if (!v) throw new Error("'" + x.name + "' not in scope.");
+            if (v === undefined) throw new Error("'" + x.name + "' not in scope.");
             return v; }
         return x; });
 

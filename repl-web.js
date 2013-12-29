@@ -17,7 +17,7 @@
     function eval (line) {
         function evaluateLine () {
             var result = teslo.evaluate(line, env)[0];
-            if (!result) return undefined;
+            if (result === undefined) return undefined;
             env.def("$" + history.length, result);
             return toString("$" + history.length); }
 
