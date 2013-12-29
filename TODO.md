@@ -29,7 +29,6 @@
 
 # Issues
 
- * Negative numbers
  * Builtins can be overwritten
  * Macros don't check arg count
      (deft) ;=> Error: 'tname' not in scope.
@@ -69,3 +68,4 @@
  * Correct Readme:
    * link to tests (now there are gh-pages)
    * how to test the repl (no npm step required or online)
+ * Negative numbers
