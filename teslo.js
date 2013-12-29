@@ -15,7 +15,7 @@
     function each2 (arr, f) { for (var i = 0; i < arr.length; i += 2) { f(arr[i], arr[i + 1]); } }
     function map (arr, f) { var r = []; each(arr || [], function (x, i) { r.push(f(x, i)); }); return r; }
     function concat (x) { return Array.prototype.concat.apply([], x); };
-    function cons (a, b) { return jsArrayToTesloArray(concat([[a], b])); }
+    function cons (a, b) { return concat([[a], b]); }
     function find (arr, f) { for (var i = 0; i < arr.length; i++) { if (f(arr[i], i)) return arr[i]; } return undefined; }
     function zip (as, bs) { return map(as, function (a, i) { return [a, bs[i]]; }); }
     function zipmap (ks, vs) { var r = {}; map(zip(ks, vs), function (x) { r[x[0]] = x[1]; }); return r; }
@@ -65,7 +65,6 @@
     each(["Type", "Function", "Symbol", "String", "Number", "Keyword", "List", "Array"], mkType);
 
     function mkArray () { return toArray(arguments); }
-    function jsArrayToTesloArray (a) { return mkArray.apply(null, a); }
     function mkSymbol (x) { return { name: x, type: "Symbol" }; }
     function mkKeyword (x) { return { name: x, type: "Keyword" }; };
     function mkMacro (f) { var m = mkFunction(f); m.macro = true; return m; };
@@ -87,8 +86,7 @@
     var keyword = cromp.seq(cromp.character(":"), cromp.regex(/[a-z]+/).map(first))
             .map(second).map(mkKeyword);
     var list = cromp.recursive(function () {
-        return cromp.between(open, close, cromp.optional(forms))
-            .map(jsArrayToTesloArray); });
+        return cromp.between(open, close, cromp.optional(forms)); });
     var macro = cromp.recursive(function () {
         return cromp.choose(quote,
                             syntaxQuote,
@@ -149,7 +147,7 @@
         if (isSequence(form) && form.length > 0) {
             var expanded = tryExpandForm(env, form);
             if (!isSequence(expanded)) return expanded;
-            return jsArrayToTesloArray(map(expanded, compose(curry(bootstrap["macro-expand"].invoke, env), mkArray))); }
+            return map(expanded, compose(curry(bootstrap["macro-expand"].invoke, env), mkArray)); }
         return form; });
 
     bootstrap["eval"] = mkFunction(function (env, args) {
@@ -175,8 +173,7 @@
         function unquoteForm (form) {
             if (!isSequence(form)) return form;
             if (isUnquote(first(form))) return evaluateForm(env, second(form));
-            return jsArrayToTesloArray(
-                flatmap(form, function (f) { return isSplicedForm(f) ? unquoteForm(f) : [unquoteForm(f)]; })); }
+            return flatmap(form, function (f) { return isSplicedForm(f) ? unquoteForm(f) : [unquoteForm(f)]; }); }
         return unquoteForm(args[0]); });
 
     function membersToArray (x) {
@@ -237,7 +234,7 @@
     bootstrap["macro"] = mkSpecial(compile(mkMacro));
 
     function appliedFunctionForm (fs, args) {
-        var nbs = flatmap(fs, function (f) { return [jsArrayToTesloArray(f.params), f.body]; });
+        var nbs = flatmap(fs, function (f) { return [f.params, f.body]; });
         return cons(cons(mkSymbol("fn"), nbs), args); }
 
     bootstrap["let"] = mkMacro(function (env, args) {
