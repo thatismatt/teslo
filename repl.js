@@ -10,7 +10,7 @@ function completer (env) {
         var hits = vs.filter(function (c) { return c.indexOf(v) === 0; });
         return [hits, v]; }; }
 
-function repl() {
+function repl () {
     var env = teslo.environment();
     env.def("js-print", { invoke: function (env, args) { console.log(args[0]); } });
     teslo.evaluate(teslo.prelude, env);
@@ -21,20 +21,22 @@ function repl() {
     var resultIndex = 0;
     rdln.setPrompt("> ");
     rdln.prompt();
-    rdln.on("line", function (line) {
-        function evaluateLine () {
-            var result = teslo.evaluate(line, env);
-            if (result.length) {
-                for (var i = 0; i < result.length; i++) {
-                    if (result[i]) {
-                        env.def("$" + resultIndex, result[i]);
-                        teslo.evaluate("(print $" + resultIndex + ")", env);
-                        resultIndex++; } } } }
-           try {
+    rdln.on(
+        "line",
+        function (line) {
+            function evaluateLine () {
+                var result = teslo.evaluate(line, env);
+                if (result.length) {
+                    for (var i = 0; i < result.length; i++) {
+                        if (result[i]) {
+                            env.def("$" + resultIndex, result[i]);
+                            teslo.evaluate("(print $" + resultIndex + ")", env);
+                            resultIndex++; } } } }
+            try {
                 evaluateLine();
-           } catch (e) {
-               console.log(e); }
-        rdln.prompt(); })
+            } catch (e) {
+                console.log(e); }
+            rdln.prompt(); })
         .on("close", function () {
             process.exit(0); }); }
 
