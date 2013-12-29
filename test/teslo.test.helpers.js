@@ -3,7 +3,7 @@
     var assert = chai.assert;
 
     // assert helpers
-    function simplify (o) { return o.name || o; }
+    function simplify (o) { return o.members && o.members.name || o; }
     function isOfType (type, propFn, typeFn) {
         // args: env, n
         //    OR env, n, v
@@ -28,8 +28,8 @@
         isFunction: isOfType("Function"),
         isNumber:   isOfType("Number", function (x) { return x; }, jsType),
         isString:   isOfType("String", function (x) { return x; }, jsType),
-        isSymbol:   isOfType("Symbol", function (o) { return o.name; }),
-        isKeyword:  isOfType("Keyword", function (o) { return o.name; }),
+        isSymbol:   isOfType("Symbol", function (o) { return o.members.name; }),
+        isKeyword:  isOfType("Keyword", function (o) { return o.members.name; }),
         isArray:    isOfType("Array",
                              function (o) { var r = []; for (var i = 0; i < o.length; i++) {
                                  r.push(simplify(o[i])); } return r; },

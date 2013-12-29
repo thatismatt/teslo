@@ -28,8 +28,8 @@
     function curry (f) { var args = rest(arguments);
                          return function () { return f.apply(null, args.concat(toArray(arguments))); }; }
     var flatmap = compose(concat, map);
-    function equals (a, b) { return a === b || (isKeyword(a) && isKeyword(b) && a.name === b.name); }
-    function get (p) { return function (x) { return x[p]; }; }
+    function equals (a, b) { return a === b || (isKeyword(a) && isKeyword(b) && get("name")(a) === get("name")(b)); }
+    function get (p) { return function (x) { return x.members[p]; }; }
 
     function jsType (x) { return /\[object (\w*)\]/.exec(Object.prototype.toString.call(x))[1]; }
     function getType (x) { return x.type || jsType(x); }
@@ -45,8 +45,9 @@
     function isSequence (x) { return isList(x) || isArray(x); }
     function isMacro (x) { return isFunction(x) && x.macro; }
     function isSpecial (x) { return isFunction(x) && x.special; }
-    function isOfTypeSymbol (x) { return isSymbol(x) && x.name === ":"; }
-    function isVariadicSymbol (x) { return isSymbol(x) && x.name === "."; }
+    function isParticularSymbol (name) { return function (s) { return isSymbol(s) && get("name")(s) === name; }; }
+    var isOfTypeSymbol = isParticularSymbol(":");
+    var isVariadicSymbol = isParticularSymbol(".");
 
     // Types
     var types = {};
@@ -65,8 +66,8 @@
     each(["Type", "Function", "Symbol", "String", "Number", "Keyword", "List", "Array"], mkType);
 
     function mkArray () { return toArray(arguments); }
-    function mkSymbol (x) { return { name: x, type: "Symbol" }; }
-    function mkKeyword (x) { return { name: x, type: "Keyword" }; };
+    function mkSymbol (x) { return { members: { name: x }, type: "Symbol" }; }
+    function mkKeyword (x) { return { members: { name: x }, type: "Keyword" }; };
     function mkMacro (f) { var m = mkFunction(f); m.macro = true; return m; };
     function mkSpecial (f) { var s = mkFunction(f); s.special = true; return s; };
     function mkFunction (f) { return { invoke: f, type: "Function" }; };
@@ -127,18 +128,18 @@
         //    Then def is defined in terms of def-unquoted
         var symbol = first(args);
         var val = evaluateForm(env, second(args));
-        var currentVal = env.lookup(symbol.name);
+        var currentVal = env.lookup(get("name")(symbol));
         // function extension
         if (isFunction(currentVal)) {
             currentVal.overloads = merge(currentVal.overloads, val.overloads, function (a, b) { return concat([a, b]); }); }
         // function definition
-        else { env.def(symbol.name, val); }
+        else { env.def(get("name")(symbol), val); }
         return symbol; });
 
     function tryExpandForm (env, form) {
         var f = first(form);
         if (isSymbol(f)) {
-            var x = env.lookup(f.name);
+            var x = env.lookup(get("name")(f));
             if (x && isMacro(x)) return x.invoke(env, rest(form)); }
         return form; }
 
@@ -161,15 +162,15 @@
                     : rest(x).map(curry(evaluateForm, env));
             return f.invoke(env, fargs); }
         if (isSymbol(x)) {
-            var v = env.lookup(x.name);
-            if (v === undefined) throw new Error("'" + x.name + "' not in scope.");
+            var v = env.lookup(get("name")(x));
+            if (v === undefined) throw new Error("'" + get("name")(x) + "' not in scope.");
             return v; }
         return x; });
 
     bootstrap["quote"] = mkSpecial(function (env, args) { return first(args); });
     bootstrap["syntax-quote"] = mkSpecial(function (env, args) {
-        function isUnquote (f) { return isSymbol(f) && (f.name === "unquote" || f.name === "unquote-splice"); }
-        function isSplicedForm (f) { return isSequence(f) && isSymbol(first(f)) && first(f).name === "unquote-splice"; }
+        function isUnquote (f) { return isParticularSymbol("unquote")(f) || isParticularSymbol("unquote-splice")(f); }
+        function isSplicedForm (f) { return isSequence(f) && isParticularSymbol("unquote-splice")(first(f)); }
         function unquoteForm (form) {
             if (!isSequence(form)) return form;
             if (isUnquote(first(form))) return evaluateForm(env, second(form));
@@ -177,21 +178,21 @@
         return unquoteForm(args[0]); });
 
     function membersToArray (x) {
-        return map(x.constructor, function (p) { return x.members[p.name]; }); }
+        return map(x.constructor, function (p) { return x.members[get("name")(p)]; }); }
 
     function bind (params, args) {
         var frame = {};
         for (var i = 0; i < params.length; i++) {
             if (isSequence(params[i])) {
                 if (params[i].length === 3 && isOfTypeSymbol(second(params[i]))) {
-                    frame[first(params[i]).name] = args[i];
+                    frame[get("name")(first(params[i]))] = args[i];
                     return frame; }
                 return merge(frame, bind(rest(params[i]), membersToArray(args[i]))); }
             if (isVariadicSymbol(params[i])) {
-                frame[params[i + 1].name] = mkArray.apply(null, args.slice(i));
+                frame[get("name")(params[i + 1])] = mkArray.apply(null, args.slice(i));
                 // TODO: error if the rest param is malformed - it must be one symbol
                 return frame; }
-            frame[params[i].name] = args[i]; }
+            if (isSymbol(params[i])) frame[get("name")(params[i])] = args[i]; }
         return frame; }
 
     function findMatch (os, args) {
@@ -205,8 +206,8 @@
     function isTypeMatch (pattern, arg) {
         if (!isSequence(pattern)) return false;
         if (pattern.length === 3 && isOfTypeSymbol(second(pattern)))
-            return third(pattern).name === getType(arg);
-        return first(pattern).name === arg.type
+            return get("name")(third(pattern)) === getType(arg);
+        return get("name")(first(pattern)) === arg.type
             && rest(pattern).length === arg.constructor.length
             && all(zip(rest(pattern), membersToArray(arg)), isMatch); }
 
@@ -259,7 +260,7 @@
         return mkType(name, rest(args)); });
 
     bootstrap["name"] = mkSpecial(function (env, args) {
-        return first(args).name; });
+        return get("name")(first(args)); });
 
     bootstrap["do"] = mkSpecial(function (env, args) {
         var results = args.map(curry(evaluateForm, env));
@@ -268,7 +269,7 @@
     bootstrap["string"] = mkFunction(function (env, args) {
         var arg = first(args);
         var str = compose(curry(bootstrap.string.invoke, env), mkArray);
-        return isSymbol(arg) ? arg.name :
+        return isSymbol(arg) ? get("name")(arg) :
             isString(arg)    ? '"' + arg + '"' :
             isNumber(arg)    ? arg :
             isKeyword(arg)   ? ":" + arg.name :
