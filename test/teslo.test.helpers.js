@@ -16,7 +16,7 @@
             assert.isDefined(o);
             var actualType = typeFn ? typeFn(o) : o.type;
             assert.ok(actualType, "no type");
-            assert.equal(actualType, type);
+            assert.equal(actualType, type, "Type is '" + actualType + "' but expected '" + type + "'");
             if (propFn && v !== undefined) assert.deepEqual(propFn(o), v); }; }
 
     function jsType (x) { return /\[object (\w*)\]/.exec(Object.prototype.toString.call(x))[1]; }
