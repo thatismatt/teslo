@@ -6,13 +6,13 @@
  * Debugger
  * Dependent let bindings:
     (let (x 1 y x) ...)
- * Keywords as member getters
-    (deft A (x)) (def a (A "x")) (a :x) ;=> "x"
-    ;; implementation:
-    (defn apply ((a : A) :x) (. a x))
  * Variadic type constructors `(deft T (. xs))`
  * Defining/extending the application of a data type
     (defn apply ((s : String) (n : Number)) (nth s n)) ("asdf" 1) ;=> "a"
+   * Keywords as member getters
+      (deft A (x)) (def a (A "x")) (a :x) ;=> "x"
+      ;; implementation:
+      (defn apply ((A x) :x) x)
  * Escape characters in strings
  * More read literals
    * Arrays - []
