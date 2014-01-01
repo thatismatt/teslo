@@ -219,17 +219,17 @@
                 var k = any(params, isVariadicSymbol) ? "." : params.length;
                 overloads[k] = overloads[k] || [];
                 overloads[k].push({ params: params, body: body }); });
-            var x = mk(function (_env, fargs) {
-                var os = this.overloads[fargs.length] // exact arity match
-                      || this.overloads["."];         // variadic signature
+            var f = mk(function (_env, fargs) {
+                var os = f.overloads[fargs.length] // exact arity match
+                      || f.overloads["."];         // variadic signature
                 if (!os) throw new Error("No matching overload.");
                 var o = findMatch(os, fargs);
                 if (!o) throw new Error("No matching pattern.");
                 var frame = bind(o.params, fargs);
                 var result = evaluateForm(env.child(frame), o.body);
                 return result; });
-            x.overloads = overloads;
-            return x; }; }
+            f.overloads = overloads;
+            return f; }; }
 
     bootstrap["fn"] = mkSpecial(compile(mkFunction));
     bootstrap["macro"] = mkSpecial(compile(mkMacro));
