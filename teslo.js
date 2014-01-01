@@ -299,8 +299,9 @@
     each([["+", add], ["-", subtract], ["*", multiply], ["/", divide]],
          function (p) { var n = first(p); var f = second(p);
              bootstrap[n] = mkFunction(function (env, args) {
-                 return args.map(function (x) { return x; })
-                     .reduce(f) * (n === "-" && args.length === 1 ? -1 : 1); }); });
+                 return n === "-" && args.length === 1
+                     ? -1 * first(args)
+                     : args.reduce(f); }); });
 
     // Evaluation
     function Environment (parent) {
