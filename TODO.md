@@ -4,6 +4,7 @@
    * Namespacing
    * Loading / Requiring
    * Private defs
+   * Parameterised modules
  * Debugger
  * Dependent let bindings:
     (let (x 1 y x) ...)
