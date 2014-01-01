@@ -529,6 +529,34 @@
                 isSequence(evaluateForm("(List 1 (List))"));
             });
 
+            test("string - string", function () {
+                isString(evaluateForm('(string "str")'), '"str"');
+            });
+
+            test("string - numbers", function () {
+                isString(evaluateForm("(string 1)"), "1");
+                isString(evaluateForm("(string 1.1)"), "1.1");
+                isString(evaluateForm("(string -1)"), "-1");
+            });
+
+            test("string - symbol", function () {
+                isString(evaluateForm("(string 'a)"), "a");
+            });
+
+            test("string - keyword", function () {
+                isString(evaluateForm("(string :kwd)"), ":kwd");
+            });
+
+            test("string - array", function () {
+                isString(evaluateForm("(string '())"), "()");
+                isString(evaluateForm("(string '(1 2 3))"), "(1 2 3)");
+            });
+
+            test("string - list", function () {
+                isString(evaluateForm("(string (List))"), "()");
+                // TODO: isString(evaluateForm("(string (List 1 (List 2 (List 3 nil))))"), "(1 2 3)");
+            });
+
         });
 
     });

@@ -2,10 +2,19 @@
 
 (defm defn (name . signatures) `(def ~name (fn ~@signatures)))
 
-(defm deft (tname . params) `(def ~tname (create-type (name ~tname) ~@params)))
+(defm deft (tname . params) `(def ~tname (create-type (name '~tname) ~@params)))
 
 (defn identity (x) x)
 
+(defn string ((k : Keyword)) (+ ":" (name k))
+             ((s : Symbol))  (name s)
+             ((s : String))  (+ double-quote-string* s double-quote-string*)
+             ((n : Number))  (+ n "")
+             ((a : Array))   (sequence-string* a)
+             ((l : List))    (sequence-string* l)
+             (x) (string* x))
+;            ((a : Array))   (+ "(" (join (map string a) " ") ")")
+;            ((l : List))    (+ "(" (join (map string l) " ") ")"))
 
 ;; Lists
 

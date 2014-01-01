@@ -259,28 +259,28 @@
         var name = evaluateForm(env, first(args));
         return mkType(name, rest(args)); });
 
-    bootstrap["name"] = mkSpecial(function (env, args) {
+    bootstrap["name"] = mkFunction(function (env, args) {
         return get("name")(first(args)); });
 
     bootstrap["do"] = mkSpecial(function (env, args) {
         var results = args.map(curry(evaluateForm, env));
         return last(results); });
 
-    bootstrap["string"] = mkFunction(function (env, args) {
+    // HACK: currently don't support escape characters in strings
+    bootstrap["double-quote-string*"] = '"';
+
+    function str (env) { return function (x) { return env.lookup("string").invoke(env, [x]); }; }
+    bootstrap["sequence-string*"] = mkFunction(function (env, args) {
+        return "(" + map(first(args), str(env)).join(" ") + ")"; });
+
+    bootstrap["string*"] = mkFunction(function (env, args) {
         var arg = first(args);
-        var str = compose(curry(bootstrap.string.invoke, env), mkArray);
-        return isSymbol(arg) ? get("name")(arg) :
-            isString(arg)    ? '"' + arg + '"' :
-            isNumber(arg)    ? arg :
-            isKeyword(arg)   ? ":" + arg.name :
-            isSpecial(arg)   ? "<Special>" :
+        return isSpecial(arg)   ? "<Special>" :
             isMacro(arg)     ? "<Macro>" :
             isFunction(arg)  ? "<Function>" :
             isType(arg)      ? "<Type " + arg.name + ">" :
-            isArray(arg) ||
-            isList(arg)      ? "(" + map(arg, str).join(" ") + ")" :
             arg.type         ? str(cons(arg.type, map(Object.keys(arg.members),
-                                         function (k) { return str(arg.members[k]); }))) :
+                                                      function (k) { return str(arg.members[k]); }))) :
             /* otherwise */    arg; });
 
     bootstrap["print"] = mkFunction(function (env, args) {
