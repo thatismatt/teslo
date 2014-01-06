@@ -5,7 +5,7 @@
 
     var isOfType   = teslo.test.helpers.isOfType;
     var isFunction = teslo.test.helpers.isFunction;
-    var isSequence     = teslo.test.helpers.isSequence;
+    var isSequence = teslo.test.helpers.isSequence;
     var isNumber   = teslo.test.helpers.isNumber;
     var isString   = teslo.test.helpers.isString;
     var isSymbol   = teslo.test.helpers.isSymbol;
