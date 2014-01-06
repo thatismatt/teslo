@@ -10,11 +10,9 @@
              ((s : Symbol))  (name s)
              ((s : String))  (+ "\"" s "\"")
              ((n : Number))  (+ n "")
+             ((l : List))    (+ "(" (join (map string l) " ") ")")
              ((a : Array))   (sequence-string* a)
-             ((l : List))    (sequence-string* l)
-             (x) (string* x))
-;            ((a : Array))   (+ "(" (join (map string a) " ") ")")
-;            ((l : List))    (+ "(" (join (map string l) " ") ")"))
+             (x)             (string* x))
 
 (defn print (x) (log* (string x)))
 
@@ -41,3 +39,6 @@
 
 (defn reduce (f a (List h t)) (reduce f (f a h) t)
              (f a (List))     a)
+
+(defn join ((List h t) sep) (reduce (fn (a h*) (+ a sep h*)) h t)
+           ((List) sep) "")

@@ -554,7 +554,7 @@
 
             test("string - list", function () {
                 isString(evaluateForm("(string (List))"), "()");
-                // TODO: isString(evaluateForm("(string (List 1 (List 2 (List 3 nil))))"), "(1 2 3)");
+                isString(evaluateForm("(string (List 1 (List 2 (List 3 nil))))"), "(1 2 3)");
             });
 
             test("string - instance of type", function () {
