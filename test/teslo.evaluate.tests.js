@@ -557,6 +557,12 @@
                 // TODO: isString(evaluateForm("(string (List 1 (List 2 (List 3 nil))))"), "(1 2 3)");
             });
 
+            test("string - instance of type", function () {
+                var env = evaluate("(deft T () (a)) (def x (T))");
+                isString(evaluateForm("(string (T))", env), "(T)");
+                isString(evaluateForm("(string (T 1))", env), "(T 1)");
+            });
+
             test("map", function () {
                 isSequence(evaluateForm("(map (fn (x) (+ x 1)) nil)"), []);
                 isSequence(evaluateForm("(map (fn (x) (+ x 1)) (List 1 (List 2 (List 3 nil))))"), [2, 3, 4]);

@@ -278,13 +278,14 @@
 
     bootstrap["string*"] = mkFunction(function (env, args) {
         var arg = first(args);
-        return isSpecial(arg)   ? "<Special>" :
-            isMacro(arg)     ? "<Macro>" :
-            isFunction(arg)  ? "<Function>" :
-            isType(arg)      ? "<Type " + arg.name + ">" :
-            arg.type         ? str(cons(arg.type, map(Object.keys(arg.members),
-                                                      function (k) { return str(arg.members[k]); }))) :
-            /* otherwise */    arg; });
+        return isSpecial(arg) ? "<Special>" :
+            isMacro(arg)      ? "<Macro>" :
+            isFunction(arg)   ? "<Function>" :
+            isType(arg)       ? "<Type " + arg.name + ">" :
+            arg.type          ? str(env)(cons(mkSymbol(arg.type),
+                                              map(Object.keys(arg.members),
+                                                  function (k) { return arg.members[k]; }))) :
+            /* otherwise */     arg; });
 
     bootstrap["log*"] = mkFunction(function (env, args) {
         console.log(first(args)); });
