@@ -30,6 +30,7 @@
 
 # Issues
 
+ * Comments are "seen" by macros
  * Builtins can be overwritten
  * defn doesn't overwrite overloads
     (defn f () 0) (defn f () 1) (f) ;=> 0
