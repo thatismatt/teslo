@@ -15,7 +15,6 @@
       (deft A (x)) (def a (A "x")) (a :x) ;=> "x"
       ;; implementation:
       (defn apply ((A x) :x) x)
- * Escape characters in strings
  * More read literals
    * Arrays - []
    * Maps - {}
@@ -73,3 +72,4 @@
    * link to tests (now there are gh-pages)
    * how to test the repl (no npm step required or online)
  * Negative numbers
+ * Escape characters in strings

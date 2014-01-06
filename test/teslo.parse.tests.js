@@ -102,6 +102,18 @@
                 isString(result.forms[0], "Hello world!");
             });
 
+            test("string - newline", function () {
+                var result = teslo.parse('"line 1\\nline 2"');
+                assert.ok(result.success);
+                isString(result.forms[0], "line 1\nline 2");
+            });
+
+            test("string - escape characters", function () {
+                var result = teslo.parse('"\\t\\""');
+                assert.ok(result.success);
+                isString(result.forms[0], "\t\"");
+            });
+
             test("empty string", function () {
                 var result = teslo.parse('""');
                 assert.ok(result.success);

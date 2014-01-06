@@ -81,9 +81,15 @@
     var eof = cromp.regex(/$/);
     var number = cromp.regex(/-?((\.[0-9]+)|[0-9]+(\.[0-9]+)?)/)
             .map(first).map(parseFloat);
+    var character = cromp.choose(
+        cromp.regex(/[^"\\]/).map(first),
+        cromp.seq(cromp.character("\\"), cromp.regex(/./).map(first))
+            .map(function (m) { return { "n": "\n",
+                                         "t": "\t",
+                                         '"': '"' }[second(m)]; }));
     var string = cromp.between(
         cromp.character('"'), cromp.character('"'),
-        cromp.optional(cromp.regex(/[^"]+/)).map(function (m) { return m || [""]; }).map(first));
+        cromp.many(character)).map(function (m) { return m.join(""); });
     var keyword = cromp.seq(cromp.character(":"), cromp.regex(/[a-z]+/).map(first))
             .map(second).map(mkKeyword);
     var list = cromp.recursive(function () {
@@ -265,9 +271,6 @@
     bootstrap["do"] = mkSpecial(function (env, args) {
         var results = args.map(curry(evaluateForm, env));
         return last(results); });
-
-    // HACK: currently don't support escape characters in strings
-    bootstrap["double-quote-string*"] = '"';
 
     function str (env) { return function (x) { return env.lookup("string").invoke(env, [x]); }; }
     bootstrap["sequence-string*"] = mkFunction(function (env, args) {

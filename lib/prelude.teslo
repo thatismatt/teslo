@@ -8,7 +8,7 @@
 
 (defn string ((k : Keyword)) (+ ":" (name k))
              ((s : Symbol))  (name s)
-             ((s : String))  (+ double-quote-string* s double-quote-string*)
+             ((s : String))  (+ "\"" s "\"")
              ((n : Number))  (+ n "")
              ((a : Array))   (sequence-string* a)
              ((l : List))    (sequence-string* l)
