@@ -23,7 +23,7 @@
  * Constructor functions for some built in types:
     (Symbol "name")
     (Keyword "name")
- * Interfaces / Type Classes
+ * Interfaces / Type Classes / Type Groups
  * Reader macros written in teslo
  * Metadata
    * Documentation
