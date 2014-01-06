@@ -31,6 +31,13 @@
 
 (defn first ((a : Array)) (array-first* a)
             ((List h t)) h)
+
 (defn rest ((a : Array)) (array-rest* a)
            ((List h t)) t
            ((List)) nil)
+
+(defn map (f (List h t)) (List (f h) (map f t))
+          (f (List))     nil)
+
+(defn reduce (f a (List h t)) (reduce f (f a h) t)
+             (f a (List))     a)

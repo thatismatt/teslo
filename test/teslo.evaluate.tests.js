@@ -557,6 +557,16 @@
                 // TODO: isString(evaluateForm("(string (List 1 (List 2 (List 3 nil))))"), "(1 2 3)");
             });
 
+            test("map", function () {
+                isSequence(evaluateForm("(map (fn (x) (+ x 1)) nil)"), []);
+                isSequence(evaluateForm("(map (fn (x) (+ x 1)) (List 1 (List 2 (List 3 nil))))"), [2, 3, 4]);
+            });
+
+            test("reduce", function () {
+                isNumber(evaluateForm("(reduce + 1 nil)"), 1);
+                isNumber(evaluateForm("(reduce + 1 (List 1 (List 2 (List 3 nil))))"), 7);
+            });
+
         });
 
     });
