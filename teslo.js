@@ -193,7 +193,7 @@
                 if (params[i].length === 3 && isOfTypeSymbol(second(params[i]))) {
                     frame[get("name")(first(params[i]))] = args[i];
                     return frame; }
-                return merge(frame, bind(rest(params[i]), membersToArray(args[i]))); }
+                frame = merge(frame, bind(rest(params[i]), membersToArray(args[i]))); }
             if (isVariadicSymbol(params[i])) {
                 frame[get("name")(params[i + 1])] = mkArray.apply(null, args.slice(i));
                 // TODO: error if the rest param is malformed - it must be one symbol
