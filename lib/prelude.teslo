@@ -34,6 +34,10 @@
            ((List h t))  t
            ((List))      nil)
 
+(defn length ((a : Array)) (array-length* a)
+             ((List h t))  (+ 1 (length t))
+             ((List))      0)
+
 (defn map (f (List h t))  (List (f h) (map f t))
           (f (List))      nil
           (f (a : Array)) (match (array-length* a)

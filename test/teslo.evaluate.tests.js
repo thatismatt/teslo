@@ -578,6 +578,16 @@
                 isNumber(evaluateForm("(reduce + 1 (List 1 (List 2 (List 3 nil))))"), 7);
             });
 
+            test("length - list", function () {
+                isNumber(evaluateForm("(length nil)"), 0);
+                isNumber(evaluateForm("(length (List 1 (List 2 (List 3 nil))))"), 3);
+            });
+
+            test("length - array", function () {
+                isNumber(evaluateForm("(length ())"), 0);
+                isNumber(evaluateForm("(length '(1 2 3))"), 3);
+            });
+
         });
 
     });
