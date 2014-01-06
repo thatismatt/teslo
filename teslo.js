@@ -283,8 +283,8 @@
                                                       function (k) { return str(arg.members[k]); }))) :
             /* otherwise */    arg; });
 
-    bootstrap["print"] = mkFunction(function (env, args) {
-        console.log(bootstrap.string.invoke(env, args)); });
+    bootstrap["log*"] = mkFunction(function (env, args) {
+        console.log(first(args)); });
 
     // Array functions
     bootstrap["array-first*"] = mkFunction(function (env, args) {

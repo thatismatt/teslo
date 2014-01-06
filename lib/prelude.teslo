@@ -16,6 +16,9 @@
 ;            ((a : Array))   (+ "(" (join (map string a) " ") ")")
 ;            ((l : List))    (+ "(" (join (map string l) " ") ")"))
 
+(defn print (x) (log* (string x)))
+
+
 ;; Lists
 
 (deft List ()
