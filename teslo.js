@@ -272,9 +272,6 @@
         var results = args.map(curry(evaluateForm, env));
         return last(results); });
 
-    bootstrap["sequence-string*"] = mkFunction(function (env, args) {
-        return "(" + map(first(args), str(env)).join(" ") + ")"; });
-
     bootstrap["string*"] = mkFunction(function (env, args) {
         var arg = first(args);
         return isSpecial(arg) ? "<Special>" :

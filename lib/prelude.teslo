@@ -11,7 +11,7 @@
              ((s : String))  (+ "\"" s "\"")
              ((n : Number))  (+ n "")
              ((l : List))    (+ "(" (join (map string l) " ") ")")
-             ((a : Array))   (sequence-string* a)
+             ((a : Array))   (+ "(" (join (map string a) " ") ")")
              (x)             (string* x))
 
 (defn print (x) (log* (string x)))
