@@ -295,6 +295,8 @@
         return first(first(args)); });
     bootstrap["array-rest*"] = mkFunction(function (env, args) {
         return rest(first(args)); });
+    bootstrap["array-length*"] = mkFunction(function (env, args) {
+        return first(args).length; });
 
     // TODO: atom, =, cond, ns
     // TODO: "interop"/"introspection" - vars, lookup/env

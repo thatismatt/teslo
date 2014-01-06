@@ -563,9 +563,14 @@
                 isString(evaluateForm("(string (T 1))", env), "(T 1)");
             });
 
-            test("map", function () {
+            test("map - list", function () {
                 isSequence(evaluateForm("(map (fn (x) (+ x 1)) nil)"), []);
                 isSequence(evaluateForm("(map (fn (x) (+ x 1)) (List 1 (List 2 (List 3 nil))))"), [2, 3, 4]);
+            });
+
+            test("map - array", function () {
+                isSequence(evaluateForm("(map (fn (x) (+ x 1)) nil)"), []);
+                isSequence(evaluateForm("(map (fn (x) (+ x 1)) '(1 2 3))"), [2, 3, 4]);
             });
 
             test("reduce", function () {
