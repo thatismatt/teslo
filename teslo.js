@@ -162,7 +162,7 @@
         if (isSequence(x)) {
             if (x.length === 0) return x;
             var f = evaluateForm(env, first(x));
-            if (!f.invoke) throw new Error(bootstrap.string.invoke(null, [f]) + " can't be invoked.");
+            if (!f.invoke) throw new Error(str(env)(f) + " can't be invoked.");
             var fargs = isSpecial(f)
                     ? rest(x) // if evaluating a special form, don't evaluate args
                     : rest(x).map(curry(evaluateForm, env));
@@ -272,7 +272,6 @@
         var results = args.map(curry(evaluateForm, env));
         return last(results); });
 
-    function str (env) { return function (x) { return env.lookup("string").invoke(env, [x]); }; }
     bootstrap["sequence-string*"] = mkFunction(function (env, args) {
         return "(" + map(first(args), str(env)).join(" ") + ")"; });
 
@@ -286,6 +285,7 @@
                                               map(Object.keys(arg.members),
                                                   function (k) { return arg.members[k]; }))) :
             /* otherwise */     arg; });
+    function str (env) { return function (x) { return env.lookup("string").invoke(env, [x]); }; }
 
     bootstrap["log*"] = mkFunction(function (env, args) {
         console.log(first(args)); });
