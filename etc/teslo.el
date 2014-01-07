@@ -1,3 +1,16 @@
+;;; teslo.el --- Major mode for teslo code
+
+;; Copyright © 2014 Matt Lee
+;;
+;; Author: Matt Lee
+;; Keywords: languages, lisp
+
+;; This file is not part of GNU Emacs.
+
+;;; Commentary:
+
+;; Provides an editing mode for the teslo programming language.
+
 (defvar teslo-keywords '("def" "defn" "defm" "deft" "fn"))
 
 (defvar teslo-font-lock-defaults
