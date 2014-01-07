@@ -1,7 +1,8 @@
-(defvar teslo-keywords '("def" "defn" "defm" "deft"))
+(defvar teslo-keywords '("def" "defn" "defm" "deft" "fn"))
 
 (defvar teslo-font-lock-defaults
-  `(((,(regexp-opt teslo-keywords 'words) . font-lock-keyword-face))))
+  `(((,(regexp-opt teslo-keywords 'words) . font-lock-keyword-face)
+     ("\\([A-Z][a-z]*\\)+" . font-lock-type-face))))
 
 (define-derived-mode teslo-mode lisp-mode "teslo"
   "teslo mode is a major mode for editing teslo files"
