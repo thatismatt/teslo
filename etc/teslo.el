@@ -16,6 +16,7 @@
 (defvar teslo-font-lock-defaults
   `(((,(regexp-opt teslo-keywords 'words) . font-lock-keyword-face)
      ("\\([A-Z][a-z]*\\)+" . font-lock-type-face)
+     ("\\(:[a-z]+\\)+" . font-lock-preprocessor-face)
      ("(def[mn]? \\([a-z-]+\\)"
       (1 font-lock-function-name-face)))))
 
