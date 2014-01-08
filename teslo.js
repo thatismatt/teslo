@@ -347,7 +347,7 @@
     // DEBUG
     // function str (x) {
     //     if (isArray(x)) return "(" + x.map(str).join(" ") + ")";
-    //     return x && x.members && x.members.name; }
+    //     return x && x.members && x.members.name || x; }
 
     teslo.evaluate = function (src, env) {
         var result = teslo.parse(src);
