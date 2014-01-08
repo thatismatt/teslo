@@ -39,6 +39,8 @@
  * Separate read and eval
  * Change read/parse to do one form at a time
  * No line numbers in errors
+ * `def` isn't global
+    (def a 1) ((fn () (def a 2))) a ;=> 1
 
 # Comms
 
