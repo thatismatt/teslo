@@ -158,6 +158,7 @@
                 var env = evaluate("(deft T () (a)) (def x (T))");
                 isString(evaluateForm("(string (T))", env), "(T)");
                 isString(evaluateForm("(string (T 1))", env), "(T 1)");
+                isString(evaluateForm("(string (T (T)))", env), "(T (T))");
             });
 
         });
