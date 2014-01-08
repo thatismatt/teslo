@@ -158,19 +158,40 @@
 
     bootstrap["eval"] = function (args, env) {
         var x = first(args);
-        if (isSequence(x)) {
-            if (x.length === 0) return x;
-            var f = evaluateForm(env, first(x));
-            var fargs = isSpecial(f)
+        var s = compile(x);
+        return run(s, env); };
+
+    function compile (x) {
+        if (isSequence(x) && x.length > 0) {
+            var f = compile(first(x));
+            var fargs = isSpecialOperation(f)
                     ? rest(x) // if evaluating a special form, don't evaluate args
-                    : rest(x).map(curry(evaluateForm, env));
-            if (isFunction(f)) return f(fargs, env);
-            if (isType(f)) return mkInstance(f, fargs); }
+                    : map(rest(x), compile);
+            return ["invoke", f, fargs]; }
         if (isSymbol(x)) {
-            var v = env.lookup(get("name")(x));
-            if (v === undefined) throw new Error("'" + get("name")(x) + "' not in scope.");
+            return ["lookup", get("name")(x)]; }
+        return ["value", x]; };
+
+    function run (x, env) {
+        if (x[0] === "invoke") {
+            var f = run(x[1], env);
+            var fargs = isSpecial(f)
+                    ? x[2] // if evaluating a special form, don't evaluate args
+                    : map(x[2], function (a) { return run(a, env); });
+            if (isFunction(f)) return f(fargs, env);
+            if (isType(f)) return mkInstance(f, fargs);
+            throw new Error("Invalid invoke operation, only functions and types can be invoked."); }
+        if (x[0] === "lookup") {
+            var v = env.lookup(x[1]);
+            if (v === undefined) throw new Error("'" + x[1] + "' not in scope.");
             return v; }
-        return x; };
+        if (x[0] === "value") {
+            return x[1]; }
+        throw new Error("Unknown operation " + x[0]);
+    }
+
+    function isSpecialOperation (x) {
+        return bootstrap[x[1]] && bootstrap[x[1]].special; }
 
     bootstrap["quote"] = mkSpecial(function (args) { return first(args); });
     bootstrap["syntax-quote"] = mkSpecial(function (args, env) {
