@@ -15,7 +15,7 @@
             var v = aIsEnv ? c : b;
             assert.isDefined(o);
             var actualType = typeFn ? typeFn(o) : o.type;
-            assert.ok(actualType, "no type");
+            assert.ok(actualType, "no type, expecting " + type);
             assert.equal(actualType, type, "Type is '" + actualType + "' but expected '" + type + "'");
             if (propFn && v !== undefined) assert.deepEqual(propFn(o), v); }; }
 
