@@ -216,8 +216,7 @@
             && rest(pattern).length === arg.constructor.length
             && all(zip(rest(pattern), membersToArray(arg)), isMatch); }
 
-    function compile (isMacro) {
-        return function (args, env) {
+    function mkFunction (args, env) {
             var overloads = {};
             each2(args, function (params, body) {
                 // TODO: only allow one variadic signature
@@ -233,12 +232,11 @@
                 var frame = bind(o.params, fargs);
                 var result = evaluateForm(env.child(frame), o.body);
                 return result; };
-            if (isMacro) f = mkMacro(f);
             f.overloads = overloads;
-            return f; }; }
+            return f; }
 
-    bootstrap["fn"] = mkSpecial(compile(false));
-    bootstrap["macro"] = mkSpecial(compile(true));
+    bootstrap["fn"] = mkSpecial(mkFunction);
+    bootstrap["macro"] = mkSpecial(compose(mkMacro, mkFunction));
 
     function appliedFunctionForm (fs, args) {
         var nbs = flatmap(fs, function (f) { return [f.params, f.body]; });
