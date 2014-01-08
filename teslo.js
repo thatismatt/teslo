@@ -5,6 +5,7 @@
     function second (arr) { return arr[1]; }
     function third (arr) { return arr[2]; }
     function last (arr) { return arr[arr.length - 1]; }
+    function pop (arr, n) { return [arr.slice(0, n).reverse(), arr.slice(n)]; }
     function toArray (x) { return Array.prototype.slice.call(x, 0); }
     function rest (arr) { return Array.prototype.slice.call(arr, 1); }
     function add (a, b) { return a + b; }
@@ -157,40 +158,43 @@
         return form; });
 
     bootstrap["eval"] = function (args, env) {
-        var x = first(args);
-        var s = compile(x);
-        return run(s, env); };
+        var ops = compile(first(args), []);
+        var state = { ops: ops, stack: [] };
+        while (state.ops.length) {
+            state = run(state.ops, state.stack, env); }
+        return first(state.stack); };
 
-    function compile (x) {
-        if (isSequence(x) && x.length > 0) {
-            var f = compile(first(x));
-            var fargs = isSpecialOperation(f)
-                    ? rest(x) // if evaluating a special form, don't evaluate args
-                    : map(rest(x), compile);
-            return ["invoke", f, fargs]; }
-        if (isSymbol(x)) {
-            return ["lookup", get("name")(x)]; }
-        return ["value", x]; };
+    function compile (form, ops) {
+        if (isSequence(form) && form.length > 0) {
+            var f = compile(first(form), ops);
+            var fargs = rest(form);
+            var fops = isSpecialOperation(f)
+                    ? fargs.map(function (a) { return ["value", a]; }) // if evaluating a special form, don't evaluate args
+                    : flatmap(fargs, function (a) { return compile(a, []); });
+            return concat([ops, fops, f, [["invoke", fargs.length]]]); }
+        if (isSymbol(form)) {
+            return [["lookup", get("name")(form)]]; }
+        return [["value", form]]; };
 
-    function run (x, env) {
-        if (x[0] === "invoke") {
-            var f = run(x[1], env);
-            var fargs = isSpecial(f)
-                    ? x[2] // if evaluating a special form, don't evaluate args
-                    : map(x[2], function (a) { return run(a, env); });
-            if (isFunction(f)) return f(fargs, env);
-            if (isType(f)) return mkInstance(f, fargs);
+    function run (ops, stack, env) {
+        var op = first(ops);
+        if (op[0] === "invoke") {
+            var f = first(stack);
+            var x = pop(rest(stack), op[1]);
+            var fargs = x[0];
+            if (isFunction(f)) return { ops: rest(ops), stack: cons(f(fargs, env), x[1]) };
+            if (isType(f)) return { ops: rest(ops), stack: cons(mkInstance(f, fargs), x[1]) };
             throw new Error("Invalid invoke operation, only functions and types can be invoked."); }
-        if (x[0] === "lookup") {
-            var v = env.lookup(x[1]);
-            if (v === undefined) throw new Error("'" + x[1] + "' not in scope.");
-            return v; }
-        if (x[0] === "value") {
-            return x[1]; }
-        throw new Error("Unknown operation " + x[0]);
-    }
+        if (op[0] === "lookup") {
+            var v = env.lookup(op[1]);
+            if (v === undefined) throw new Error("'" + op[1] + "' not in scope.");
+            return { ops: rest(ops), stack: cons(v, stack) }; }
+        if (op[0] === "value") {
+            return { ops: rest(ops), stack: cons(op[1], stack) }; }
+        throw new Error("Unknown operation " + op[0]); }
 
-    function isSpecialOperation (x) {
+    function isSpecialOperation (ops) {
+        var x = first(ops);
         return bootstrap[x[1]] && bootstrap[x[1]].special; }
 
     bootstrap["quote"] = mkSpecial(function (args) { return first(args); });
