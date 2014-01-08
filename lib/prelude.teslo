@@ -6,6 +6,10 @@
 
 (defn identity (x) x)
 
+(defn inc (x) (+ x 1))
+
+(defn dec (x) (- x 1))
+
 (defn string ((k : Keyword)) (+ ":" (name k))
              ((s : Symbol))  (name s)
              ((s : String))  (+ "\"" s "\"")

@@ -169,6 +169,14 @@
                 isNumber(evaluateForm("(identity 1)"), 1);
             });
 
+            test("inc", function () {
+                isNumber(evaluateForm("(inc 1)"), 2);
+            });
+
+            test("dec", function () {
+                isNumber(evaluateForm("(dec 2)"), 1);
+            });
+
         });
 
     });
