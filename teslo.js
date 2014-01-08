@@ -157,7 +157,7 @@
         return form; });
 
     bootstrap["eval"] = function (args, env) {
-        var x = bootstrap["macro-expand"](args, env);
+        var x = first(args);
         if (isSequence(x)) {
             if (x.length === 0) return x;
             var f = evaluateForm(env, first(x));
@@ -331,9 +331,9 @@
     teslo.evaluate = function (src, env) {
         var result = teslo.parse(src);
         if (result.success)
-            return result.forms.map(compose(curry(evaluateForm, env),
-                                            function (args) { return bootstrap["macro-expand"](args, env); },
-                                            mkArray));
+            return result.forms.map(function (arg) {
+                var x = bootstrap["macro-expand"]([arg], env);
+                return evaluateForm(env, x); });
         else
             throw new Error("Parse error: " + (result.message || "unknown error.")); };
 
