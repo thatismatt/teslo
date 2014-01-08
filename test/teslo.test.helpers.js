@@ -25,7 +25,7 @@
     teslo.test.helpers = {
         isOfType:   isOfType,
         isType:     isOfType("Type", function (o) { return o.name; }),
-        isFunction: isOfType("Function"),
+        isFunction: isOfType("Function", null, jsType),
         isNumber:   isOfType("Number", function (x) { return x; }, jsType),
         isString:   isOfType("String", function (x) { return x; }, jsType),
         isSymbol:   isOfType("Symbol", function (o) { return o.members.name; }),

@@ -12,7 +12,7 @@
              ((n : Number))  (+ n "")
              ((l : List))    (+ "(" (join (map string l) " ") ")")
              ((a : Array))   (+ "(" (join (map string a) " ") ")")
-             (x)             (string* x))
+             (x)             (string* x string))
 
 (defn print (x) (log* (string x)))
 
