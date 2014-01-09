@@ -146,7 +146,7 @@
         var f = first(form);
         if (isSymbol(f)) {
             var x = env.lookup(get("name")(f));
-            if (x && isMacro(x)) return x(rest(form), env); }
+            if (x && isMacro(x)) return runFunction(x, rest(form), env); }
         return form; }
 
     bootstrap["macro-expand"] = mkSpecial(function (args, env) {
@@ -182,7 +182,7 @@
             var f = first(stack);
             var x = pop(rest(stack), op[1]);
             var fargs = x[0];
-            if (isFunction(f)) return { ops: rest(ops), stack: cons(f(fargs, env), x[1]) };
+            if (isFunction(f)) return { ops: rest(ops), stack: cons(runFunction(f, fargs, env), x[1]) };
             if (isType(f)) return { ops: rest(ops), stack: cons(mkInstance(f, fargs), x[1]) };
             throw new Error("Invalid invoke operation, only functions and types can be invoked."); }
         if (op[0] === "lookup") {
@@ -192,6 +192,17 @@
         if (op[0] === "value") {
             return { ops: rest(ops), stack: cons(op[1], stack) }; }
         throw new Error("Unknown operation " + op[0]); }
+
+    function runFunction (f, fargs, env) {
+        if (!f.overloads) return f(fargs, env);
+        var os = f.overloads[fargs.length] // exact arity match
+                || f.overloads["."];       // variadic signature
+        if (!os) throw new Error("No matching overload.");
+        var o = findMatch(os, fargs);
+        if (!o) throw new Error("No matching pattern.");
+        var frame = bind(o.params, fargs);
+        var result = evaluateForm(f.env.child(frame), o.body);
+        return result; };
 
     function isSpecialOperation (ops) {
         var x = first(ops);
@@ -248,17 +259,7 @@
             var k = any(params, isVariadicSymbol) ? "." : params.length;
             overloads[k] = overloads[k] || [];
             overloads[k].push({ params: params, body: body }); });
-        var f = function (fargs) {
-            var os = f.overloads[fargs.length] // exact arity match
-                    || f.overloads["."];         // variadic signature
-            if (!os) throw new Error("No matching overload.");
-            var o = findMatch(os, fargs);
-            if (!o) throw new Error("No matching pattern.");
-            var frame = bind(o.params, fargs);
-            var result = evaluateForm(env.child(frame), o.body);
-            return result; };
-        f.overloads = overloads;
-        return f; }
+        return { type: "Function", overloads: overloads, env: env }; }
 
     bootstrap["fn"] = mkSpecial(mkFunction);
     bootstrap["macro"] = mkSpecial(compose(mkMacro, mkFunction));
@@ -302,7 +303,7 @@
             isMacro(arg)      ? "<Macro>" :
             isFunction(arg)   ? "<Function>" :
             isType(arg)       ? "<Type " + arg.name + ">" :
-            arg.type          ? str([cons(mkSymbol(arg.type),
+            arg.type          ? runFunction(str, [cons(mkSymbol(arg.type),
                                               map(Object.keys(arg.members),
                                                   function (k) { return arg.members[k]; }))]) :
             /* otherwise */     arg; };
