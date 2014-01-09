@@ -242,23 +242,23 @@
             && all(zip(rest(pattern), membersToArray(arg)), isMatch); }
 
     function mkFunction (args, env) {
-            var overloads = {};
-            each2(args, function (params, body) {
-                // TODO: only allow one variadic signature
-                var k = any(params, isVariadicSymbol) ? "." : params.length;
-                overloads[k] = overloads[k] || [];
-                overloads[k].push({ params: params, body: body }); });
-            var f = function (fargs) {
-                var os = f.overloads[fargs.length] // exact arity match
-                      || f.overloads["."];         // variadic signature
-                if (!os) throw new Error("No matching overload.");
-                var o = findMatch(os, fargs);
-                if (!o) throw new Error("No matching pattern.");
-                var frame = bind(o.params, fargs);
-                var result = evaluateForm(env.child(frame), o.body);
-                return result; };
-            f.overloads = overloads;
-            return f; }
+        var overloads = {};
+        each2(args, function (params, body) {
+            // TODO: only allow one variadic signature
+            var k = any(params, isVariadicSymbol) ? "." : params.length;
+            overloads[k] = overloads[k] || [];
+            overloads[k].push({ params: params, body: body }); });
+        var f = function (fargs) {
+            var os = f.overloads[fargs.length] // exact arity match
+                    || f.overloads["."];         // variadic signature
+            if (!os) throw new Error("No matching overload.");
+            var o = findMatch(os, fargs);
+            if (!o) throw new Error("No matching pattern.");
+            var frame = bind(o.params, fargs);
+            var result = evaluateForm(env.child(frame), o.body);
+            return result; };
+        f.overloads = overloads;
+        return f; }
 
     bootstrap["fn"] = mkSpecial(mkFunction);
     bootstrap["macro"] = mkSpecial(compose(mkMacro, mkFunction));
