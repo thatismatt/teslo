@@ -1,5 +1,5 @@
 body, .pure-g-r [class *= "pure-u"] { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; decoration: no }
-.container { width: 900px; margin: 20px auto; }
+.container { width: 900px; margin: 0 auto; }
 @media only screen and (max-width: 900px) {
     .container { margin: 0; width: 100%; } }
 h1 a { text-decoration: none; color: black; }
