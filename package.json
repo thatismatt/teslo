@@ -10,6 +10,6 @@
         "chai": ""
     },
     "scripts": {
-        "test": "mocha -u tdd -R spec"
+        "test": "mocha `find test -name \"[^.]*.js\"` -u tdd -R spec"
     }
 }
