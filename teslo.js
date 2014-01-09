@@ -349,9 +349,9 @@
 
     function evaluateForm (env, form) { return bootstrap.eval(mkArray(form), env); }
     // DEBUG
-    // function str (x) {
-    //     if (isArray(x)) return "(" + x.map(str).join(" ") + ")";
-    //     return x && x.members && x.members.name || x; }
+    function pp (x) {
+        if (isArray(x)) return "(" + x.map(pp).join(" ") + ")";
+        return x && x.members && x.members.name || x; }
 
     teslo.evaluate = function (src, env) {
         var result = teslo.parse(src);
