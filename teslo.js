@@ -35,6 +35,7 @@
     function jsType (x) { return /\[object (\w*)\]/.exec(Object.prototype.toString.call(x))[1]; }
     function getType (x) { return x.type || jsType(x); }
     function isOfType (t) { return function (x) { return x && getType(x) === t; }; }
+    function isJsFunction (x) { return jsType(x) === "Function"; }
     var isList = isOfType("List");
     var isArray = isOfType("Array");
     var isString = isOfType("String");
@@ -159,9 +160,9 @@
 
     bootstrap["eval"] = function (args, env) {
         var ops = compile(first(args), []);
-        var state = { ops: ops, stack: [] };
+        var state = { ops: ops, stack: [], env: env };
         while (state.ops.length) {
-            state = run(state.ops, state.stack, env); }
+            state = run(state.ops, state.stack, state.env); }
         return first(state.stack); };
 
     function compile (form, ops) {
@@ -182,27 +183,40 @@
             var f = first(stack);
             var x = pop(rest(stack), op[1]);
             var fargs = x[0];
-            if (isFunction(f)) return { ops: rest(ops), stack: cons(runFunction(f, fargs, env), x[1]) };
-            if (isType(f)) return { ops: rest(ops), stack: cons(mkInstance(f, fargs), x[1]) };
+            if (isType(f)) {
+                return { ops: rest(ops), stack: cons(mkInstance(f, fargs), x[1]), env: env }; }
+            if (isFunction(f)) {
+                if (isJsFunction(f)) {
+                    return { ops: rest(ops), stack: cons(f(fargs, env), x[1]), env: env }; }
+                var o = dispatch(f, fargs);
+                var frame = bind(o.params, fargs);
+                var fenv = f.env.child(frame);
+                var ops2 = concat([o.compiled, [["env", env]], rest(ops)]);
+                return { ops: ops2, stack: x[1], env: fenv }; }
             throw new Error("Invalid invoke operation, only functions and types can be invoked."); }
+        if (op[0] === "env") {
+            return { ops: rest(ops), stack: stack, env: op[1] }; }
         if (op[0] === "lookup") {
             var v = env.lookup(op[1]);
             if (v === undefined) throw new Error("'" + op[1] + "' not in scope.");
-            return { ops: rest(ops), stack: cons(v, stack) }; }
+            return { ops: rest(ops), stack: cons(v, stack), env: env }; }
         if (op[0] === "value") {
-            return { ops: rest(ops), stack: cons(op[1], stack) }; }
+            return { ops: rest(ops), stack: cons(op[1], stack), env: env }; }
         throw new Error("Unknown operation " + op[0]); }
 
     function runFunction (f, fargs, env) {
-        if (!f.overloads) return f(fargs, env);
+        if (isJsFunction(f)) return f(fargs, env);
+        var o = dispatch(f, fargs);
+        var frame = bind(o.params, fargs);
+        return evaluateForm(f.env.child(frame), o.body); }
+
+    function dispatch (f, fargs) {
         var os = f.overloads[fargs.length] // exact arity match
                 || f.overloads["."];       // variadic signature
         if (!os) throw new Error("No matching overload.");
         var o = findMatch(os, fargs);
         if (!o) throw new Error("No matching pattern.");
-        var frame = bind(o.params, fargs);
-        var result = evaluateForm(f.env.child(frame), o.body);
-        return result; };
+        return o; }
 
     function isSpecialOperation (ops) {
         var x = first(ops);
@@ -256,9 +270,10 @@
         var overloads = {};
         each2(args, function (params, body) {
             // TODO: only allow one variadic signature
+            var compiled = compile(body, []);
             var k = any(params, isVariadicSymbol) ? "." : params.length;
             overloads[k] = overloads[k] || [];
-            overloads[k].push({ params: params, body: body }); });
+            overloads[k].push({ params: params, body: body, compiled: compiled }); });
         return { type: "Function", overloads: overloads, env: env }; }
 
     bootstrap["fn"] = mkSpecial(mkFunction);
