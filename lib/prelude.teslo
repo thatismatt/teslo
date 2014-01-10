@@ -4,6 +4,8 @@
 
 (defm deft (tname . params) `(def ~tname (create-type (name '~tname) ~@params)))
 
+(defm do (. x) `((fn (. x) (last x)) ~@x))
+
 (defn identity (x) x)
 
 (defn inc (x) (+ x 1))
@@ -37,6 +39,10 @@
 (defn rest ((a : Array)) (array-rest* a)
            ((List h t))  t
            ((List))      nil)
+
+(defn last ((a : Array))     (array-last* a)
+           ((List h (List))) h
+           ((List h t))      (last t))
 
 (defn length ((a : Array)) (array-length* a)
              ((List h t))  (+ 1 (length t))

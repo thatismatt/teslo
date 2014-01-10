@@ -53,6 +53,16 @@
                 isSequence(rest, [2, 3]);
             });
 
+            test("last - array", function () {
+                var result = evaluateForm("(last '(1 2 3))");
+                isSequence(result, 3);
+            });
+
+            test("last - list", function () {
+                var result = evaluateForm("(last (List 1 (List 2 (List 3 nil))))");
+                isSequence(result, 3);
+            });
+
             test("lists", function () {
                 isSequence(evaluateForm("(List)"));
                 isSequence(evaluateForm("(List 1 (List))"));

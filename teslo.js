@@ -307,10 +307,6 @@
     bootstrap["name"] = function (args) {
         return get("name")(first(args)); };
 
-    bootstrap["do"] = mkSpecial(function (args, env) {
-        var results = args.map(curry(evaluateForm, env));
-        return last(results); });
-
     bootstrap["string*"] = function (args) {
         var arg = first(args);
         var str = second(args);
@@ -331,6 +327,8 @@
         return first(first(args)); };
     bootstrap["array-rest*"] = function (args) {
         return rest(first(args)); };
+    bootstrap["array-last*"] = function (args) {
+        return last(first(args)); };
     bootstrap["array-length*"] = function (args) {
         return first(args).length; };
 
