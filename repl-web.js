@@ -38,8 +38,9 @@
             .filter(function (n) { return !/\$[0-9]/.test(n); })
             .map(function (n, i) {
                 $env.append(
-                    $("<tr>").append($("<td>").text(n))
-                             .append($("<td>").text(toString(n)))); }); }
+                    $("<div>").addClass("var")
+                        .append($("<span>").text(n))
+                        .append($("<span>").text(toString(n)))); }); }
 
     function toString(x) {
         return teslo.evaluate("(string " + x + ")", env)[0]; }
