@@ -44,12 +44,13 @@
 
 # Comms
 
- * Move tests to test.html
- * Add an intro (index.html)
+ * Mention prelude in readme
  * Example code on repl.html, click to eval
 
 # Done
 
+ * Move tests to test.html
+ * Add an intro (index.html)
  * Function matching on type, without destructuring:
     (deft A ()) (defn f ((a : A)) a) (f (A)) ;=> (A)
  * "Extending" functions, e.g.:
