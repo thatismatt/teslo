@@ -27,6 +27,7 @@
  * Reader macros written in teslo
  * Metadata
    * Documentation
+ * Threads
 
 # Issues
 
