@@ -44,13 +44,13 @@
             });
 
             test("rest - array", function () {
-                var rest = evaluateForm("(rest '(1 2 3))");
-                isSequence(rest, [2, 3]);
+                var result = evaluateForm("(rest '(1 2 3))");
+                isSequence(result, [2, 3]);
             });
 
             test("rest - list", function () {
-                var rest = evaluateForm("(rest (List 1 (List 2 (List 3 nil))))");
-                isSequence(rest, [2, 3]);
+                var result = evaluateForm("(rest (List 1 (List 2 (List 3 nil))))");
+                isSequence(result, [2, 3]);
             });
 
             test("last - array", function () {
