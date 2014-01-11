@@ -32,8 +32,9 @@
 # Issues
 
  * Comments are "seen" by macros
- * Builtins can be overwritten
- * defn doesn't overwrite overloads
+ * `def` overwriting
+   * Builtins can be overwritten
+   * defn doesn't overwrite overloads
     (defn f () 0) (defn f () 1) (f) ;=> 0
  * Macros don't check arg count
     (deft) ;=> Error: 'tname' not in scope.
@@ -45,6 +46,7 @@
 
 # Comms
 
+ * Link to github repo in nav
  * Mention prelude in readme
  * Example code on repl.html, click to eval
 
