@@ -8,6 +8,7 @@
     var historyIndex = 0;
     var env = teslo.environment();
     teslo.evaluate(teslo.prelude, env);
+    env.def("log*", function (args) { print(args[0]); });
 
     function read () {
         var line = $in.val();
@@ -52,7 +53,7 @@
             historyIndex = history.length;
             print(line, "in", "> ");
             var result = eval(line);
-            print(result, result instanceof Error ? "error" : "out");
+            if (result) print(result, result instanceof Error ? "error" : "out");
             displayEnvironment(); }
         $out.scrollTop($out[0].scrollHeight);
         return false; });
