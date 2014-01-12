@@ -9,6 +9,7 @@
  * Dependent let bindings:
     (let (x 1 y x) ...)
  * Variadic type constructors `(deft T (. xs))`
+ * Type constraints in contructors `(deft List (h (t : List)))`
  * Defining/extending the application of a data type
     (defn apply ((s : String) (n : Number)) (nth s n)) ("asdf" 1) ;=> "a"
    * Keywords as member getters
