@@ -171,6 +171,11 @@
                 isString(evaluateForm("(string (T (T)))", env), "(T (T))");
             });
 
+            test("string - special case", function () {
+                var env = evaluate("(deft T (type constructor))");
+                isString(evaluateForm("(string (T 1 2))", env), "(T 1 2)");
+            });
+
         });
 
         suite("misc", function () {

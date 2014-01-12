@@ -30,10 +30,12 @@
                          return function () { return f.apply(null, args.concat(toArray(arguments))); }; }
     var flatmap = compose(concat, map);
     function equals (a, b) { return a === b || (isKeyword(a) && isKeyword(b) && get("name")(a) === get("name")(b)); }
-    function get (p) { return function (x) { return x.members[p]; }; }
+    function get (p) { return function (x) { return x[p]; }; }
+    function getMeta (o, k) { return (o["!meta"] || {})[k]; }
+    function setMeta (o, k, v) { (o["!meta"] || (o["!meta"] = {}))[k] = v; return o; }
 
     function jsType (x) { return /\[object (\w*)\]/.exec(Object.prototype.toString.call(x))[1]; }
-    function getType (x) { return x.type || jsType(x); }
+    function getType (x) { return getMeta(x, "type") || jsType(x); }
     function isOfType (t) { return function (x) { return x && getType(x) === t; }; }
     function isJsFunction (x) { return jsType(x) === "Function"; }
     var isList = isOfType("List");
@@ -58,18 +60,19 @@
         name = name || "__type__" + typeId++;
         var cs = {};
         constructorList && each(constructorList, function (c) { cs[c.length] = c; });
-        var t = { name: name, type: "Type", constructors: cs };
-        types[name] = t;
-        return t; }
+        return types[name] = setMeta({ name: name, constructors: cs }, "type", "Type"); }
     each(["Type", "Function", "Symbol", "String", "Number", "Keyword", "List", "Array"], mkType);
     function mkInstance (t, args) {
         var c = t.constructors[args.length];
         if (!c) throw new Error("No matching constructor.");
-        return { type: t.name, constructor: c, members: zipmap(map(c, get("name")), args) }; }
+        return setMeta(setMeta(
+            zipmap(map(c, get("name")), args),
+            "type", t.name),
+            "constructor", c); }
 
     function mkArray () { return toArray(arguments); }
-    function mkSymbol (x) { return { members: { name: x }, type: "Symbol" }; }
-    function mkKeyword (x) { return { members: { name: x }, type: "Keyword" }; };
+    function mkSymbol (x) { return setMeta({ name: x }, "type", "Symbol"); }
+    function mkKeyword (x) { return setMeta({ name: x }, "type", "Keyword"); }
     function mkMacro (f) { f.macro = true; return f; };
     function mkSpecial (f) { f.special = true; return f; };
 
@@ -233,7 +236,7 @@
         return unquoteForm(args[0]); });
 
     function membersToArray (x) {
-        return map(x.constructor, function (p) { return x.members[get("name")(p)]; }); }
+        return map(getMeta(x, "constructor"), function (p) { return x[get("name")(p)]; }); }
 
     function bind (params, args) {
         var frame = {};
@@ -262,8 +265,8 @@
         if (!isSequence(pattern)) return false;
         if (pattern.length === 3 && isOfTypeSymbol(second(pattern)))
             return get("name")(third(pattern)) === getType(arg);
-        return get("name")(first(pattern)) === arg.type
-            && rest(pattern).length === arg.constructor.length
+        return get("name")(first(pattern)) === getMeta(arg, "type")
+            && rest(pattern).length === getMeta(arg, "constructor").length
             && all(zip(rest(pattern), membersToArray(arg)), isMatch); }
 
     function mkFunction (args, env) {
@@ -274,7 +277,7 @@
             var k = any(params, isVariadicSymbol) ? "." : params.length;
             overloads[k] = overloads[k] || [];
             overloads[k].push({ params: params, body: body, compiled: compiled }); });
-        return { type: "Function", overloads: overloads, env: env }; }
+        return setMeta({ overloads: overloads, env: env }, "type", "Function"); }
 
     bootstrap["fn"] = mkSpecial(mkFunction);
     bootstrap["macro"] = mkSpecial(compose(mkMacro, mkFunction));
@@ -310,14 +313,12 @@
     bootstrap["string*"] = function (args) {
         var arg = first(args);
         var str = second(args);
-        return isSpecial(arg) ? "<Special>" :
-            isMacro(arg)      ? "<Macro>" :
-            isFunction(arg)   ? "<Function>" :
-            isType(arg)       ? "<Type " + arg.name + ">" :
-            arg.type          ? runFunction(str, [cons(mkSymbol(arg.type),
-                                              map(Object.keys(arg.members),
-                                                  function (k) { return arg.members[k]; }))]) :
-            /* otherwise */     arg; };
+        return isSpecial(arg)    ? "<Special>" :
+            isMacro(arg)         ? "<Macro>" :
+            isFunction(arg)      ? "<Function>" :
+            isType(arg)          ? "<Type " + arg.name + ">" :
+            getMeta(arg, "type") ? runFunction(str, [cons(mkSymbol(getMeta(arg, "type")), membersToArray(arg))]) :
+            /* otherwise */        arg; };
 
     bootstrap["log*"] = function (args) {
         console.log(first(args)); };
@@ -362,10 +363,11 @@
         return env; };
 
     function evaluateForm (env, form) { return bootstrap.eval(mkArray(form), env); }
+
     // DEBUG
     function pp (x) {
         if (isArray(x)) return "(" + x.map(pp).join(" ") + ")";
-        return x && x.members && x.members.name || x; }
+        return x && x.name || x; }
 
     teslo.evaluate = function (src, env) {
         var result = teslo.parse(src);
