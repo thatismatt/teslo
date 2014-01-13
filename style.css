@@ -6,7 +6,7 @@ h1 a { text-decoration: none; color: black; }
 h1 a:hover { text-decoration: underline; color: black; }
 .pure-button { vertical-align: top; font-size: 95%; }
 #out, #in, #env { font: 12px/1.5 monospace; }
-#out { height: 200px; overflow: auto; }
+#out { height: 200px; overflow: auto; margin-right: 20px; }
 #in { width: 300px; }
 .in { color: #444; }
 .out { color: #449; }
