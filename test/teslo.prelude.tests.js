@@ -192,6 +192,11 @@
                 isNumber(evaluateForm("(dec 2)"), 1);
             });
 
+            test("->", function () {
+                var result = evaluateForm("(-> 1 inc inc)");
+                isNumber(result, 3);
+            });
+
         });
 
     });

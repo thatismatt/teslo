@@ -79,7 +79,7 @@
     // Parser
     var open = cromp.character("(");
     var close = cromp.character(")");
-    var symbol = cromp.regex(/[a-zA-Z0-9+=\-_*\/?.:$]+/).map(first).map(mkSymbol);
+    var symbol = cromp.regex(/[a-zA-Z0-9+=\-_*\/?.:$<>]+/).map(first).map(mkSymbol);
     var whitespace = cromp.regex(/\s+/);
     var optionalWhitespace = cromp.optional(whitespace);
     var eof = cromp.regex(/$/);
@@ -146,19 +146,25 @@
         else { env.def(get("name")(symbol), val); }
         return symbol; });
 
-    function tryExpandForm (env, form) {
-        var f = first(form);
-        if (isSymbol(f)) {
-            var x = env.lookup(get("name")(f));
-            if (x && isMacro(x)) return runFunction(x, rest(form), env); }
-        return form; }
+    function isMacroForm (form, env) {
+        if (isSequence(form) && form.length > 0) {
+            var f = first(form);
+            if (isSymbol(f)) {
+                var x = env.lookup(get("name")(f));
+                if (x && isMacro(x))
+                    return true; } }
+        return false; }
+
+    function expandForm (form, env) {
+        var x = env.lookup(get("name")(first(form)));
+        return runFunction(x, rest(form), env); }
 
     bootstrap["macro-expand"] = mkSpecial(function (args, env) {
         var form = first(args);
-        if (isSequence(form) && form.length > 0) {
-            var expanded = tryExpandForm(env, form);
-            if (!isSequence(expanded)) return expanded;
-            return map(expanded, compose(function (args) { return bootstrap["macro-expand"](args, env); }, mkArray)); }
+        if (isMacroForm(form, env))
+            return bootstrap["macro-expand"]([expandForm(form, env)], env);
+        if (isSequence(form))
+            return map(form, function (f) { return bootstrap["macro-expand"]([f], env); });
         return form; });
 
     bootstrap["eval"] = function (args, env) {

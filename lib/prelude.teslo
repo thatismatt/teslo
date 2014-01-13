@@ -1,4 +1,4 @@
-(def defm (macro (name signature body) `(def ~name (macro ~signature ~body))))
+(def defm (macro (name . signatures) `(def ~name (macro ~@signatures))))
 
 (defm defn (name . signatures) `(def ~name (fn ~@signatures)))
 
@@ -7,6 +7,9 @@
 (defm do (. x) `((fn (. x) (last x)) ~@x))
 
 (defn identity (x) x)
+
+(defm -> (v f)      `(~f ~v)
+         (v f . fs) `(-> (~f ~v) ~@fs))
 
 (defn inc (x) (+ x 1))
 
