@@ -354,9 +354,16 @@
     function Environment (parent) {
         function x () {}
         if (parent) x.prototype = parent.frames;
+        this.parent = parent;
         this.frames = new x; }
     Environment.prototype.lookup = function (n) { return this.frames[n]; };
     Environment.prototype.def = function (n, v) { this.frames[n] = v; };
+    Environment.prototype.defs = function () {
+        var e = this, ds = [];
+        while (e) {
+            ds = ds.concat(Object.keys(e.frames));
+            e = e.parent; }
+        return ds; };
     Environment.prototype.child = function (f) {
         var c = new Environment(this);
         for (var n in f) { c.def(n, f[n]); }

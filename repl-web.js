@@ -34,7 +34,7 @@
 
     function displayEnvironment () {
         $env.empty();
-        Object.keys(env.frames)
+        env.defs()
             .sort()
             .filter(function (n) { return !/\$[0-9]/.test(n); })
             .map(function (n, i) {
