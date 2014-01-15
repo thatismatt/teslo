@@ -6,9 +6,15 @@
     var $env = $("#env");
     var history = [];
     var historyIndex = 0;
-    var env = teslo.environment();
-    teslo.evaluate(teslo.prelude, env);
-    env.def("log*", function (args) { print(args[0]); });
+    var global_env = teslo.environment();
+
+    teslo.evaluate(teslo.prelude, global_env);
+
+    var env = global_env.child(
+        { "console-log*": global_env.lookup("log*"),
+          "log*": function (args) { print(args[0]); } });
+
+    teslo.evaluate(teslo.repl, env);
 
     function read () {
         var line = $in.val();

@@ -19,4 +19,5 @@ function formatSrc (src) {
 
 if (require.main === module) {
     convert("prelude");
+    convert("repl");
     console.log("Conversion complete!"); }
