@@ -169,10 +169,7 @@
 
     bootstrap["eval"] = function (args, env) {
         var ops = compile(first(args), []);
-        var state = { ops: ops, stack: [], env: env };
-        while (state.ops.length) {
-            state = run(state.ops, state.stack, state.env); }
-        return first(state.stack); };
+        return run(ops, env); };
 
     function compile (form, ops) {
         if (isSequence(form) && form.length > 0) {
@@ -186,7 +183,13 @@
             return [["lookup", get("name")(form)]]; }
         return [["value", form]]; };
 
-    function run (ops, stack, env) {
+    function run (ops, env) {
+        var state = { ops: ops, stack: [], env: env };
+        while (state.ops.length) {
+            state = step(state.ops, state.stack, state.env); }
+        return first(state.stack); }
+
+    function step (ops, stack, env) {
         var op = first(ops);
         if (op[0] === "invoke") {
             var f = first(stack);
