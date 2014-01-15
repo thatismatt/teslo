@@ -3,35 +3,17 @@
     chai.Assertion.includeStack = true;
     var assert = chai.assert;
 
-    var isOfType   = teslo.test.helpers.isOfType;
-    var isFunction = teslo.test.helpers.isFunction;
-    var isSequence = teslo.test.helpers.isSequence;
-    var isNumber   = teslo.test.helpers.isNumber;
-    var isString   = teslo.test.helpers.isString;
-    var isSymbol   = teslo.test.helpers.isSymbol;
-    var isType     = teslo.test.helpers.isType;
+    var isOfType     = teslo.test.helpers.isOfType;
+    var isFunction   = teslo.test.helpers.isFunction;
+    var isSequence   = teslo.test.helpers.isSequence;
+    var isNumber     = teslo.test.helpers.isNumber;
+    var isString     = teslo.test.helpers.isString;
+    var isSymbol     = teslo.test.helpers.isSymbol;
+    var isType       = teslo.test.helpers.isType;
+    var evaluate     = teslo.test.helpers.evaluate;
+    var evaluateForm = teslo.test.helpers.evaluateForm;
 
     suite("prelude", function () {
-
-        function setupEnv () {
-            var env = teslo.environment();
-            try {
-                teslo.evaluate(teslo.prelude, env); }
-            catch(e) {
-                e.message += " [in prelude]";
-                throw e; }
-            return env;
-        }
-
-        function evaluate (src) {
-            var env = setupEnv();
-            teslo.evaluate(src, env);
-            return env;
-        }
-
-        function evaluateForm (src, env) {
-            return teslo.evaluate(src, env || setupEnv())[0];
-        }
 
         suite("sequences", function () {
 

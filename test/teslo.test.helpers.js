@@ -19,10 +19,30 @@
             assert.equal(actualType, type, "Type is '" + actualType + "' but expected '" + type + "'");
             if (propFn && v !== undefined) assert.deepEqual(propFn(o), v); }; }
 
-
     function getMeta (o, k) { return (o["!meta"] || {})[k]; }
     function jsType (x) { return /\[object (\w*)\]/.exec(Object.prototype.toString.call(x))[1]; }
     function getType (x) { return getMeta(x, "type") || jsType(x); }
+
+    function setupEnv () {
+        var env = teslo.environment();
+        try {
+            teslo.evaluate(teslo.prelude, env);
+        } catch(e) {
+            e.message += " [in prelude]";
+            throw e;
+        }
+        return env;
+    }
+
+    function evaluate (src) {
+        var env = setupEnv();
+        teslo.evaluate(src, env);
+        return env;
+    }
+
+    function evaluateForm (src, env) {
+        return teslo.evaluate(src, env || setupEnv())[0];
+    }
 
     teslo.test.helpers = {
         isOfType:   isOfType,
@@ -39,7 +59,9 @@
         isList:     isOfType("List",
                              function (o) { var r = []; for (var i = o; i.tail; i = i.tail) {
                                  r.push(simplify(i.head)); } return r; } ),
-        isSequence: function (x) { return teslo.test.helpers["is" + getType(x)].apply(null, arguments); }
+        isSequence: function (x) { return teslo.test.helpers["is" + getType(x)].apply(null, arguments); },
+        evaluate: evaluate,
+        evaluateForm: evaluateForm
     };
 
 })(this.chai || require("chai"),
