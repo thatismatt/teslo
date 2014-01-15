@@ -41,6 +41,7 @@
     ```
 
  * Interfaces / Type Classes / Type Groups
+ * Function dispatch on predicate `(defn f ((s : String : (fn (x) (> (length x) 5)))) ...)`
  * Reader macros written in teslo
  * Metadata
    * Documentation
