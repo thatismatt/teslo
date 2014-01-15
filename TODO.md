@@ -13,10 +13,10 @@
  * Defining/extending the application of a data type
     (defn apply ((s : String) (n : Number)) (nth s n)) ("asdf" 1) ;=> "a"
    * Keywords as member getters
-   
-       (deft A (x)) (def a (A "x")) (a :x) ;=> "x"
-       ;; implementation:
-       (defn apply ((A x) :x) x)
+
+    (deft A (x)) (def a (A "x")) (a :x) ;=> "x"
+    ;; implementation:
+    (defn apply ((A x) :x) x)
 
  * More read literals
    * Arrays - []
