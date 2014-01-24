@@ -104,8 +104,7 @@
                             unquote,
                             unquoteSplice,
                             comment); });
-    var literal = cromp.choose(number, string, keyword);
-    var form = cromp.choose(macro, list, literal, symbol);
+    var form = cromp.choose(macro, list, number, string, keyword, symbol);
     var forms = cromp.interpose(optionalWhitespace, form)
             .map(function (x) { return x.filter(function (x, i) { return i % 2; }); });
     var file = cromp.seq(forms, eof).map(first);
