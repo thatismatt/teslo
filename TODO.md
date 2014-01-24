@@ -41,14 +41,26 @@
     ```
 
  * Interfaces / Type Classes / Type Groups
+ * Repeated symbols in function params should match when arguments are equal
+
+    ```
+    (def f (x x) :equal
+           (x y) :not-equal)
+    ```
+
  * Function dispatch on predicate `(defn f ((s : String : (fn (x) (> (length x) 5)))) ...)`
  * Reader macros written in teslo
  * Metadata
    * Documentation
  * Threads
+ * Auto complete for web repl
 
 # Issues
 
+ * Split prelude into:
+   * prelude - required
+   * code - optional but useful
+ * Split `macro-exand` in to `macro-expand` and `macro-expand-all`
  * Comments are "seen" by macros
  * `def` overwriting
    * Builtins can be overwritten
@@ -75,12 +87,13 @@
 
 # Comms
 
- * Link to github repo in nav
- * Mention prelude in readme
+ * Mention prelude in Readme, as an example of source code
  * Example code on repl.html, click to eval
+ * Add rationale / reasoning / comparison section to Readme
 
 # Done
 
+ * Link to github repo in nav
  * Move tests to test.html
  * Add an intro (index.html)
  * Function matching on type, without destructuring:
