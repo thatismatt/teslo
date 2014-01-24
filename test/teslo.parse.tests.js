@@ -12,6 +12,9 @@
     var isKeyword  = teslo.test.helpers.isKeyword;
     var isType     = teslo.test.helpers.isType;
 
+    function isIndexedAt (form, index) {
+        assert.equal(form["!meta"].index, index, "Index incorrect"); }
+
     suite("parser", function () {
 
         suite("forms", function () {
@@ -182,6 +185,40 @@
                 isSequence(result.forms[0]);
                 isSymbol(result.forms[0][1][0][0], "unquote-splice");
                 isSymbol(result.forms[0][1][0][1], "a");
+            });
+
+        });
+
+        suite("source index", function () {
+
+            test("list at start", function () {
+                var result = teslo.parse("()");
+                assert.ok(result.success);
+                isSequence(result.forms[0]);
+                isIndexedAt(result.forms[0], 0);
+            });
+
+            test("list preceded by whitespace", function () {
+                var sp = teslo.parse(" ()");
+                assert.ok(sp.success);
+                isSequence(sp.forms[0]);
+                isIndexedAt(sp.forms[0], 1);
+                var tb = teslo.parse("\t()");
+                assert.ok(tb.success);
+                isSequence(tb.forms[0]);
+                isIndexedAt(tb.forms[0], 1);
+                var nl = teslo.parse("\n()");
+                assert.ok(nl.success);
+                isSequence(nl.forms[0]);
+                isIndexedAt(nl.forms[0], 1);
+            });
+
+            test("nested list", function () {
+                var result = teslo.parse("(())");
+                assert.ok(result.success);
+                isSequence(result.forms[0]);
+                isSequence(result.forms[0][0]);
+                isIndexedAt(result.forms[0][0], 1);
             });
 
         });

@@ -97,7 +97,10 @@
     var keyword = cromp.seq(cromp.character(":"), cromp.regex(/[a-z]+/).map(first))
             .map(second).map(mkKeyword);
     var list = cromp.recursive(function () {
-        return cromp.between(open, close, cromp.optional(forms)); });
+        return cromp.between(open, close, cromp.optional(forms))
+            .mapState(function (state, x) {
+                setMeta(x.result, "index", state.index);
+                return x; }); });
     var macro = cromp.recursive(function () {
         return cromp.choose(quote,
                             syntaxQuote,
