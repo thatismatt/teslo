@@ -5,12 +5,12 @@ body, .pure-g-r [class *= "pure-u"] { font-family: "Helvetica Neue", Helvetica, 
 h1 a { text-decoration: none; color: black; }
 h1 a:hover { text-decoration: underline; color: black; }
 .pure-button { vertical-align: top; font-size: 95%; }
-#out, #in, #env { font: 12px/1.5 monospace; }
+#out, #in, #env, #ops, #stack { font: 12px/1.5 monospace; }
 #out { height: 200px; overflow: auto; margin-right: 20px; }
 #in { width: 300px; }
 .in { color: #444; }
 .out { color: #449; }
 .error { color: #944; }
-#env .var { float: left; background-color: #EEEEEE; margin: 1px 1px 0 0; padding: 3px; }
-#env .var span { display: inline-block; width: 100px; }
+.var { float: left; background-color: #EEEEEE; margin: 1px 1px 0 0; padding: 3px; }
+.var span { display: inline-block; width: 100px; }
 #mocha { margin: 0; }

@@ -398,5 +398,11 @@
         else
             throw new Error("Parse error: " + (result.message || "unknown error.")); };
 
+    teslo.macroExpand = bootstrap["macro-expand"];
+    teslo.compile = compile;
+    teslo.run = run;
+    teslo.step = step;
+    teslo.pp = pp;
+
 })(typeof exports === "undefined" ? this["teslo"] = {} : exports,
    this.cromp || require("cromp"));

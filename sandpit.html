@@ -1,0 +1,38 @@
+<!doctype html>
+<html>
+  <head>
+    <title>teslo</title>
+    <link rel="stylesheet" href="vendor/pure-min.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="style.css" type="text/css" media="screen" />
+  </head>
+  <body>
+    <div class="container">
+      <form class="pure-form">
+        <fieldset>
+          <!-- <input type="text" id="in" autocomplete="off" /> -->
+          <button id="backward" class="pure-button">
+            &lt; backward
+          </button>
+          <button id="forward" class="pure-button">
+            forward &gt;
+          </button>
+        </fieldset>
+      </form>
+      <div class="pure-g-r">
+        <div class="pure-u-1-2">
+          <h3>Ops</h3>
+          <div id="ops"></div>
+        </div>
+        <div class="pure-u-1-2">
+          <h3>Stack</h3>
+          <div id="stack"></div>
+        </div>
+      </div>
+    </div>
+    <script type="text/javascript" src="node_modules/cromp/cromp.js"></script>
+    <script type="text/javascript" src="teslo.js"></script>
+    <script type="text/javascript" src="lib-js/teslo.prelude.js"></script>
+    <script type="text/javascript" src="vendor/jquery.min.js"></script>
+    <script type="text/javascript" src="sandpit.js"></script>
+  </body>
+</html>
