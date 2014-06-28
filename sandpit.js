@@ -1,37 +1,9 @@
 (function (teslo) {
 
-    function compile (form, env) {
-        return teslo.compile(teslo.macroExpand([form], env), []); }
-
-    function step (state) {
-        return teslo.step(state.ops, state.stack, state.env); }
-
-    function stepper (state) {
-        return function () {
-            state = step(state);
-            displayState(state);
-        };
-    }
-
-    function p (op) {
-        if (op[0] === "value") console.log("value", teslo.pp(op[1]));
-        else if (op[0] === "invoke") console.log("invoke", op[1], teslo.pp(op[2]));
-        else console.log(op[0], op[1]);
-    }
-
     function opString (op) {
         if (op[0] === "value") return "value " + teslo.pp(op[1]);
         return op[0] + " " + op[1];
     }
-
-    function mkStepper (src) {
-        var env = teslo.environment();
-        teslo.evaluate(teslo.prelude, env);
-        var form = teslo.parse(src).forms[0];
-        var ops = compile(form, env);
-        console.log(ops);
-        var state = { ops: ops, stack: [], env: env };
-        return stepper(state); }
 
     function compilePrelude () {
         var env = teslo.environment();
@@ -46,35 +18,25 @@
         return Array.prototype.concat.apply([], prelude_ops);
     }
 
-    function test () {
-        //teslo.evaluate(teslo.prelude, env);
-        var stepper = mkStepper("(do (log* 1) (log* 2) (log* 3) (log* 4))");
-        return stepper;
-    }
-
-    function mkPreludeStepper () {
-        var states = [{ ops: compilePrelude(),
+    function mkStepper (ops, env) {
+        var states = [{ ops: ops,
                         stack: [],
-                        env: teslo.environment() }];
-        displayState(states[0]);
-        var i = -1;
+                        env: env || teslo.environment() }];
+        var i = 0;
         return {
-            f: function () {
-                i++;
+            current: function () { return states[i]; },
+            forward: function () {
                 var state = states[i];
-                states[i+1] = teslo.step(state.ops, state.stack, state.env);
-                console.log(i+1);
-                displayState(states[i+1]);
+                i++;
+                states[i] = teslo.step(state.ops, state.stack, state.env);
             },
-            b: function () {
+            backward: function () {
                 i--;
                 var state = states[i];
-                //state = teslo.step(state.ops, state.stack, state.env);
-                console.log(i);
-                displayState(state);
             },
-            canStepForward: function () { return states[i+1].ops.length > 0; },
-            canStepBackward: function () { return i > 1; }
+            canStepForward: function () { return states[i].ops.length > 0; },
+            canStepBackward: function () { return i > 0; },
+            states: function () { return states; }
         };
     }
 
@@ -82,7 +44,6 @@
     var $stack = $("#stack");
 
     function displayState (state) {
-        console.log(state);
         $ops.empty();
         $stack.empty();
         state.ops.forEach(function (op) {
@@ -93,29 +54,28 @@
         state.stack.forEach(function (v) {
             $stack.append($("<div>")
                           .css("border", "blue solid 1px")
-                          .text(teslo.pp(v) || "×"));
+                          .text(teslo.pp(v) || "<undefined>"));
         });
     }
 
-    var s = mkPreludeStepper();
+    var stepper = mkStepper(compilePrelude());
     $("#forward").click(function () {
-        if (s.canStepForward()) s.f();
+        if (stepper.canStepForward()) {
+            stepper.forward();
+            displayState(stepper.current());
+        }
         return false;
     });
     $("#backward").click(function () {
-        if (s.canStepBackward()) s.b();
+        if (stepper.canStepBackward()) {
+            stepper.backward();
+            displayState(stepper.current());
+        }
         return false;
     });
+    displayState(stepper.current());
 
-//    var $out = $("#out");
-//
-//    function print (result, cssClass, prefix) {
-//        $out.append($("<div>")
-//                    .addClass(cssClass)
-//                    .text((prefix || "") + result)); }
-
-    window.test = test;
+    window.stepper = stepper;
     window.mkStepper = mkStepper;
-    window.mkPreludeStepper = mkPreludeStepper;
 
 })(this.teslo);
