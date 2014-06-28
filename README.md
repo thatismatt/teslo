@@ -23,9 +23,9 @@ Teslo has:
 
 Well... teslo is very early on in its development, so there isn't much more!
 
-### Tests
+### Examples
 
-For example code the best place to look is the test suite, [view the source](https://github.com/thatismatt/teslo/blob/gh-pages/test/teslo.evaluate.tests.js) or [run them online](http://thatismatt.github.io/teslo/tests.html).
+For example code see either [prelude.teslo](https://github.com/thatismatt/teslo/blob/gh-pages/lib/prelude.teslo) or the test suite, [view the source](https://github.com/thatismatt/teslo/blob/gh-pages/test/teslo.evaluate.tests.js) or [run them online](http://thatismatt.github.io/teslo/tests.html).
 
 ### REPL
 

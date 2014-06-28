@@ -87,12 +87,12 @@
 
 # Comms
 
- * Mention prelude in Readme, as an example of source code
  * Example code on repl.html, click to eval
  * Add rationale / reasoning / comparison section to Readme
 
 # Done
 
+ * Mention prelude in Readme, as an example of source code
  * Link to github repo in nav
  * Move tests to test.html
  * Add an intro (index.html)
