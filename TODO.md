@@ -85,6 +85,10 @@
     (def a 1) ((fn () (def a 2))) a ;=> 1
     ```
 
+* Stack grows for every top level form.
+   * Because the result of all forms is added to stack.
+   * For top level forms should we throw away the stack?
+
 # Comms
 
  * Example code on repl.html, click to eval
