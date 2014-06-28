@@ -57,7 +57,7 @@
             state.stack.forEach(function (v) {
                 $stack.append($("<div>")
                               .addClass("stack")
-                              .text(teslo.pp(v) || "<undefined>"));
+                              .text(teslo.pp(v) || "×"));
             });
         }
 
