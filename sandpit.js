@@ -73,6 +73,13 @@
         }
         return false;
     });
+    $("#play").click(function () {
+        while (stepper.canStepForward()) {
+            stepper.forward();
+            displayState(stepper.current());
+        }
+        return false;
+    });
     displayState(stepper.current());
 
     window.stepper = stepper;
