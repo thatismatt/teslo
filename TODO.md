@@ -60,7 +60,7 @@
  * Split prelude into:
    * prelude - required
    * code - optional but useful
- * Split `macro-exand` in to `macro-expand` and `macro-expand-all`
+ * Split `macro-expand` in to `macro-expand` and `macro-expand-all`
  * Comments are "seen" by macros
  * `def` overwriting
    * Builtins can be overwritten
