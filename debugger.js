@@ -2,6 +2,7 @@
 
     function opString (op) {
         if (op[0] === "value") return "value " + teslo.pp(op[1]);
+        if (op[0] === "env") return "env";
         return op[0] + " " + op[1];
     }
 
