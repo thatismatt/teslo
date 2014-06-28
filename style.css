@@ -11,6 +11,7 @@ h1 a:hover { text-decoration: underline; color: black; }
 .in { color: #444; }
 .out { color: #449; }
 .error { color: #944; }
-.var { float: left; background-color: #EEEEEE; margin: 1px 1px 0 0; padding: 3px; }
+.var, .op, .stack { background-color: #EEEEEE; margin: 1px 1px 0 0; padding: 3px; }
+.var { float: left; }
 .var span { display: inline-block; width: 100px; }
 #mocha { margin: 0; }

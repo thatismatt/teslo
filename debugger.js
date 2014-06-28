@@ -48,12 +48,12 @@
         $stack.empty();
         state.ops.forEach(function (op) {
             $ops.append($("<div>")
-                        .css("border", "red solid 1px")
+                        .addClass("op")
                         .text(opString(op)));
         });
         state.stack.forEach(function (v) {
             $stack.append($("<div>")
-                          .css("border", "blue solid 1px")
+                          .addClass("stack")
                           .text(teslo.pp(v) || "<undefined>"));
         });
     }
