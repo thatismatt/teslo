@@ -5,9 +5,8 @@
         return op[0] + " " + op[1];
     }
 
-    function compilePrelude () {
-        var env = teslo.environment();
-        var forms = teslo.parse(teslo.prelude).forms;
+    function compileSource (source, env) {
+        var forms = teslo.parse(source).forms;
         var prelude_ops = forms.map(
             function (form) {
                 var expandedForm = teslo.macroExpand([form], env);
@@ -40,53 +39,74 @@
         };
     }
 
-    var $ops = $("#ops");
-    var $stack = $("#stack");
+    function mkUI (s) {
 
-    function displayState (state) {
-        $ops.empty();
-        $stack.empty();
-        state.ops.forEach(function (op) {
-            $ops.append($("<div>")
-                        .addClass("op")
-                        .text(opString(op)));
-        });
-        state.stack.forEach(function (v) {
-            $stack.append($("<div>")
-                          .addClass("stack")
-                          .text(teslo.pp(v) || "<undefined>"));
-        });
-    }
+        var $ops = $("#ops");
+        var $stack = $("#stack");
+        var stepper = s;
 
-    var stepper = mkStepper(compilePrelude());
-    $("#forward").click(function () {
-        if (stepper.canStepForward()) {
-            stepper.forward();
-            displayState(stepper.current());
+        function displayState (state) {
+            $ops.empty();
+            $stack.empty();
+            state.ops.forEach(function (op) {
+                $ops.append($("<div>")
+                            .addClass("op")
+                            .text(opString(op)));
+            });
+            state.stack.forEach(function (v) {
+                $stack.append($("<div>")
+                              .addClass("stack")
+                              .text(teslo.pp(v) || "<undefined>"));
+            });
         }
-        return false;
-    });
-    $("#backward").click(function () {
-        if (stepper.canStepBackward()) {
-            stepper.backward();
-            displayState(stepper.current());
-        }
-        return false;
-    });
-    $("#play").click(function () {
-        function playStep () {
+
+        $("#forward").click(function () {
             if (stepper.canStepForward()) {
                 stepper.forward();
                 displayState(stepper.current());
-                setTimeout(playStep, 0);
             }
-        }
-        playStep();
-        return false;
-    });
-    displayState(stepper.current());
+            return false;
+        });
+        $("#backward").click(function () {
+            if (stepper.canStepBackward()) {
+                stepper.backward();
+                displayState(stepper.current());
+            }
+            return false;
+        });
+        $("#play").click(function () {
+            function playStep () {
+                if (stepper.canStepForward()) {
+                    stepper.forward();
+                    displayState(stepper.current());
+                    setTimeout(playStep, 0);
+                }
+            }
+            playStep();
+            return false;
+        });
+        displayState(stepper.current());
 
-    window.stepper = stepper;
-    window.mkStepper = mkStepper;
+        return {
+            stepper: function (s) {
+                if (!s) return stepper;
+                stepper = s;
+                displayState(stepper.current());
+            }
+        };
+    };
+
+    (function () {
+        var stepper = mkStepper(compileSource(teslo.prelude, teslo.environment()));
+        var ui = mkUI(stepper);
+
+        window.ui = ui;
+        window.go = function (source) {
+            var env = stepper.current().env;
+            var ops = compileSource(source || "(identity (identity 1))", env);
+            stepper = mkStepper( ops, env);
+            ui.stepper(stepper);
+        }
+    })();
 
 })(this.teslo);
