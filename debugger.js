@@ -74,10 +74,14 @@
         return false;
     });
     $("#play").click(function () {
-        while (stepper.canStepForward()) {
-            stepper.forward();
-            displayState(stepper.current());
+        function playStep () {
+            if (stepper.canStepForward()) {
+                stepper.forward();
+                displayState(stepper.current());
+                setTimeout(playStep, 0);
+            }
         }
+        playStep();
         return false;
     });
     displayState(stepper.current());
