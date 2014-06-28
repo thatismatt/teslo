@@ -1,6 +1,6 @@
 (function (mocha, chai, teslo) {
 
-    chai.Assertion.includeStack = true;
+    chai.config.includeStack = true;
     var assert = chai.assert;
 
     var isOfType     = teslo.test.helpers.isOfType;
