@@ -61,7 +61,6 @@
    * prelude - required
    * code - optional but useful
  * Split `macro-expand` in to `macro-expand` and `macro-expand-all`
- * Comments are "seen" by macros
  * `def` overwriting
    * Builtins can be overwritten
    * defn doesn't overwrite overloads
@@ -97,6 +96,7 @@
 
 # Done
 
+ * Comments are "seen" by macros
  * Mention prelude in Readme, as an example of source code
  * Link to github repo in nav
  * Move tests to test.html

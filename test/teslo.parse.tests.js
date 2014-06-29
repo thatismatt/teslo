@@ -152,15 +152,13 @@
             test("comment", function () {
                 var result = teslo.parse("; a comment");
                 assert.ok(result.success);
-                isSequence(result.forms[0]);
-                isSymbol(result.forms[0][0], "comment");
-                isString(result.forms[0][1], " a comment");
+                assert.equal(result.forms.length, 0);
             });
 
             test("comment between lists", function () {
                 var result = teslo.parse("()\n; a comment\n()");
                 assert.ok(result.success);
-                assert.equal(result.forms.length, 3);
+                assert.equal(result.forms.length, 2);
             });
 
             test("syntax quote", function () {

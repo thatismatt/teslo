@@ -77,6 +77,7 @@
     function mkSpecial (f) { f.special = true; return f; };
 
     // Parser
+    var COMMENT = {};
     var open = cromp.character("(");
     var close = cromp.character(")");
     var symbol = cromp.regex(/[a-zA-Z0-9+=\-_*\/?.:$<>]+/).map(first).map(mkSymbol);
@@ -109,7 +110,7 @@
                             comment); });
     var form = cromp.choose(macro, list, number, string, keyword, symbol);
     var forms = cromp.interpose(optionalWhitespace, form)
-            .map(function (x) { return x.filter(function (x, i) { return i % 2; }); });
+            .map(function (x) { return x.filter(function (x, i) { return i % 2 && x !== COMMENT; }); });
     var file = cromp.seq(forms, eof).map(first);
 
     // Reader Macros
@@ -121,9 +122,8 @@
             .map(function (x) { return mkArray(mkSymbol("unquote"), second(x)); });
     var unquoteSplice = cromp.seq(cromp.string("~@"), form)
             .map(function (x) { return mkArray(mkSymbol("unquote-splice"), second(x)); });
-    var comment = cromp.seq(cromp.character(";"),
-                            cromp.regex(/.*[\s\S]/).map(first)) // [\s\S] matches & consumes newline (unlike $)
-            .map(function (x) { return mkArray(mkSymbol("comment"), second(x)); });
+    var comment = cromp.regex(/;.*[\s\S]/) // [\s\S] matches & consumes newline (unlike $)
+            .map(function (x) { return COMMENT; });
 
     teslo.parse = function (src) {
         var a = cromp.parse(file, src);

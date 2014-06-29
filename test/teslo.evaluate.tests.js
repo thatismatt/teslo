@@ -252,6 +252,10 @@
                 isNumber(evaluateForm("(f :two)", env), 2);
             });
 
+            test("functions shouldn't 'see' comments", function () {
+                isNumber(evaluateForm("((fn () ;comment\n 1))"), 1);
+            });
+
         });
 
         suite("type", function () {
