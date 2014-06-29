@@ -380,7 +380,7 @@
         //for (var t in types) { env.def(t, types[t]); }
         return env; };
 
-    function evaluateForm (env, form) { return bootstrap.eval(mkArray(form), env); }
+    function evaluateForm (env, form) { return bootstrap["eval"](mkArray(form), env); }
 
     // DEBUG
     function pp (x) {
