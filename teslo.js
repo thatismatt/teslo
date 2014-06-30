@@ -385,8 +385,8 @@
     // DEBUG
     function pp (x) {
         if (isArray(x)) return "(" + x.map(pp).join(" ") + ")";
-        if (isJsFunction(x)) return "<Function native>";
-        if (isFunction(x)) return "<Function>";
+        if (isJsFunction(x)) return "<Fn native>";
+        if (isFunction(x)) return "<Fn>";
         return x && x.name || x; }
 
     teslo.evaluate = function (src, env) {
