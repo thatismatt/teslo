@@ -148,6 +148,9 @@
         else { env.def(get("name")(symbol), val); }
         return symbol; });
 
+    bootstrap["read"] = function (args, env) {
+        return read(first(args)).forms || []; };
+
     function isMacroForm (form, env) {
         if (isSequence(form) && form.length > 0) {
             var f = first(form);
