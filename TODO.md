@@ -69,10 +69,11 @@
     (defn f () 0) (defn f () 1) (f) ;=> 0
     ```
 
- * Macros don't check arg count
+ * Variadic functions don't check arg count
 
     ```
-    (deft) ;=> Error: 'tname' not in scope.
+    (defn f (x . xs) x)
+    (f) ;=> Error: 'x' not in scope.
     ```
 
  * Separate read and eval
