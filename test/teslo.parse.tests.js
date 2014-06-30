@@ -20,26 +20,26 @@
         suite("forms", function () {
 
             test("one empty top level list", function () {
-                var result = teslo.parse("()");
+                var result = teslo.read("()");
                 assert.ok(result.success);
                 assert.equal(result.forms.length, 1);
                 assert.equal(result.forms[0].length, 0);
             });
 
             test("invalid list fails", function () {
-                var result = teslo.parse("(");
+                var result = teslo.read("(");
                 assert.ok(!result.success);
             });
 
             test("list containing symbol", function () {
-                var result = teslo.parse("(f)");
+                var result = teslo.read("(f)");
                 assert.ok(result.success);
                 assert.equal(result.forms[0].length, 1);
                 isSymbol(result.forms[0][0], "f");
             });
 
             test("list containing 2 symbols", function () {
-                var result = teslo.parse("(f a)");
+                var result = teslo.read("(f a)");
                 assert.ok(result.success);
                 assert.equal(result.forms[0].length, 2);
                 isSymbol(result.forms[0][0], "f");
@@ -47,7 +47,7 @@
             });
 
             test("multi character symbols", function () {
-                var result = teslo.parse("(zero one two three)");
+                var result = teslo.read("(zero one two three)");
                 assert.ok(result.success);
                 isSymbol(result.forms[0][0], "zero");
                 isSymbol(result.forms[0][1], "one");
@@ -56,19 +56,19 @@
             });
 
             test("multiple top level lists", function () {
-                var result = teslo.parse("()()()");
+                var result = teslo.read("()()()");
                 assert.ok(result.success);
                 assert.equal(result.forms.length, 3);
             });
 
             test("different whitespace between top level lists", function () {
-                var result = teslo.parse("()\n()\t() () \n()\t ()");
+                var result = teslo.read("()\n()\t() () \n()\t ()");
                 assert.ok(result.success);
                 assert.equal(result.forms.length, 6);
             });
 
             test("nested lists", function () {
-                var result = teslo.parse("(())");
+                var result = teslo.read("(())");
                 assert.ok(result.success);
                 assert.equal(result.forms.length, 1);
                 assert.equal(result.forms[0].length, 1);
@@ -79,20 +79,20 @@
         suite("literals", function () {
 
             test("number", function () {
-                var result = teslo.parse("123");
+                var result = teslo.read("123");
                 assert.ok(result.success);
                 isNumber(result.forms[0], 123);
             });
 
             test("number - decimal", function () {
-                var result = teslo.parse("123.123 .456");
+                var result = teslo.read("123.123 .456");
                 assert.ok(result.success);
                 isNumber(result.forms[0], 123.123);
                 isNumber(result.forms[1], 0.456);
             });
 
             test("number - negative", function () {
-                var result = teslo.parse("-0 -1 -2.3");
+                var result = teslo.read("-0 -1 -2.3");
                 assert.ok(result.success);
                 isNumber(result.forms[0], -0); // 0 does not deepEqual -0
                 isNumber(result.forms[1], -1);
@@ -100,31 +100,31 @@
             });
 
             test("string", function () {
-                var result = teslo.parse('"Hello world!"');
+                var result = teslo.read('"Hello world!"');
                 assert.ok(result.success);
                 isString(result.forms[0], "Hello world!");
             });
 
             test("string - newline", function () {
-                var result = teslo.parse('"line 1\\nline 2"');
+                var result = teslo.read('"line 1\\nline 2"');
                 assert.ok(result.success);
                 isString(result.forms[0], "line 1\nline 2");
             });
 
             test("string - escape characters", function () {
-                var result = teslo.parse('"\\t\\""');
+                var result = teslo.read('"\\t\\""');
                 assert.ok(result.success);
                 isString(result.forms[0], "\t\"");
             });
 
             test("empty string", function () {
-                var result = teslo.parse('""');
+                var result = teslo.read('""');
                 assert.ok(result.success);
                 isString(result.forms[0], "");
             });
 
             test("keyword", function () {
-                var result = teslo.parse(':kwd');
+                var result = teslo.read(':kwd');
                 assert.ok(result.success);
                 isKeyword(result.forms[0], "kwd");
             });
@@ -134,7 +134,7 @@
         suite("reader macros", function () {
 
             test("quote list", function () {
-                var result = teslo.parse("'()"); // (quote ())
+                var result = teslo.read("'()"); // (quote ())
                 assert.ok(result.success);
                 isSequence(result.forms[0]);
                 isSymbol(result.forms[0][0], "quote");
@@ -143,26 +143,26 @@
             });
 
             test("quote symbol in list", function () {
-                var result = teslo.parse("(f 'x)"); // (f (quote x))
+                var result = teslo.read("(f 'x)"); // (f (quote x))
                 assert.ok(result.success);
                 isSymbol(result.forms[0][1][0], "quote");
                 isSymbol(result.forms[0][1][1], "x");
             });
 
             test("comment", function () {
-                var result = teslo.parse("; a comment");
+                var result = teslo.read("; a comment");
                 assert.ok(result.success);
                 assert.equal(result.forms.length, 0);
             });
 
             test("comment between lists", function () {
-                var result = teslo.parse("()\n; a comment\n()");
+                var result = teslo.read("()\n; a comment\n()");
                 assert.ok(result.success);
                 assert.equal(result.forms.length, 2);
             });
 
             test("syntax quote", function () {
-                var result = teslo.parse("`(a)"); // (syntax-quote (a))
+                var result = teslo.read("`(a)"); // (syntax-quote (a))
                 assert.ok(result.success);
                 isSequence(result.forms[0]);
                 isSymbol(result.forms[0][0], "syntax-quote");
@@ -170,7 +170,7 @@
             });
 
             test("unquote", function () {
-                var result = teslo.parse("`(~a)"); // (syntax-quote ((unquote a)))
+                var result = teslo.read("`(~a)"); // (syntax-quote ((unquote a)))
                 assert.ok(result.success);
                 isSequence(result.forms[0]);
                 isSymbol(result.forms[0][1][0][0], "unquote");
@@ -178,7 +178,7 @@
             });
 
             test("unquote splice", function () {
-                var result = teslo.parse("`(~@a)"); // (syntax-quote ((unquote-splice a)))
+                var result = teslo.read("`(~@a)"); // (syntax-quote ((unquote-splice a)))
                 assert.ok(result.success);
                 isSequence(result.forms[0]);
                 isSymbol(result.forms[0][1][0][0], "unquote-splice");
@@ -190,29 +190,29 @@
         suite("source index", function () {
 
             test("list at start", function () {
-                var result = teslo.parse("()");
+                var result = teslo.read("()");
                 assert.ok(result.success);
                 isSequence(result.forms[0]);
                 isIndexedAt(result.forms[0], 0);
             });
 
             test("list preceded by whitespace", function () {
-                var sp = teslo.parse(" ()");
+                var sp = teslo.read(" ()");
                 assert.ok(sp.success);
                 isSequence(sp.forms[0]);
                 isIndexedAt(sp.forms[0], 1);
-                var tb = teslo.parse("\t()");
+                var tb = teslo.read("\t()");
                 assert.ok(tb.success);
                 isSequence(tb.forms[0]);
                 isIndexedAt(tb.forms[0], 1);
-                var nl = teslo.parse("\n()");
+                var nl = teslo.read("\n()");
                 assert.ok(nl.success);
                 isSequence(nl.forms[0]);
                 isIndexedAt(nl.forms[0], 1);
             });
 
             test("nested list", function () {
-                var result = teslo.parse("(())");
+                var result = teslo.read("(())");
                 assert.ok(result.success);
                 isSequence(result.forms[0]);
                 isSequence(result.forms[0][0]);

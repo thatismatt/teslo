@@ -76,7 +76,7 @@
     function mkMacro (f) { f.macro = true; return f; };
     function mkSpecial (f) { f.special = true; return f; };
 
-    // Parser
+    // Reader
     var COMMENT = {};
     var open = cromp.character("(");
     var close = cromp.character(")");
@@ -125,7 +125,7 @@
     var comment = cromp.regex(/;.*[\s\S]/) // [\s\S] matches & consumes newline (unlike $)
             .map(function (x) { return COMMENT; });
 
-    function parse (src) {
+    function read (src) {
         var a = cromp.parse(file, src);
         return { forms: a.result,
                  success: a.success,
@@ -390,16 +390,16 @@
         return x && x.name || x; }
 
     teslo.evaluate = function (src, env) {
-        var result = parse(src);
+        var result = read(src);
         if (result.success)
             return result.forms.map(function (arg) {
                 var x = bootstrap["macro-expand"]([arg], env);
                 return evaluateForm(x, env); });
         else
-            throw new Error("Parse error: " + (result.message || "unknown error.")); };
+            throw new Error("Read error: " + (result.message || "unknown error.")); };
 
     teslo.environment = environment;
-    teslo.parse = parse;
+    teslo.read = read;
     teslo.macroExpand = bootstrap["macro-expand"];
     teslo.compile = compile;
     teslo.run = run;

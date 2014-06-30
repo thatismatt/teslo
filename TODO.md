@@ -77,7 +77,7 @@
     ```
 
  * Separate read and eval
- * Change read/parse to do one form at a time
+ * Change read to do one form at a time
  * No line numbers in errors
  * `def` isn't global
 

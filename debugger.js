@@ -7,7 +7,7 @@
     }
 
     function compileSource (source, env) {
-        var forms = teslo.parse(source).forms;
+        var forms = teslo.read(source).forms;
         var prelude_ops = forms.map(
             function (form) {
                 var expandedForm = teslo.macroExpand([form], env);
