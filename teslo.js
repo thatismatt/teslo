@@ -326,7 +326,7 @@
         var str = second(args);
         return isSpecial(arg)    ? "<Special>" :
             isMacro(arg)         ? "<Macro>" :
-            isFunction(arg)      ? "<Function>" :
+            isFunction(arg)      ? "<Fn" + (isJsFunction(arg) ? " native" : "") + ">" :
             isType(arg)          ? "<Type " + arg.name + ">" :
             getMeta(arg, "type") ? runFunction(str, [cons(mkSymbol(getMeta(arg, "type")), membersToArray(arg))]) :
             /* otherwise */        arg; };
