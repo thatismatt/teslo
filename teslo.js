@@ -139,7 +139,7 @@
         //    i.e. def quotes first arg, like setq, and "def-unquoted" evals first arg?
         //    Then def is defined in terms of def-unquoted
         var symbol = first(args);
-        var val = evaluateForm(env, second(args));
+        var val = evaluateForm(second(args), env);
         var currentVal = env.lookup(get("name")(symbol));
         // function extension
         if (isFunction(currentVal)) {
@@ -222,7 +222,7 @@
         if (isJsFunction(f)) return f(fargs, env);
         var o = dispatch(f, fargs);
         var frame = bind(o.params, fargs);
-        return evaluateForm(f.env.child(frame), o.body); }
+        return evaluateForm(o.body, f.env.child(frame)); }
 
     function dispatch (f, fargs) {
         var os = f.overloads[fargs.length] // exact arity match
@@ -242,7 +242,7 @@
         function isSplicedForm (f) { return isSequence(f) && isParticularSymbol("unquote-splice")(first(f)); }
         function unquoteForm (form) {
             if (!isSequence(form)) return form;
-            if (isUnquote(first(form))) return evaluateForm(env, second(form));
+            if (isUnquote(first(form))) return evaluateForm(second(form), env);
             return flatmap(form, function (f) { return isSplicedForm(f) ? unquoteForm(f) : [unquoteForm(f)]; }); }
         return unquoteForm(args[0]); });
 
@@ -315,7 +315,7 @@
     bootstrap["type"] = function (args) {
         return types[getType(first(args))]; };
     bootstrap["create-type"] = mkSpecial(function (args, env) {
-        var name = evaluateForm(env, first(args));
+        var name = evaluateForm(first(args), env);
         return mkType(name, rest(args)); });
 
     bootstrap["name"] = function (args) {
@@ -380,7 +380,7 @@
         //for (var t in types) { env.def(t, types[t]); }
         return env; };
 
-    function evaluateForm (env, form) { return bootstrap["eval"](mkArray(form), env); }
+    function evaluateForm (form, env) { return bootstrap["eval"](mkArray(form), env); }
 
     // DEBUG
     function pp (x) {
@@ -394,7 +394,7 @@
         if (result.success)
             return result.forms.map(function (arg) {
                 var x = bootstrap["macro-expand"]([arg], env);
-                return evaluateForm(env, x); });
+                return evaluateForm(x, env); });
         else
             throw new Error("Parse error: " + (result.message || "unknown error.")); };
 
