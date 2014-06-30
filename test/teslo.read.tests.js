@@ -15,7 +15,7 @@
     function isIndexedAt (form, index) {
         assert.equal(form["!meta"].index, index, "Index incorrect"); }
 
-    suite("parser", function () {
+    suite("read", function () {
 
         suite("forms", function () {
 
