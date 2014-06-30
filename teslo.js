@@ -125,7 +125,7 @@
     var comment = cromp.regex(/;.*[\s\S]/) // [\s\S] matches & consumes newline (unlike $)
             .map(function (x) { return COMMENT; });
 
-    teslo.parse = function (src) {
+    function parse (src) {
         var a = cromp.parse(file, src);
         return { forms: a.result,
                  success: a.success,
@@ -374,7 +374,7 @@
         for (var n in f) { c.def(n, f[n]); }
         return c; };
 
-    teslo.environment = function () {
+    function environment () {
         var env = new Environment();
         for (var n in bootstrap) { env.def(n, bootstrap[n]); }
         //for (var t in types) { env.def(t, types[t]); }
@@ -390,7 +390,7 @@
         return x && x.name || x; }
 
     teslo.evaluate = function (src, env) {
-        var result = teslo.parse(src);
+        var result = parse(src);
         if (result.success)
             return result.forms.map(function (arg) {
                 var x = bootstrap["macro-expand"]([arg], env);
@@ -398,6 +398,8 @@
         else
             throw new Error("Parse error: " + (result.message || "unknown error.")); };
 
+    teslo.environment = environment;
+    teslo.parse = parse;
     teslo.macroExpand = bootstrap["macro-expand"];
     teslo.compile = compile;
     teslo.run = run;
