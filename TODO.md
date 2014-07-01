@@ -56,7 +56,9 @@
  * Auto complete for web repl
 
 # Issues
-
+ * Code organisation / build process
+   * Split teslo.js
+   * Automated build of teslo.js
  * Split prelude into:
    * core - required
    * prelude - optional but useful
