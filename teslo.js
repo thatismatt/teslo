@@ -77,7 +77,6 @@
     function mkSpecial (f) { f.special = true; return f; };
 
     // Reader
-    var COMMENT = {};
     var open = cromp.character("(");
     var close = cromp.character(")");
     var symbol = cromp.regex(/[a-zA-Z0-9+=\-_*\/?.:$<>]+/).map(first).map(mkSymbol);
@@ -95,6 +94,7 @@
     var string = cromp.between(
         cromp.character('"'), cromp.character('"'),
         cromp.many(character)).map(function (m) { return m.join(""); });
+    var comment = cromp.regex(/;.*[\s\S]/); // [\s\S] matches & consumes newline (unlike $)
     var keyword = cromp.seq(cromp.character(":"), cromp.regex(/[a-z]+/).map(first))
             .map(second).map(mkKeyword);
     var list = cromp.recursive(function () {
@@ -106,11 +106,11 @@
         return cromp.choose(quote,
                             syntaxQuote,
                             unquote,
-                            unquoteSplice,
-                            comment); });
+                            unquoteSplice); });
     var form = cromp.choose(macro, list, number, string, keyword, symbol);
-    var forms = cromp.interpose(optionalWhitespace, form)
-            .map(function (x) { return x.filter(function (x, i) { return i % 2 && x !== COMMENT; }); });
+    var ignored = cromp.optional(cromp.interpose(optionalWhitespace, comment));
+    var forms = cromp.interpose(ignored, form)
+            .map(function (x) { return x.filter(function (x, i) { return i % 2; }); });
     var file = cromp.seq(forms, eof).map(first);
 
     // Reader Macros
@@ -122,8 +122,6 @@
             .map(function (x) { return mkArray(mkSymbol("unquote"), second(x)); });
     var unquoteSplice = cromp.seq(cromp.string("~@"), form)
             .map(function (x) { return mkArray(mkSymbol("unquote-splice"), second(x)); });
-    var comment = cromp.regex(/;.*[\s\S]/) // [\s\S] matches & consumes newline (unlike $)
-            .map(function (x) { return COMMENT; });
 
     function read (src) {
         var a = cromp.parse(file, src);

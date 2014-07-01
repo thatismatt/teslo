@@ -161,6 +161,12 @@
                 assert.equal(result.forms.length, 2);
             });
 
+            test("multiple comments between lists", function () {
+                var result = teslo.read("()\n; a comment\n; another\n()");
+                assert.ok(result.success);
+                assert.equal(result.forms.length, 2);
+            });
+
             test("syntax quote", function () {
                 var result = teslo.read("`(a)"); // (syntax-quote (a))
                 assert.ok(result.success);
