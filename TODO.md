@@ -60,6 +60,7 @@
  * Split prelude into:
    * prelude - required
    * code - optional but useful
+ * Quoted macros are expanded `'(-> a b) ;=> (b a)`
  * Split `macro-expand` in to `macro-expand` and `macro-expand-all`
  * `def` overwriting
    * Builtins can be overwritten
