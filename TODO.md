@@ -47,6 +47,12 @@
    * Documentation
  * Threads
  * Auto complete for web repl
+ * Function extension
+
+    ```
+    (defn f () 0)
+    (defnx f (x) 1)
+    ```
 
 # Issues
  * Code organisation / build process
@@ -111,14 +117,7 @@
     (deft A ()) (defn f ((a : A)) a) (f (A)) ;=> (A)
     ```
 
- * "Extending" functions, e.g.:
-
-    ```
-    (defn f () 0)
-    (defn f (x) 1)
-    ```
-
-   * Expose the function's overloads for additions
+ * Expose the function's overloads for additions
  * Partial functions over a subset of a types contructors:
 
     ```

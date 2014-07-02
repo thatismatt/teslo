@@ -146,12 +146,7 @@
         //    Then def is defined in terms of def-unquoted
         var symbol = first(args);
         var val = evaluateForm(second(args), env);
-        var currentVal = env.lookup(get("name")(symbol));
-        // function extension
-        if (isFunction(currentVal)) {
-            currentVal.overloads = merge(currentVal.overloads, val.overloads, function (a, b) { return concat([a, b]); }); }
-        // function definition
-        else { env.def(get("name")(symbol), val); }
+        env.def(get("name")(symbol), val);
         return symbol; });
 
     bootstrap["read"] = function (args, env) {

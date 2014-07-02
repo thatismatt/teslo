@@ -241,18 +241,6 @@
                 isNumber(evaluateForm("(f (A :two))", env), 2);
             });
 
-            test("function extension", function () {
-                var env = evaluate("(defn f () 0) (defn f (x) 1)");
-                isNumber(evaluateForm("(f)", env), 0);
-                isNumber(evaluateForm("(f 1)", env), 1);
-            });
-
-            test("function extension, same arity", function () {
-                var env = evaluate("(defn f (:one) 1) (defn f (:two) 2)");
-                isNumber(evaluateForm("(f :one)", env), 1);
-                isNumber(evaluateForm("(f :two)", env), 2);
-            });
-
             test("functions shouldn't 'see' comments", function () {
                 isNumber(evaluateForm("((fn () ;comment\n 1))"), 1);
             });
