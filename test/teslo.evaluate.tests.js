@@ -9,6 +9,7 @@
     var isNumber     = teslo.test.helpers.isNumber;
     var isString     = teslo.test.helpers.isString;
     var isSymbol     = teslo.test.helpers.isSymbol;
+    var isKeyword    = teslo.test.helpers.isKeyword;
     var isType       = teslo.test.helpers.isType;
     var evaluate     = teslo.test.helpers.evaluate;
     var evaluateForm = teslo.test.helpers.evaluateForm;
@@ -254,6 +255,20 @@
 
             test("functions shouldn't 'see' comments", function () {
                 isNumber(evaluateForm("((fn () ;comment\n 1))"), 1);
+            });
+
+        });
+
+        suite("builtins", function () {
+
+            test("symbol", function () {
+                var result = evaluateForm('(Symbol "a")');
+                isSymbol(result, "a");
+            });
+
+            test("keyword", function () {
+                var result = evaluateForm('(Keyword "a")');
+                isKeyword(result, "a");
             });
 
         });

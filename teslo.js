@@ -61,7 +61,15 @@
         var cs = {};
         constructorList && each(constructorList, function (c) { cs[c.length] = c; });
         return types[name] = setMeta({ name: name, constructors: cs }, "type", "Type"); }
-    each(["Type", "Function", "Symbol", "String", "Number", "Keyword", "List", "Array"], mkType);
+    each([{ name: "Type" },
+          { name: "Function" },
+          { name: "Symbol", constructorList: mkArray(mkArray(mkSymbol("name"))) },
+          { name: "String" },
+          { name: "Number" },
+          { name: "Keyword", constructorList: mkArray(mkArray(mkSymbol("name"))) },
+          { name: "List" },
+          { name: "Array" }],
+         function (t) { mkType(t.name, t.constructorList); });
     function mkInstance (t, args) {
         var c = t.constructors[args.length];
         if (!c) throw new Error("No matching constructor.");
@@ -378,7 +386,7 @@
     function environment () {
         var env = new Environment();
         for (var n in bootstrap) { env.def(n, bootstrap[n]); }
-        //for (var t in types) { env.def(t, types[t]); }
+        for (var t in types) { env.def(t, types[t]); }
         return env; };
 
     function evaluateForm (form, env) { return bootstrap["eval"](mkArray(form), env); }

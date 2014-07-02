@@ -33,13 +33,6 @@
    * Maps - {}
    * Sets?
    * Regexs?
- * Constructor functions for some built in types:
-
-    ```
-    (Symbol "name")
-    (Keyword "name")
-    ```
-
  * Interfaces / Type Classes / Type Groups
  * Repeated symbols in function params should match when arguments are equal
 
@@ -99,6 +92,13 @@
  * Add rationale / reasoning / comparison section to Readme
 
 # Done
+
+ * Constructor functions for some built in types:
+
+    ```
+    (Symbol "name")
+    (Keyword "name")
+    ```
 
  * Comments are "seen" by macros
  * Mention prelude in Readme, as an example of source code
