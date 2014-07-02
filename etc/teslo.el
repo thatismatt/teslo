@@ -11,6 +11,8 @@
 
 ;; Provides an editing mode for the teslo programming language.
 
+;;; Code:
+
 (defvar teslo-keywords '("def" "defn" "defm" "deft" "fn" "let" "do" "match"))
 
 (defvar teslo-font-lock-defaults
@@ -27,3 +29,4 @@
 (add-to-list 'auto-mode-alist '("\\.teslo\\'" . teslo-mode))
 
 (provide 'teslo-mode)
+;;; teslo.el ends here
