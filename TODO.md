@@ -46,7 +46,7 @@
  * Metadata
    * Documentation
  * Threads
- * Auto complete for web repl
+ * Auto complete for web repl - *STARTED*
  * Function extension
 
     ```

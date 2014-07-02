@@ -52,6 +52,15 @@
     function toString(x) {
         return teslo.evaluate("(string " + x + ")", env)[0]; }
 
+    function complete (s) {
+        if (s && s !== "") {
+            var symbols = s.split(/[ ()]/);
+            var symbol = symbols[symbols.length - 1];
+            var x = [s.substring(0, s.length - symbol.length), symbol];
+            var completion = env.defs().sort().find(function (d) { return d.match("^" + x[1]); });
+            if (completion) return x[0] + completion; }
+        return s; }
+
     $form.submit(function () {
         var line = read();
         if (line) {
@@ -74,6 +83,13 @@
             && historyIndex < history.length) {
             historyIndex++;
             $in.val(history[historyIndex]); } });
+
+    $form.keydown(function (e) {
+        var key = e.keyCode || e.which;
+        if (key === 9) { // tab
+            $in.val(complete($in.val()));
+            return false; }
+        return true; });
 
     $in.focus();
 
