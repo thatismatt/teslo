@@ -19,7 +19,7 @@
   `(((,(regexp-opt teslo-keywords 'words) . font-lock-keyword-face)
      ("\\([A-Z][a-z]*\\)+" . font-lock-type-face)
      ("\\(:[a-z]+\\)+" . font-lock-preprocessor-face)
-     ("(def[mn]? \\([a-z-]+\\)"
+     ("(def[mn]? \\([a-zA-Z0-9+=_*\/?.:$<>-]+\\)"
       (1 font-lock-function-name-face)))))
 
 (define-derived-mode teslo-mode lisp-mode "teslo"
