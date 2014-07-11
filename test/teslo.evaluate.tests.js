@@ -53,9 +53,9 @@
 
             test("maths with values", function () {
                 var env = evaluate(["(def add (+ 1 2))",
-                                "(def sub (- 6 1 2))",
-                                "(def mul (* 1 2 3))",
-                                "(def div (/ 12 4 3))"].join(""));
+                                    "(def sub (- 6 1 2))",
+                                    "(def mul (* 1 2 3))",
+                                    "(def div (/ 12 4 3))"].join(""));
                 isNumber(env, "add", 3);
                 isNumber(env, "sub", 3);
                 isNumber(env, "mul", 6);
