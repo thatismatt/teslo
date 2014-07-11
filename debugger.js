@@ -18,7 +18,8 @@
         return Array.prototype.concat.apply([], prelude_ops);
     }
 
-    function mkStepper (ops, env) {
+    function mkStepper (source, env) {
+        var ops = compileSource(source, env);
         var states = [{ ops: ops,
                         stack: [],
                         env: env || teslo.environment() }];
@@ -99,14 +100,12 @@
     };
 
     (function () {
-        var stepper = mkStepper(compileSource(teslo.prelude, teslo.environment()));
-        var ui = mkUI(stepper);
+        var ui = mkUI(mkStepper(teslo.prelude, teslo.environment()));
 
         window.ui = ui;
         window.go = function (source) {
-            var env = stepper.current().env;
-            var ops = compileSource(source || "(identity (identity 1))", env);
-            stepper = mkStepper(ops, env);
+            var stepper = ui.stepper();
+            stepper = mkStepper(source || "(identity (identity 1))", stepper.current().env);
             ui.stepper(stepper);
         };
     })();
