@@ -165,11 +165,11 @@
 
     bootstrap["macro-expand"] = mkSpecial(function (args, env) {
         var form = first(args);
-        if (isMacroForm(form, env))
-            return bootstrap["macro-expand"]([expandForm(form, env)], env);
-        if (isSequence(form))
-            return map(form, function (f) { return bootstrap["macro-expand"]([f], env); });
-        return form; });
+        if (!isSequence(form)) return form;
+        var result = isMacroForm(form, env)
+                ? bootstrap["macro-expand"]([expandForm(form, env)], env)
+                : map(form, function (f) { return bootstrap["macro-expand"]([f], env); });
+        return setMeta(result, "index", getMeta(form, "index")); });
 
     bootstrap["eval"] = function (args, env) {
         var ops = compile(first(args), []);

@@ -11,6 +11,7 @@
     var isSymbol     = teslo.test.helpers.isSymbol;
     var isKeyword    = teslo.test.helpers.isKeyword;
     var isType       = teslo.test.helpers.isType;
+    var isIndexedAt  = teslo.test.helpers.isIndexedAt;
     var evaluate     = teslo.test.helpers.evaluate;
     var evaluateForm = teslo.test.helpers.evaluateForm;
 
@@ -450,6 +451,11 @@
             test("result not evaluated", function () {
                 var env = evaluate("(defm m (x) `(~x ~x))");
                 isSequence(evaluateForm("(macro-expand (m a))", env), ["a", "a"]);
+            });
+
+            test("source index is preserved", function () {
+                var env = evaluate("(defn f () (foo))");
+                isIndexedAt(env.lookup("f").overloads[0][0].body, "(defn f () ".length);
             });
 
         });
