@@ -6,12 +6,9 @@
    * Private defs
    * Parameterised modules
  * Debugger
- * Dependent let bindings:
-
-    ```
-    (let (x 1 y x) ...)
-    ```
-
+   * op code level - *DONE*
+   * source level
+ * Dependent let bindings `(let (x 1 y x) ...)`
  * Variadic type constructors `(deft T (. xs))`
  * Type constraints in contructors `(deft List (h (t : List)))`
  * Defining/extending the application of a data type
@@ -44,15 +41,11 @@
  * Function dispatch on predicate `(defn f ((s : String : (fn (x) (> (length x) 5)))) ...)`
  * Reader macros written in teslo
  * Metadata
-   * Documentation
+   * Documentation `(doc f)`
+   * Source code `(source f)`
  * Threads
  * Auto complete for web repl - *STARTED*
- * Function extension
-
-    ```
-    (defn f () 0)
-    (defnx f (x) 1)
-    ```
+ * Function extension `(defn f () 0) (defnx f (x) 1)`
 
 # Issues
  * Code organisation / build process
@@ -65,28 +58,11 @@
  * Split `macro-expand` in to `macro-expand` and `macro-expand-all`
  * `def` overwriting
    * Builtins can be overwritten
-   * defn doesn't overwrite overloads
-
-    ```
-    (defn f () 0) (defn f () 1) (f) ;=> 0
-    ```
-
- * Variadic functions don't check arg count
-
-    ```
-    (defn f (x . xs) x)
-    (f) ;=> Error: 'x' not in scope.
-    ```
-
- * Separate read and eval
+   * defn doesn't overwrite overloads `(defn f () 0) (defn f () 1) (f) ;=> 0`
+ * Variadic functions don't check arg count `(defn f (x . xs) x) (f) ;=> Error: 'x' not in scope.`
  * Change read to do one form at a time
  * No line numbers in errors
- * `def` isn't global
-
-    ```
-    (def a 1) ((fn () (def a 2))) a ;=> 1
-    ```
-
+ * `def` isn't global `(def a 1) ((fn () (def a 2))) a ;=> 1`
 * Stack grows for every top level form
    * Because the result of all forms is added to stack
    * For top level forms should we throw away the stack?
@@ -94,11 +70,12 @@
 
 # Comms
 
- * Example code on repl.html, click to eval
+ * Example code on REPL & Debugger, click to eval
  * Add rationale / reasoning / comparison section to Readme
 
 # Done
 
+ * Separate read and eval
  * Constructor functions for some built in types:
 
     ```
