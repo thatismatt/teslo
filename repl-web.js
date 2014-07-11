@@ -66,7 +66,7 @@
         if (line) {
             history.push(line);
             historyIndex = history.length;
-            print(line, "in", "> ");
+            print(line, "in", "‣ ");
             var result = eval(line);
             if (result) print(result, result instanceof Error ? "error" : "out");
             displayEnvironment(); }
