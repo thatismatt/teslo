@@ -389,6 +389,7 @@
         if (isArray(x)) return "(" + x.map(pp).join(" ") + ")";
         if (isJsFunction(x)) return "<Fn native>";
         if (isFunction(x)) return "<Fn>";
+        if (jsType(x) === "String") return '"' + x + '"';
         return x && x.name || x; }
 
     teslo.evaluate = function (src, env) {
