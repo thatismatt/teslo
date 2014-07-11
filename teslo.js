@@ -40,8 +40,6 @@
     function isJsFunction (x) { return jsType(x) === "Function"; }
     var isList = isOfType("List");
     var isArray = isOfType("Array");
-    var isString = isOfType("String");
-    var isNumber = isOfType("Number");
     var isSymbol = isOfType("Symbol");
     var isKeyword = isOfType("Keyword");
     var isFunction = isOfType("Function");
