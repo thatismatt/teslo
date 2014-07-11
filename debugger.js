@@ -44,9 +44,12 @@
 
         var $ops = $("#ops");
         var $stack = $("#stack");
+        var $forward = $("#forward");
+        var $backward = $("#backward");
         var stepper = s;
 
-        function displayState (state) {
+        function displayState () {
+            var state = stepper.current();
             $ops.empty();
             $stack.empty();
             state.ops.forEach(function (op) {
@@ -59,40 +62,38 @@
                               .addClass("stack")
                               .text(teslo.pp(v) || "×"));
             });
+            $forward.attr("disabled", !stepper.canStepForward());
+            $backward.attr("disabled", !stepper.canStepBackward());
         }
 
-        $("#forward").click(function () {
-            if (stepper.canStepForward()) {
-                stepper.forward();
-                displayState(stepper.current());
-            }
+        $forward.click(function () {
+            stepper.forward();
+            displayState();
             return false;
         });
-        $("#backward").click(function () {
-            if (stepper.canStepBackward()) {
-                stepper.backward();
-                displayState(stepper.current());
-            }
+        $backward.click(function () {
+            stepper.backward();
+            displayState();
             return false;
         });
         $("#play").click(function () {
             function playStep () {
                 if (stepper.canStepForward()) {
                     stepper.forward();
-                    displayState(stepper.current());
+                    displayState();
                     setTimeout(playStep, 0);
                 }
             }
             playStep();
             return false;
         });
-        displayState(stepper.current());
+        displayState();
 
         return {
             stepper: function (s) {
                 if (!s) return stepper;
                 stepper = s;
-                displayState(stepper.current());
+                displayState();
             }
         };
     };
