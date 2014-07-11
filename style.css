@@ -1,7 +1,7 @@
 body, .pure-g-r [class *= "pure-u"] { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; decoration: no }
 .container { width: 900px; margin: 0 auto; }
-@media only screen and (max-width: 900px) {
-    .container { margin: 0; width: 100%; } }
+@media only screen and (max-width: 950px) {
+    .container { width: 95%; } }
 h1 a { text-decoration: none; color: black; }
 h1 a:hover { text-decoration: underline; color: black; }
 .pure-button { vertical-align: top; font-size: 95%; }
