@@ -106,7 +106,7 @@
         window.go = function (source) {
             var env = stepper.current().env;
             var ops = compileSource(source || "(identity (identity 1))", env);
-            stepper = mkStepper( ops, env);
+            stepper = mkStepper(ops, env);
             ui.stepper(stepper);
         };
     })();
