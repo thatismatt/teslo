@@ -11,9 +11,7 @@
     var isSymbol   = teslo.test.helpers.isSymbol;
     var isKeyword  = teslo.test.helpers.isKeyword;
     var isType     = teslo.test.helpers.isType;
-
-    function isIndexedAt (form, index) {
-        assert.equal(form["!meta"].index, index, "Index incorrect"); }
+    var isIndexedAt = teslo.test.helpers.isIndexedAt;
 
     suite("read", function () {
 

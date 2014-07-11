@@ -23,6 +23,10 @@
     function jsType (x) { return /\[object (\w*)\]/.exec(Object.prototype.toString.call(x))[1]; }
     function getType (x) { return getMeta(x, "type") || jsType(x); }
 
+    function isIndexedAt (form, index) {
+        assert.equal(form["!meta"].index, index, "Index incorrect");
+    }
+
     function setupEnv () {
         var env = teslo.environment();
         try {
@@ -60,6 +64,7 @@
                              function (o) { var r = []; for (var i = o; i.tail; i = i.tail) {
                                  r.push(simplify(i.head)); } return r; } ),
         isSequence: function (x) { return teslo.test.helpers["is" + getType(x)].apply(null, arguments); },
+        isIndexedAt: isIndexedAt,
         evaluate: evaluate,
         evaluateForm: evaluateForm
     };
