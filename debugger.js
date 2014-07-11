@@ -107,7 +107,7 @@
             var ops = compileSource(source || "(identity (identity 1))", env);
             stepper = mkStepper( ops, env);
             ui.stepper(stepper);
-        }
+        };
     })();
 
 })(this.teslo);
