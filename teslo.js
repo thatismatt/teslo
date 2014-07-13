@@ -182,7 +182,7 @@
             var f = compile(first(form), ops);
             var fargs = rest(form);
             var fops = isSpecialOperation(f)
-                    ? fargs.map(function (a) { return ["value", a]; }) // if evaluating a special form, don't evaluate args
+                    ? map(fargs, function (a) { return ["value", a]; }) // if evaluating a special form, don't evaluate args
                     : flatmap(fargs, function (a) { return compile(a, []); });
             return concat([ops, fops, f, [["invoke", fargs.length]]]); }
         if (isSymbol(form)) {
@@ -388,7 +388,7 @@
 
     // DEBUG
     function pp (x) {
-        if (isArray(x)) return "(" + x.map(pp).join(" ") + ")";
+        if (isArray(x)) return "(" + map(x, pp).join(" ") + ")";
         if (isJsFunction(x)) return "<Fn native>";
         if (isFunction(x)) return "<Fn>";
         if (jsType(x) === "String") return '"' + x + '"';
@@ -397,7 +397,7 @@
     teslo.evaluate = function (src, env) {
         var result = read(src);
         if (result.success)
-            return result.forms.map(function (arg) {
+            return map(result.forms, function (arg) {
                 var x = bootstrap["macro-expand"]([arg], env);
                 return evaluateForm(x, env); });
         else
