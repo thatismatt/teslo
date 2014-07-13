@@ -23,8 +23,10 @@
     function jsType (x) { return /\[object (\w*)\]/.exec(Object.prototype.toString.call(x))[1]; }
     function getType (x) { return getMeta(x, "type") || jsType(x); }
 
-    function isIndexedAt (form, index) {
-        assert.equal(form["!meta"].index, index, "Index incorrect");
+    function isIndexedAt (form, start, end) {
+        var meta = form["!meta"];
+        assert.equal(meta.start, start, "Start index incorrect");
+        assert.equal(meta.end, end, "End index incorrect");
     }
 
     function setupEnv () {

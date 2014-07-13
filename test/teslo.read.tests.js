@@ -197,22 +197,22 @@
                 var result = teslo.read("()");
                 assert.ok(result.success);
                 isSequence(result.forms[0]);
-                isIndexedAt(result.forms[0], 0);
+                isIndexedAt(result.forms[0], 0, 2);
             });
 
             test("list preceded by whitespace", function () {
                 var sp = teslo.read(" ()");
                 assert.ok(sp.success);
                 isSequence(sp.forms[0]);
-                isIndexedAt(sp.forms[0], 1);
+                isIndexedAt(sp.forms[0], 1, 3);
                 var tb = teslo.read("\t()");
                 assert.ok(tb.success);
                 isSequence(tb.forms[0]);
-                isIndexedAt(tb.forms[0], 1);
+                isIndexedAt(tb.forms[0], 1, 3);
                 var nl = teslo.read("\n()");
                 assert.ok(nl.success);
                 isSequence(nl.forms[0]);
-                isIndexedAt(nl.forms[0], 1);
+                isIndexedAt(nl.forms[0], 1, 3);
             });
 
             test("nested list", function () {
@@ -220,7 +220,7 @@
                 assert.ok(result.success);
                 isSequence(result.forms[0]);
                 isSequence(result.forms[0][0]);
-                isIndexedAt(result.forms[0][0], 1);
+                isIndexedAt(result.forms[0][0], 1, 3);
             });
 
         });

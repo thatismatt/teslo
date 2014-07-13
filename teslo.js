@@ -106,7 +106,8 @@
     var list = cromp.recursive(function () {
         return cromp.between(open, close, cromp.optional(forms))
             .mapState(function (state, x) {
-                setMeta(x.result, "index", state.index);
+                setMeta(setMeta(x.result, "start", state.before.index),
+                                          "end", state.after.index);
                 return x; }); });
     var macro = cromp.recursive(function () {
         return cromp.choose(quote,
@@ -169,7 +170,8 @@
         var result = isMacroForm(form, env)
                 ? bootstrap["macro-expand"]([expandForm(form, env)], env)
                 : map(form, function (f) { return bootstrap["macro-expand"]([f], env); });
-        return setMeta(result, "index", getMeta(form, "index")); });
+        return setMeta(setMeta(result, "start", getMeta(form, "start")),
+                                       "end",   getMeta(form, "end")); });
 
     bootstrap["eval"] = function (args, env) {
         var ops = compile(first(args), []);

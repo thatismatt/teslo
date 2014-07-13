@@ -455,7 +455,7 @@
 
             test("source index is preserved", function () {
                 var env = evaluate("(defn f () (foo))");
-                isIndexedAt(env.lookup("f").overloads[0][0].body, "(defn f () ".length);
+                isIndexedAt(env.lookup("f").overloads[0][0].body, "(defn f () ".length, "(defn f () (foo)".length);
             });
 
         });
