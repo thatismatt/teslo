@@ -67,6 +67,11 @@
    * Because the result of all forms is added to stack
    * For top level forms should we throw away the stack?
 * Environment is mutable
+* Error message when braces unmatched is unclear
+
+    ```
+    teslo.read("(") ;=> Object { forms: undefined, success: false, message: "regex '/$/' failed to parse at 0" }`
+    ```
 
 # Comms
 
