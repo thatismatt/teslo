@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>teslo</title>
+    <link rel="stylesheet" href="vendor/pure-min.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="style.css" type="text/css" media="screen" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="pure-menu pure-menu-open pure-menu-horizontal">
+        <ul>
+          <li><a href="./">home</a></li>
+          <li><a href="tests.html">tests</a></li>
+          <li><a href="repl.html">repl</a></li>
+          <li><a href="debugger.html">debugger</a></li>
+          <li class="pure-menu-selected"><a href="highlight.html">highlight</a></li>
+          <li><a href="https://github.com/thatismatt/teslo">source</a></li>
+        </ul>
+      </div>
+      <h1><a href="./">teslo</a></h1>
+      <div class="pure-g-r">
+        <div class="pure-u-1-2">
+          <h3>Code</h3>
+          <pre id="code"></pre>
+        </div>
+        <div class="pure-u-1-2">
+          <h3>Environment</h3>
+          <div id="env"></div>
+        </div>
+      </div>
+    </div>
+    <script type="text/javascript" charset="utf-8" src="node_modules/cromp/cromp.js"></script>
+    <script type="text/javascript" charset="utf-8" src="teslo.js"></script>
+    <script type="text/javascript" charset="utf-8" src="lib-js/teslo.prelude.js"></script>
+    <script type="text/javascript" charset="utf-8" src="vendor/jquery.min.js"></script>
+    <script type="text/javascript" charset="utf-8" src="highlight.js"></script>
+  </body>
+</html>

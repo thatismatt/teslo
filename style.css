@@ -16,3 +16,4 @@ h1 a:hover { text-decoration: underline; color: black; }
 .var span { display: inline-block; width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 #mocha { margin: 0; }
 #mocha #mocha-stats { top: 50px; }
+.highlight { background: #acf; }
