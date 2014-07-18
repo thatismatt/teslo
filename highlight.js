@@ -7,7 +7,7 @@
     ].join("\n");
 
     var env = teslo.environment();
-    teslo.evaluate(teslo.prelude, env);
+    teslo.run(teslo.prelude.ops, env);
 
     var ast = teslo.read(code).forms;
     var ops;

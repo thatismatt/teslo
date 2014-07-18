@@ -12,7 +12,7 @@ function completer (env) {
 
 function repl () {
     var env = teslo.environment();
-    teslo.evaluate(teslo.prelude, env);
+    teslo.run(teslo.prelude.ops, env);
     var rdln = readline.createInterface({
         input: process.stdin,
         output: process.stdout,

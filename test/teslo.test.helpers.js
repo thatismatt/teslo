@@ -32,7 +32,7 @@
     function setupEnv () {
         var env = teslo.environment();
         try {
-            teslo.evaluate(teslo.prelude, env);
+            teslo.run(teslo.prelude.ops, env);
         } catch(e) {
             e.message += " [in prelude]";
             throw e;

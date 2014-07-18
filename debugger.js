@@ -99,7 +99,7 @@
     };
 
     (function () {
-        var ui = mkUI(mkStepper(teslo.prelude, teslo.environment()));
+        var ui = mkUI(mkStepper(teslo.prelude.source, teslo.environment()));
 
         window.ui = ui;
         window.go = function (source) {
