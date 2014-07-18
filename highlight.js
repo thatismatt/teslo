@@ -10,17 +10,14 @@
     teslo.evaluate(teslo.prelude, env);
 
     var ast = teslo.read(code).forms;
-    //var mex = [];
     var ops;
     for (var i = 0; i < ast.length; i++) {
         var mx = teslo.macroExpand([ast[i]], env);
-        //mex.push(mx);
         ops = teslo.compile(mx, []);
         teslo.run(ops, env);
     }
 
     function mkStepper (ops, env) {
-        //var ops = compileSource(source, env);
         var states = [{ ops: ops,
                         stack: [],
                         env: env || teslo.environment() }];

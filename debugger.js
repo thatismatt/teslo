@@ -8,14 +8,13 @@
 
     function compileSource (source, env) {
         var forms = teslo.read(source).forms;
-        var all_ops = forms.map(
-            function (form) {
+        return forms.reduce(
+            function (all, form) {
                 var expandedForm = teslo.macroExpand([form], env);
                 var ops = teslo.compile(expandedForm, []);
                 teslo.run(ops, env); // run the compiled code, to update env with any macro expansion time dependencies
-                return ops;
-            });
-        return Array.prototype.concat.apply([], all_ops);
+                return all.concat(ops);
+            }, []);
     }
 
     function mkStepper (source, env) {
