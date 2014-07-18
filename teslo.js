@@ -338,6 +338,10 @@
     bootstrap["log*"] = function (args) {
         console.log(first(args)); };
 
+    bootstrap["timestamp"] = function (args) {
+        return +new Date;
+    };
+
     // Array functions
     bootstrap["array-first*"] = function (args) {
         return first(first(args)); };
