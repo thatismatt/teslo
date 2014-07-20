@@ -63,11 +63,11 @@
  * Change read to do one form at a time
  * No line numbers in errors
  * `def` isn't global `(def a 1) ((fn () (def a 2))) a ;=> 1`
-* Stack grows for every top level form
+ * Stack grows for every top level form
    * Because the result of all forms is added to stack
    * For top level forms should we throw away the stack?
-* Environment is mutable
-* Error message when braces unmatched is unclear
+ * Environment is mutable
+ * Error message when braces unmatched is unclear
 
     ```
     teslo.read("(") ;=> Object { forms: undefined, success: false, message: "regex '/$/' failed to parse at 0" }`
@@ -76,7 +76,7 @@
 # Comms
 
  * Example code on REPL & Debugger, click to eval
- * Add rationale / reasoning / comparison section to Readme
+ * Add rationale / reasoning / comparison section to README
 
 # Done
 
