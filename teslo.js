@@ -339,8 +339,7 @@
         console.log(first(args)); };
 
     bootstrap["timestamp"] = function (args) {
-        return +new Date;
-    };
+        return +new Date; };
 
     // Array functions
     bootstrap["array-first*"] = function (args) {
