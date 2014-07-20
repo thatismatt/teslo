@@ -76,6 +76,7 @@
 # Comms
 
  * Example code on REPL & Debugger, click to eval
+ * Add values / goals section to README
  * Add rationale / reasoning / comparison section to README
 
 # Done
