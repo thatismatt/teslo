@@ -1,0 +1,6 @@
+;;
+
+(http-start "127.0.0.1" 7777
+            (fn (req res)
+                (let (ts (timestamp))
+                     (http-response-body res (+ "Hello from teslo! (" ts ")")))))
